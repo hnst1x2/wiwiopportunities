@@ -9,6 +9,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+app.use(express.urlencoded({ extended: true }));
+
+
 // --- Vues EJS ---
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
@@ -80,6 +83,49 @@ app.post('/api/opportunities', (req, res) => {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
   res.status(201).json(newOpp);
 });
+
+
+
+// --- Page admin : formulaire ajout opportunité ---
+app.get('/admin/new', (req, res) => {
+  res.render('admin-new', {
+    page: 'admin',
+    title: 'Ajouter une opportunité – WiwiOpportunity'
+  });
+});
+
+app.post('/admin/new', (req, res) => {
+  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra } = req.body;
+
+  if (!title || !country || !type) {
+    return res.status(400).send("Les champs 'Titre', 'Pays' et 'Type' sont obligatoires.");
+  }
+
+  const filePath = path.join(__dirname, 'opportunities.json');
+  const data = getOpportunities();
+
+  const newOpp = {
+    id: Date.now(),
+    title,
+    organization,
+    country,
+    city,
+    type,
+    funding,
+    deadline,
+    duration,
+    link,
+    description,
+    extra
+  };
+
+  data.push(newOpp);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+
+  // Redirection vers la home après ajout
+  res.redirect('/');
+});
+
 
 app.listen(PORT, () => {
   console.log(`WiwiOpportunity app running on http://localhost:${PORT}`);

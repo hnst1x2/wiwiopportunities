@@ -1,0 +1,90 @@
+.admin-section {
+  margin-top: 24px;
+}
+
+.admin-form-card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  box-shadow: var(--shadow-card);
+}
+
+.admin-form-card h1 {
+  margin-top: 0;
+  margin-bottom: 6px;
+  font-size: 1.35rem;
+}
+
+.admin-intro {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin-bottom: 16px;
+}
+
+.admin-intro code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: #e5e7eb;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.admin-form {
+  margin-top: 8px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.required {
+  color: #dc2626;
+}
+
+.admin-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.admin-note {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+  .admin-form-card {
+    padding: 16px 12px;
+  }
+}
