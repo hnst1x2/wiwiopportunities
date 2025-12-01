@@ -4,8 +4,7 @@
   "description": "Plateforme d'opportunités à l'international (stages, études, volontariat...)",
   "main": "server/app.js",
   "scripts": {
-    "start": "node server/app.js",
-    "dev": "nodemon server/app.js"
+    "start": "node server/app.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
