@@ -11,13 +11,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'wiwiopportunity-secret',
-    resave: false,
-    saveUninitialized: false,
-  })
-);
 
 // --- Vues EJS ---
 app.set('view engine', 'ejs');
