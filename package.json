@@ -5,7 +5,6 @@
   "main": "server/app.js",
   "scripts": {
     "start": "node server/app.js",
-    "dev": "nodemon server/app.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
