@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const session = require('express-session');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,13 +11,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'wiwiopportunity-secret',
-    resave: false,
-    saveUninitialized: false,
-  })
-);
 
 // --- Vues EJS ---
 app.set('view engine', 'ejs');
