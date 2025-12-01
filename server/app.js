@@ -127,6 +127,7 @@ app.get('/admin/login', (req, res) => {
   res.render('admin-login', {
     page: 'admin-login',
     title: 'Connexion admin – WiwiOpportunity',
+    baseUrl: process.env.PUBLIC_BASE_URL || '',
     error: null,
   });
 });
@@ -146,6 +147,7 @@ app.post('/admin/login', (req, res) => {
     page: 'admin-login',
     title: 'Connexion admin – WiwiOpportunity',
     error: 'Identifiants invalides',
+    baseUrl: process.env.PUBLIC_BASE_URL || ''
   });
 });
 
@@ -163,6 +165,7 @@ app.get('/admin', requireAdmin, (req, res) => {
   res.render('admin-list', {
     page: 'admin',
     title: 'Administration – Opportunités',
+    baseUrl: process.env.PUBLIC_BASE_URL || '',
     opportunities: data,
   });
 });
@@ -171,6 +174,7 @@ app.get('/admin', requireAdmin, (req, res) => {
 app.get('/admin/new', requireAdmin, (req, res) => {
   res.render('admin-new', {
     page: 'admin',
+    baseUrl: process.env.PUBLIC_BASE_URL || '',
     title: 'Ajouter une opportunité – WiwiOpportunity',
   });
 });
@@ -222,6 +226,7 @@ app.get('/admin/edit/:id', requireAdmin, (req, res) => {
   }
   res.render('admin-edit', {
     page: 'admin',
+    baseUrl: process.env.PUBLIC_BASE_URL || '',
     title: 'Modifier une opportunité – WiwiOpportunity',
     opp,
   });
