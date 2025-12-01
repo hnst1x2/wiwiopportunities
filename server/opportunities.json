@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "title": "Stage Marketing Digital à Berlin",
+    "organization": "Startup X",
+    "country": "Allemagne",
+    "city": "Berlin",
+    "type": "Stage",
+    "funding": "Non financé",
+    "deadline": "2025-12-31",
+    "duration": "6 mois",
+    "link": "https://example.com/stage-berlin",
+    "description": "Stage en marketing digital pour étudiants francophones, anglais B2 requis."
+  },
+  {
+    "id": 2,
+    "title": "Bourse Master en France",
+    "organization": "Université Y",
+    "country": "France",
+    "city": "Paris",
+    "type": "Bourse",
+    "funding": "Fully funded",
+    "deadline": "2025-03-01",
+    "duration": "2 ans",
+    "link": "https://example.com/bourse-master-france",
+    "description": "Bourse complète pour un master en économie."
+  },
+  {
+    "id": 3,
+    "title": "Volontariat humanitaire au Maroc",
+    "organization": "ONG Z",
+    "country": "Maroc",
+    "city": "Rabat",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-05-15",
+    "duration": "3 mois",
+    "link": "https://example.com/volontariat-maroc",
+    "description": "Projet de volontariat dans l’éducation et l’animation auprès des jeunes."
+  }
+]
