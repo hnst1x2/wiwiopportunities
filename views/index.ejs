@@ -1,111 +1,122 @@
-<%- include('partials/header', { title: "WiwiOpportunity – Opportunités à l'international", page: 'home' }) %>
+<%- include('partials/header', { title: \"WiwiOpportunity – Opportunités à l'international\", page: 'home', baseUrl }) %>
 
-<section class="hero">
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
+<section class=\"hero\">
+  <div class=\"hero-overlay\"></div>
+  <div class=\"hero-content\">
     <h1>Découvre des opportunités de stages, bourses, études et volontariats à l'international.</h1>
     <p>
       WiwiOpportunity aide les étudiants et jeunes francophones à trouver des expériences qui
       changent une vie : stages à l'étranger, bourses, volontariats, jobs et plus encore.
     </p>
 
-    <div class="hero-search">
-      <div class="hero-search-input">
+    <div class=\"hero-search\">
+      <div class=\"hero-search-input\">
         <input
-          type="text"
-          id="search"
-          placeholder="Rechercher une opportunité (ex : stage marketing Berlin, bourse France...)"
+          type=\"text\"
+          id=\"search\"
+          placeholder=\"Rechercher (ex : stage marketing Berlin, bourse France, volontariat Afrique...)\"
         />
       </div>
-      <button id="btn-hero-search">Rechercher</button>
+      <button id=\"btn-hero-search\">Rechercher</button>
     </div>
 
-    <div class="hero-tags">
+    <div class=\"hero-tags\">
       <span>Suggestions :</span>
-      <button class="chip" data-type="Stage">Stages</button>
-      <button class="chip" data-type="Bourse">Bourses</button>
-      <button class="chip" data-type="Volontariat">Volontariats</button>
-      <button class="chip" data-country="France">France</button>
-      <button class="chip" data-country="Allemagne">Allemagne</button>
+      <button class=\"chip\" data-type=\"Stage\">Stages</button>
+      <button class=\"chip\" data-type=\"Bourse\">Bourses</button>
+      <button class=\"chip\" data-type=\"Volontariat\">Volontariats</button>
+      <button class=\"chip\" data-tag=\"Marketing\">Marketing</button>
+      <button class=\"chip\" data-tag=\"Afrique\">Afrique</button>
+      <button class=\"chip\" data-country=\"France\">France</button>
+      <button class=\"chip\" data-country=\"Allemagne\">Allemagne</button>
     </div>
 
-    <div class="social-cta-bar">
-      <span class="social-cta-text">Suivez WiwiOpportunity sur les réseaux :</span>
-      <div class="social-cta-links">
-        <a href="https://www.instagram.com/wiwiopportunity" target="_blank" class="social-pill insta">
-          <i class="fa-brands fa-instagram"></i><span>Instagram</span>
+    <div class=\"social-cta-bar\">
+      <span class=\"social-cta-text\">Suivez WiwiOpportunity sur les réseaux :</span>
+      <div class=\"social-cta-links\">
+        <a href=\"https://www.instagram.com/wiwiopportunity\" target=\"_blank\" class=\"social-pill insta\">
+          <i class=\"fa-brands fa-instagram\"></i><span>Instagram</span>
         </a>
-        <a href="https://www.tiktok.com/@wiwiopportunity" target="_blank" class="social-pill tiktok">
-          <i class="fa-brands fa-tiktok"></i><span>TikTok</span>
+        <a href=\"https://www.tiktok.com/@wiwiopportunity\" target=\"_blank\" class=\"social-pill tiktok\">
+          <i class=\"fa-brands fa-tiktok\"></i><span>TikTok</span>
         </a>
-        <a href="https://www.linkedin.com/company/wiwiopportunity" target="_blank" class="social-pill linkedin">
-          <i class="fa-brands fa-linkedin"></i><span>LinkedIn</span>
+        <a href=\"https://www.linkedin.com/company/wiwiopportunity\" target=\"_blank\" class=\"social-pill linkedin\">
+          <i class=\"fa-brands fa-linkedin\"></i><span>LinkedIn</span>
         </a>
       </div>
     </div>
   </div>
 </section>
 
-<main class="main-layout">
-  <section id="opps" class="opportunities-section">
-    <div class="layout-grid">
-      <aside class="filters-panel">
+<main class=\"main-layout\">
+  <section id=\"opps\" class=\"opportunities-section\">
+    <div class=\"layout-grid\">
+      <aside class=\"filters-panel\">
         <h2>Filtrer les opportunités</h2>
 
-        <div class="filter-group">
-          <label for="filter-country">Pays</label>
-          <select id="filter-country">
-            <option value="">Tous les pays</option>
-            <option value="France">France</option>
-            <option value="Allemagne">Allemagne</option>
-            <option value="Maroc">Maroc</option>
+        <div class=\"filter-group\">
+          <label for=\"filter-country\">Pays</label>
+          <select id=\"filter-country\">
+            <option value=\"\">Tous les pays</option>
+            <option value=\"France\">France</option>
+            <option value=\"Allemagne\">Allemagne</option>
+            <option value=\"Maroc\">Maroc</option>
           </select>
         </div>
 
-        <div class="filter-group">
-          <label for="filter-type">Type d'opportunité</label>
-          <select id="filter-type">
-            <option value="">Tous les types</option>
-            <option value="Stage">Stage</option>
-            <option value="Bourse">Bourse</option>
-            <option value="Volontariat">Volontariat</option>
-            <option value="Job">Job</option>
+        <div class=\"filter-group\">
+          <label for=\"filter-type\">Type d'opportunité</label>
+          <select id=\"filter-type\">
+            <option value=\"\">Tous les types</option>
+            <option value=\"Stage\">Stage</option>
+            <option value=\"Bourse\">Bourse</option>
+            <option value=\"Volontariat\">Volontariat</option>
+            <option value=\"Job\">Job</option>
           </select>
         </div>
 
-        <div class="filter-group">
-          <label for="filter-funding">Financement</label>
-          <select id="filter-funding">
-            <option value="">Tous les financements</option>
-            <option value="Fully funded">Fully funded</option>
-            <option value="Partially funded">Partially funded</option>
-            <option value="Non financé">Non financé</option>
+        <div class=\"filter-group\">
+          <label for=\"filter-funding\">Financement</label>
+          <select id=\"filter-funding\">
+            <option value=\"\">Tous les financements</option>
+            <option value=\"Fully funded\">Fully funded</option>
+            <option value=\"Partially funded\">Partially funded</option>
+            <option value=\"Non financé\">Non financé</option>
           </select>
         </div>
 
-        <button id="btn-reset" class="btn-secondary full-width">Réinitialiser les filtres</button>
-        <p class="filters-hint">
-          Astuce : tu peux combiner la recherche texte (en haut) avec les filtres ci-dessus pour affiner.
+        <div class=\"filter-group\">
+          <label for=\"filter-tag\">Tag / Domaine</label>
+          <input type=\"text\" id=\"filter-tag\" placeholder=\"ex : IT, Marketing, Afrique...\" />
+        </div>
+
+        <button id=\"btn-reset\" class=\"btn-secondary full-width\">Réinitialiser les filtres</button>
+        <p class=\"filters-hint\">
+          Astuce : combine la recherche texte, les filtres et les tags pour affiner au maximum.
         </p>
       </aside>
 
-      <section class="results-panel">
-        <div class="results-header">
+      <section class=\"results-panel\">
+        <div class=\"results-header\">
           <h2>Opportunités disponibles</h2>
-          <div class="results-meta">
-            <span id="results-count">Chargement...</span>
+          <div class=\"results-meta\">
+            <span id=\"results-count\">Chargement...</span>
           </div>
         </div>
 
-        <div id="opportunities-list" class="cards-container">
+        <div id=\"opportunities-list\" class=\"cards-container\">
           <!-- cartes générées par app.js -->
+        </div>
+
+        <div id=\"pagination\" class=\"pagination-bar\">
+          <!-- pagination générée par app.js -->
         </div>
       </section>
     </div>
   </section>
 
-  <section id="about" class="about-section">
-    <div class="about-card">
+  <section id=\"about\" class=\"about-section\">
+    <div class=\"about-card\">
       <h2>À propos de WiwiOpportunity</h2>
       <p>
         WiwiOpportunity est une plateforme indépendante créée pour rendre plus accessibles les
@@ -116,27 +127,31 @@
         L'objectif : centraliser des opportunités fiables, donner des conseils concrets pour candidater
         et partager des retours d'expérience de celles et ceux qui sont déjà partis.
       </p>
+      <p>
+        Nous mettons en avant des opportunités variées : stages, bourses, programmes d'échange,
+        volontariats, jobs saisonniers et plus encore.
+      </p>
     </div>
   </section>
 
-  <section id="newsletter" class="newsletter-section">
-    <div class="newsletter-card">
+  <section id=\"newsletter\" class=\"newsletter-section\">
+    <div class=\"newsletter-card\">
       <h2>Reste informé(e)</h2>
       <p>
-        Bientôt, tu pourras recevoir chaque semaine une sélection d'opportunités adaptées à ton profil
+        Laisse ton email pour recevoir bientôt une sélection d'opportunités adaptées à ton profil
         (pays, type, domaine...).
       </p>
-      <div class="newsletter-form">
-        <input type="email" placeholder="Ton email (bientôt actif)" disabled />
-        <button class="btn-primary" disabled>S'inscrire</button>
-      </div>
-      <p class="newsletter-note">Fonctionnalité en préparation 🚧</p>
+      <form id=\"newsletter-form\" class=\"newsletter-form\">
+        <input type=\"email\" id=\"newsletter-email\" name=\"email\" placeholder=\"Ton email\" required />
+        <button class=\"btn-primary\" type=\"submit\">S'inscrire</button>
+      </form>
+      <p class=\"newsletter-note\" id=\"newsletter-message\"></p>
 
-      <div class="social-inline-note">
+      <div class=\"social-inline-note\">
         En attendant, on partage déjà des opportunités sur
-        <a href="https://www.instagram.com/wiwiopportunity" target="_blank">Instagram</a>,
-        <a href="https://www.tiktok.com/@wiwiopportunity" target="_blank">TikTok</a> et
-        <a href="https://www.linkedin.com/company/wiwiopportunity" target="_blank">LinkedIn</a>.
+        <a href=\"https://www.instagram.com/wiwiopportunity\" target=\"_blank\">Instagram</a>,
+        <a href=\"https://www.tiktok.com/@wiwiopportunity\" target=\"_blank\">TikTok</a> et
+        <a href=\"https://www.linkedin.com/company/wiwiopportunity\" target=\"_blank\">LinkedIn</a>.
       </div>
     </div>
   </section>

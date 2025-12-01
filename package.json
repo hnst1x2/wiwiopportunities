@@ -1,15 +1,17 @@
 {
   "name": "wiwiopportunity",
-  "version": "1.0.0",
-  "description": "Plateforme d'opportunités à l'international (stages, études, volontariat...)",
+  "version": "1.1.0",
+  "description": "Plateforme d'opportunités à l'international (stages, études, volontariat, bourses...).",
   "main": "server/app.js",
   "scripts": {
-    "start": "node server/app.js"
+    "start": "node server/app.js",
+    "dev": "nodemon server/app.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
-    "ejs": "^3.1.10"
+    "express-session": "^1.17.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

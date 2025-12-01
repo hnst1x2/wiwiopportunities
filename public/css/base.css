@@ -156,6 +156,37 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* Admin table */
+
+.admin-table-wrapper {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.admin-table th,
+.admin-table td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.admin-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.admin-actions-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
 /* Responsive nav */
 
 @media (max-width: 800px) {

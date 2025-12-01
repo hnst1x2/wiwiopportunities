@@ -132,7 +132,8 @@
   margin-bottom: 4px;
 }
 
-.filter-group select {
+.filter-group select,
+.filter-group input {
   width: 100%;
   padding: 8px 10px;
   border-radius: var(--radius-md);
@@ -267,6 +268,31 @@
 .btn-sm {
   padding: 5px 10px;
   font-size: 0.8rem;
+}
+
+/* Pagination */
+
+.pagination-bar {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pagination-bar button {
+  border-radius: var(--radius-pill);
+  border: 1px solid #d1d5db;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pagination-bar button.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
 }
 
 /* About & Newsletter */

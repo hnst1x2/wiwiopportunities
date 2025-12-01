@@ -1,0 +1,91 @@
+<%- include('partials/header', { title: "Modifier une opportunité – WiwiOpportunity", page: 'admin', baseUrl }) %>
+
+<main class="main-layout">
+  <section class="admin-section">
+    <div class="admin-form-card">
+      <h1>Modifier l'opportunité</h1>
+
+      <form action="/admin/edit/<%= opp.id %>" method="post" class="admin-form">
+        <div class="admin-grid">
+          <div class="form-group">
+            <label for="title">Titre <span class="required">*</span></label>
+            <input type="text" id="title" name="title" value="<%= opp.title %>" required />
+          </div>
+
+          <div class="form-group">
+            <label for="organization">Organisation</label>
+            <input type="text" id="organization" name="organization" value="<%= opp.organization || '' %>" />
+          </div>
+
+          <div class="form-group">
+            <label for="country">Pays <span class="required">*</span></label>
+            <input type="text" id="country" name="country" value="<%= opp.country || '' %>" required />
+          </div>
+
+          <div class="form-group">
+            <label for="city">Ville</label>
+            <input type="text" id="city" name="city" value="<%= opp.city || '' %>" />
+          </div>
+
+          <div class="form-group">
+            <label for="type">Type d'opportunité <span class="required">*</span></label>
+            <select id="type" name="type" required>
+              <option value="">Choisir...</option>
+              <option value="Stage" <%= opp.type === 'Stage' ? 'selected' : '' %>>Stage</option>
+              <option value="Bourse" <%= opp.type === 'Bourse' ? 'selected' : '' %>>Bourse</option>
+              <option value="Volontariat" <%= opp.type === 'Volontariat' ? 'selected' : '' %>>Volontariat</option>
+              <option value="Job" <%= opp.type === 'Job' ? 'selected' : '' %>>Job</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="funding">Financement</label>
+            <select id="funding" name="funding">
+              <option value="" <%= !opp.funding ? 'selected' : '' %>>Non spécifié</option>
+              <option value="Fully funded" <%= opp.funding === 'Fully funded' ? 'selected' : '' %>>Fully funded</option>
+              <option value="Partially funded" <%= opp.funding === 'Partially funded' ? 'selected' : '' %>>Partially funded</option>
+              <option value="Non financé" <%= opp.funding === 'Non financé' ? 'selected' : '' %>>Non financé</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="deadline">Deadline</label>
+            <input type="date" id="deadline" name="deadline" value="<%= opp.deadline || '' %>" />
+          </div>
+
+          <div class="form-group">
+            <label for="duration">Durée</label>
+            <input type="text" id="duration" name="duration" value="<%= opp.duration || '' %>" />
+          </div>
+
+          <div class="form-group">
+            <label for="link">Lien de candidature</label>
+            <input type="url" id="link" name="link" value="<%= opp.link || '' %>" />
+          </div>
+
+          <div class="form-group">
+            <label for="tags">Tags / Domaines</label>
+            <input type="text" id="tags" name="tags" value="<%= Array.isArray(opp.tags) ? opp.tags.join(', ') : '' %>" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="4"><%= opp.description || '' %></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="extra">Profil / Conditions / Infos complémentaires</label>
+          <textarea id="extra" name="extra" rows="4"><%= opp.extra || '' %></textarea>
+        </div>
+
+        <div class="admin-actions">
+          <a href="/admin" class="btn-secondary">Annuler</a>
+          <button type="submit" class="btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer', { page: 'admin' }) %>

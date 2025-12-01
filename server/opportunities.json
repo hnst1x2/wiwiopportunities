@@ -10,7 +10,13 @@
     "deadline": "2025-12-31",
     "duration": "6 mois",
     "link": "https://example.com/stage-berlin",
-    "description": "Stage en marketing digital pour étudiants francophones, anglais B2 requis."
+    "description": "Stage en marketing digital pour étudiants francophones, anglais B2 requis.",
+    "extra": "Profil : étudiant en marketing, communication ou business.\nCompétences : réseaux sociaux, analytics, rédaction.",
+    "tags": [
+      "Marketing",
+      "Startup",
+      "Digital"
+    ]
   },
   {
     "id": 2,
@@ -23,7 +29,14 @@
     "deadline": "2025-03-01",
     "duration": "2 ans",
     "link": "https://example.com/bourse-master-france",
-    "description": "Bourse complète pour un master en économie."
+    "description": "Bourse complète pour un master en économie dans une grande université française.",
+    "extra": "Profil : licence en économie, gestion ou sciences sociales.\nDossier académique solide.",
+    "tags": [
+      "Bourse",
+      "Master",
+      "France",
+      "Économie"
+    ]
   },
   {
     "id": 3,
@@ -36,6 +49,12 @@
     "deadline": "2025-05-15",
     "duration": "3 mois",
     "link": "https://example.com/volontariat-maroc",
-    "description": "Projet de volontariat dans l’éducation et l’animation auprès des jeunes."
+    "description": "Projet de volontariat dans l’éducation et l’animation auprès des jeunes.",
+    "extra": "Profil : motivation, sens du contact, envie d'aider.\nExpérience avec les jeunes appréciée.",
+    "tags": [
+      "Volontariat",
+      "Afrique",
+      "Éducation"
+    ]
   }
 ]

@@ -41,11 +41,11 @@ $(document).ready(function () {
       }
 
       ${
-        o.extra || o.requirements
+        o.extra
           ? `
       <section class="detail-section">
         <h2>Profil / Conditions</h2>
-        <p>${(o.extra || o.requirements || '').replace(/\n/g, '<br>')}</p>
+        <p>${(o.extra || '').replace(/\n/g, '<br>')}</p>
       </section>
       `
           : ''
@@ -66,6 +66,10 @@ $(document).ready(function () {
 
     $('#detail-main').html(mainHtml);
 
+    const tagsHtml = (o.tags || [])
+      .map((t) => `<span class="tag">${t}</span>`)
+      .join('');
+
     const sidebarHtml = `
       <div class="detail-card">
         <h3>Infos clés</h3>
@@ -76,6 +80,11 @@ $(document).ready(function () {
           ${o.funding ? `<li><strong>Financement :</strong> ${o.funding}</li>` : ''}
           ${o.deadline ? `<li><strong>Deadline :</strong> ${o.deadline}</li>` : ''}
           ${o.duration ? `<li><strong>Durée :</strong> ${o.duration}</li>` : ''}
+          ${
+            tagsHtml
+              ? `<li><strong>Tags :</strong> ${tagsHtml}</li>`
+              : ''
+          }
         </ul>
 
         ${
