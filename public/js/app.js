@@ -166,4 +166,8 @@ $(document).ready(function () {
 
   // Premier chargement
   fetchOpportunities();
+  $(document).ajaxComplete(function () {
+  renderFeatured();
+});
+
 });

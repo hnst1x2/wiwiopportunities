@@ -210,6 +210,8 @@ app.post('/admin/new', requireAdmin, (req, res) => {
           .map((t) => t.trim())
           .filter(Boolean)
       : [],
+        featured: featured === '1' || featured === 'on' || featured === 'true',
+  
   };
 
   data.push(newOpp);
@@ -265,6 +267,8 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
           .map((t) => t.trim())
           .filter(Boolean)
       : [],
+        featured: featured === '1' || featured === 'on' || featured === 'true',
+  
   };
 
   saveOpportunities(data);
