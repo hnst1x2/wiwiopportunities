@@ -164,6 +164,50 @@ $(document).ready(function () {
     });
   });
 
+  function renderFeatured() {
+  const $featured = $('#featured-list');
+  if (!$featured.length) return;
+
+  const featured = (allOpportunities || []).filter((o) => o.featured);
+  if (!featured.length) {
+    $('.featured-section').hide();
+    return;
+  }
+
+  $('.featured-section').show();
+  $featured.empty();
+
+  const top = featured.slice(0, 3);
+
+  top.forEach((o) => {
+    const detailUrl = `/detail?id=${o.id}`;
+    const tagsHtml = (o.tags || [])
+      .map((t) => `<span>${t}</span>`)
+      .join('');
+
+    const card = `
+      <article class="featured-card">
+        <div class="featured-badge">Mis en avant</div>
+        <h3><a href="${detailUrl}" class="card-title-link">${o.title}</a></h3>
+        <div class="featured-meta">
+          ${(o.organization || '')}${o.organization && (o.city || o.country) ? ' · ' : ''}${o.city || ''}${o.city && o.country ? ', ' : ''}${o.country || ''}
+        </div>
+        <div class="featured-tags">
+          ${tagsHtml}
+        </div>
+        <div class="featured-actions">
+          <a href="${detailUrl}" class="btn-primary btn-sm">Voir le detail</a>
+          <div class="featured-deadline">
+            ${o.deadline ? `Jusqu au ${o.deadline}` : ''}
+          </div>
+        </div>
+      </article>
+    `;
+    $featured.append(card);
+  });
+}
+
+
   // Premier chargement
   fetchOpportunities();
   $(document).ajaxComplete(function () {
