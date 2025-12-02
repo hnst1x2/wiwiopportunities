@@ -183,7 +183,7 @@ app.get('/admin/new', requireAdmin, (req, res) => {
 
 // POST création
 app.post('/admin/new', requireAdmin, (req, res) => {
-  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags } =
+  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags, featured } =
     req.body;
 
   if (!title || !country || !type) {
@@ -245,7 +245,7 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
     return res.status(404).send('Opportunité non trouvée');
   }
 
-  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags } =
+  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags, featured } =
     req.body;
 
   data[index] = {
