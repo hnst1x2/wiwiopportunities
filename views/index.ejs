@@ -1,12 +1,12 @@
-<%- include('partials/header', { title: 'WiwiOpportunity - Opportunites internationales', page: 'home' }) %>
+<%- include('partials/header', { title: 'WiwiOpportunity – Opportunites internationales', page: 'home' }) %>
 
 <section class="hero">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <h1>Decouvre des opportunites de stages, bourses, etudes et volontariats a l international.</h1>
+    <h1>Decouvre des opportunites de stages, bourses, etudes et volontariats a l'international.</h1>
     <p>
       WiwiOpportunity aide les etudiants et jeunes francophones a trouver des experiences
-      marquantes : stages a l etranger, bourses, volontariats, jobs et plus encore.
+      marquantes : stages a l'etranger, bourses, volontariats, jobs et plus encore.
     </p>
 
     <div class="hero-search">
@@ -46,6 +46,23 @@
   </div>
 </section>
 
+<section class="featured-section">
+  <div class="main-layout">
+    <div class="featured-header">
+      <div>
+        <h2>Opportunites mises en avant</h2>
+        <p class="featured-subtitle">
+          Une selection rapide d opportunites interessantes choisies manuellement dans le back-office.
+        </p>
+      </div>
+      <p class="featured-hint">Tu peux gerer cette selection dans l espace admin (case "Mettre en avant").</p>
+    </div>
+    <div id="featured-list" class="featured-cards">
+      <!-- cartes mises en avant generees par JS -->
+    </div>
+  </div>
+</section>
+
 <main class="main-layout">
   <section id="opps" class="opportunities-section">
     <div class="layout-grid">
@@ -63,7 +80,7 @@
         </div>
 
         <div class="filter-group">
-          <label for="filter-type">Type d opportunite</label>
+          <label for="filter-type">Type d'opportunite</label>
           <select id="filter-type">
             <option value="">Tous les types</option>
             <option value="Stage">Stage</option>
@@ -79,7 +96,7 @@
             <option value="">Tous les financements</option>
             <option value="Fully funded">Fully funded</option>
             <option value="Partially funded">Partially funded</option>
-            <option value="Non finance">Non finance</option>
+            <option value="Non financé">Non financé</option>
           </select>
         </div>
 
@@ -127,7 +144,7 @@
       <h2>A propos de WiwiOpportunity</h2>
       <p>
         WiwiOpportunity est une plateforme independante pour rendre plus accessibles les
-        opportunites a l international pour les jeunes francophones.
+        opportunites a l'international pour les jeunes francophones.
       </p>
     </div>
   </section>
@@ -136,11 +153,11 @@
     <div class="newsletter-card">
       <h2>Reste informe(e)</h2>
       <p>
-        Inscris-toi pour recevoir prochainement une selection d opportunites adaptees a ton profil.
+        Inscris-toi pour recevoir prochainement une selection d'opportunites adaptees a ton profil.
       </p>
       <form id="newsletter-form" class="newsletter-form">
         <input type="email" id="newsletter-email" placeholder="Ton email" required />
-        <button class="btn-primary" type="submit">S inscrire</button>
+        <button class="btn-primary" type="submit">S'inscrire</button>
       </form>
       <p class="newsletter-note" id="newsletter-message"></p>
 

@@ -1,11 +1,11 @@
-<%- include('partials/header', { title: "Ajouter une opportunité – WiwiOpportunity", page: 'admin', baseUrl }) %>
+<%- include('partials/header', { title: 'Ajouter une opportunite – WiwiOpportunity', page: 'admin' }) %>
 
 <main class="main-layout">
   <section class="admin-section">
     <div class="admin-form-card">
-      <h1>Ajouter une nouvelle opportunité</h1>
+      <h1>Ajouter une nouvelle opportunite</h1>
       <p class="admin-intro">
-        Les données seront enregistrées dans le fichier <code>opportunities.json</code>.
+        Utilise ce formulaire pour ajouter une opportunite (stage, bourse, volontariat, job).
       </p>
 
       <form action="/admin/new" method="post" class="admin-form">
@@ -31,7 +31,7 @@
           </div>
 
           <div class="form-group">
-            <label for="type">Type d'opportunité <span class="required">*</span></label>
+            <label for="type">Type d'opportunite <span class="required">*</span></label>
             <select id="type" name="type" required>
               <option value="">Choisir...</option>
               <option value="Stage">Stage</option>
@@ -44,10 +44,22 @@
           <div class="form-group">
             <label for="funding">Financement</label>
             <select id="funding" name="funding">
-              <option value="">Non spécifié</option>
+              <option value="">Non specifie</option>
               <option value="Fully funded">Fully funded</option>
               <option value="Partially funded">Partially funded</option>
-              <option value="Non financé">Non financé</option>
+              <option value="Non finance">Non finance</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="domain">Domaine</label>
+            <select id="domain" name="domain">
+              <option value="">Non specifie</option>
+              <option value="IT">IT / Tech</option>
+              <option value="Marketing">Marketing / Communication</option>
+              <option value="Business">Business / Management</option>
+              <option value="Etudes">Etudes / Academique</option>
+              <option value="Humanitaire">Humanitaire / Social</option>
             </select>
           </div>
 
@@ -57,39 +69,37 @@
           </div>
 
           <div class="form-group">
-            <label for="duration">Durée</label>
-            <input type="text" id="duration" name="duration" placeholder="3 mois, 1 an..." />
+            <label for="duration">Duree</label>
+            <input type="text" id="duration" name="duration" />
           </div>
 
           <div class="form-group">
             <label for="link">Lien de candidature</label>
-            <input type="url" id="link" name="link" placeholder="https://..." />
-          </div>
-
-          <div class="form-group">
-            <label for="tags">Tags / Domaines</label>
-            <input type="text" id="tags" name="tags" placeholder="ex : IT, Marketing, France..." />
+            <input type="url" id="link" name="link" />
           </div>
         </div>
 
         <div class="form-group">
           <label for="description">Description</label>
-          <textarea id="description" name="description" rows="4" placeholder="Décris l'opportunité..."></textarea>
+          <textarea id="description" name="description" rows="4"></textarea>
         </div>
 
         <div class="form-group">
-          <label for="extra">Profil / Conditions / Infos complémentaires</label>
-          <textarea id="extra" name="extra" rows="4" placeholder="Profil recherché, conditions, avantages..."></textarea>
+          <label for="extra">Profil / Conditions / Infos complementaires</label>
+          <textarea id="extra" name="extra" rows="4"></textarea>
+        
+        <div class="form-group">
+          <label>
+            <input type="checkbox" name="featured" value="1" />
+            Mettre cette opportunite en avant (section mise en avant sur la page d accueil)
+          </label>
         </div>
+</div>
 
         <div class="admin-actions">
-          <a href="/admin" class="btn-secondary">Annuler</a>
-          <button type="submit" class="btn-primary">Enregistrer l'opportunité</button>
+          <a href="/admin/opportunities" class="btn-secondary">Annuler</a>
+          <button type="submit" class="btn-primary">Enregistrer l'opportunite</button>
         </div>
-
-        <p class="admin-note">
-          <span class="required">*</span> champs obligatoires.
-        </p>
       </form>
     </div>
   </section>

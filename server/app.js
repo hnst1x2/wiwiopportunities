@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// --- Session (pour admin login) ---
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'wiwiopportunity-secret',
@@ -19,8 +19,6 @@ app.use(
     saveUninitialized: false,
   })
 );
-
-
 
 // --- Vues EJS ---
 app.set('view engine', 'ejs');
@@ -129,7 +127,6 @@ app.get('/admin/login', (req, res) => {
   res.render('admin-login', {
     page: 'admin-login',
     title: 'Connexion admin – WiwiOpportunity',
-    baseUrl: process.env.PUBLIC_BASE_URL || '',
     error: null,
   });
 });
@@ -149,7 +146,6 @@ app.post('/admin/login', (req, res) => {
     page: 'admin-login',
     title: 'Connexion admin – WiwiOpportunity',
     error: 'Identifiants invalides',
-    baseUrl: process.env.PUBLIC_BASE_URL || ''
   });
 });
 
@@ -167,7 +163,6 @@ app.get('/admin', requireAdmin, (req, res) => {
   res.render('admin-list', {
     page: 'admin',
     title: 'Administration – Opportunités',
-    baseUrl: process.env.PUBLIC_BASE_URL || '',
     opportunities: data,
   });
 });
@@ -176,14 +171,13 @@ app.get('/admin', requireAdmin, (req, res) => {
 app.get('/admin/new', requireAdmin, (req, res) => {
   res.render('admin-new', {
     page: 'admin',
-    baseUrl: process.env.PUBLIC_BASE_URL || '',
     title: 'Ajouter une opportunité – WiwiOpportunity',
   });
 });
 
 // POST création
 app.post('/admin/new', requireAdmin, (req, res) => {
-  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags } =
+  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags, featured } =
     req.body;
 
   if (!title || !country || !type) {
@@ -210,6 +204,7 @@ app.post('/admin/new', requireAdmin, (req, res) => {
           .map((t) => t.trim())
           .filter(Boolean)
       : [],
+    featured: featured === '1' || featured === 'on' || featured === 'true',
   };
 
   data.push(newOpp);
@@ -228,7 +223,6 @@ app.get('/admin/edit/:id', requireAdmin, (req, res) => {
   }
   res.render('admin-edit', {
     page: 'admin',
-    baseUrl: process.env.PUBLIC_BASE_URL || '',
     title: 'Modifier une opportunité – WiwiOpportunity',
     opp,
   });
@@ -243,7 +237,7 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
     return res.status(404).send('Opportunité non trouvée');
   }
 
-  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags } =
+  const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags, featured } =
     req.body;
 
   data[index] = {
@@ -265,6 +259,7 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
           .map((t) => t.trim())
           .filter(Boolean)
       : [],
+    featured: featured === '1' || featured === 'on' || featured === 'true',
   };
 
   saveOpportunities(data);
