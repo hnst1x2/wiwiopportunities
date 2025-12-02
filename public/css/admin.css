@@ -88,3 +88,12 @@
     padding: 16px 12px;
   }
 }
+
+
+.admin-form-card h1 {
+  letter-spacing: 0.03em;
+}
+
+.admin-table th {
+  background: linear-gradient(90deg, #eff6ff, #e0f2fe);
+}

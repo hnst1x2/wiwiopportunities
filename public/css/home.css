@@ -361,3 +361,26 @@
     position: static;
   }
 }
+
+
+/* Subtle card hover animation */
+.card {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+/* Hero subtle float animation */
+.hero-content {
+  animation: heroFloat 8s ease-in-out infinite;
+}
+
+@keyframes heroFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
