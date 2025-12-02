@@ -1,100 +1,87 @@
-<%- include('partials/header', { title: 'Modifier une opportunite – WiwiOpportunity', page: 'admin' }) %>
+<%- include('partials/header', { title: "Modifier une opportunité – WiwiOpportunity", page: 'admin', baseUrl }) %>
 
 <main class="main-layout">
   <section class="admin-section">
     <div class="admin-form-card">
-      <h1>Modifier lopportunite</h1>
-      <form action="/admin/opportunities/<%= opportunity.id %>/edit" method="post" class="admin-form">
+      <h1>Modifier l'opportunité</h1>
+
+      <form action="/admin/edit/<%= opp.id %>" method="post" class="admin-form">
         <div class="admin-grid">
           <div class="form-group">
             <label for="title">Titre <span class="required">*</span></label>
-            <input type="text" id="title" name="title" value="<%= opportunity.title %>" required />
+            <input type="text" id="title" name="title" value="<%= opp.title %>" required />
           </div>
 
           <div class="form-group">
             <label for="organization">Organisation</label>
-            <input type="text" id="organization" name="organization" value="<%= opportunity.organization || '' %>" />
+            <input type="text" id="organization" name="organization" value="<%= opp.organization || '' %>" />
           </div>
 
           <div class="form-group">
             <label for="country">Pays <span class="required">*</span></label>
-            <input type="text" id="country" name="country" value="<%= opportunity.country || '' %>" required />
+            <input type="text" id="country" name="country" value="<%= opp.country || '' %>" required />
           </div>
 
           <div class="form-group">
             <label for="city">Ville</label>
-            <input type="text" id="city" name="city" value="<%= opportunity.city || '' %>" />
+            <input type="text" id="city" name="city" value="<%= opp.city || '' %>" />
           </div>
 
           <div class="form-group">
-            <label for="type">Type d'opportunite <span class="required">*</span></label>
+            <label for="type">Type d'opportunité <span class="required">*</span></label>
             <select id="type" name="type" required>
               <option value="">Choisir...</option>
-              <option value="Stage" <%= opportunity.type === 'Stage' ? 'selected' : '' %>>Stage</option>
-              <option value="Bourse" <%= opportunity.type === 'Bourse' ? 'selected' : '' %>>Bourse</option>
-              <option value="Volontariat" <%= opportunity.type === 'Volontariat' ? 'selected' : '' %>>Volontariat</option>
-              <option value="Job" <%= opportunity.type === 'Job' ? 'selected' : '' %>>Job</option>
+              <option value="Stage" <%= opp.type === 'Stage' ? 'selected' : '' %>>Stage</option>
+              <option value="Bourse" <%= opp.type === 'Bourse' ? 'selected' : '' %>>Bourse</option>
+              <option value="Volontariat" <%= opp.type === 'Volontariat' ? 'selected' : '' %>>Volontariat</option>
+              <option value="Job" <%= opp.type === 'Job' ? 'selected' : '' %>>Job</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="funding">Financement</label>
             <select id="funding" name="funding">
-              <option value="" <%= !opportunity.funding ? 'selected' : '' %>>Non specifie</option>
-              <option value="Fully funded" <%= opportunity.funding === 'Fully funded' ? 'selected' : '' %>>Fully funded</option>
-              <option value="Partially funded" <%= opportunity.funding === 'Partially funded' ? 'selected' : '' %>>Partially funded</option>
-              <option value="Non finance" <%= opportunity.funding === 'Non finance' ? 'selected' : '' %>>Non finance</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="domain">Domaine</label>
-            <select id="domain" name="domain">
-              <option value="" <%= !opportunity.domain ? 'selected' : '' %>>Non specifie</option>
-              <option value="IT" <%= opportunity.domain === 'IT' ? 'selected' : '' %>>IT / Tech</option>
-              <option value="Marketing" <%= opportunity.domain === 'Marketing' ? 'selected' : '' %>>Marketing / Communication</option>
-              <option value="Business" <%= opportunity.domain === 'Business' ? 'selected' : '' %>>Business / Management</option>
-              <option value="Etudes" <%= opportunity.domain === 'Etudes' ? 'selected' : '' %>>Etudes / Academique</option>
-              <option value="Humanitaire" <%= opportunity.domain === 'Humanitaire' ? 'selected' : '' %>>Humanitaire / Social</option>
+              <option value="" <%= !opp.funding ? 'selected' : '' %>>Non spécifié</option>
+              <option value="Fully funded" <%= opp.funding === 'Fully funded' ? 'selected' : '' %>>Fully funded</option>
+              <option value="Partially funded" <%= opp.funding === 'Partially funded' ? 'selected' : '' %>>Partially funded</option>
+              <option value="Non financé" <%= opp.funding === 'Non financé' ? 'selected' : '' %>>Non financé</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="deadline">Deadline</label>
-            <input type="date" id="deadline" name="deadline" value="<%= opportunity.deadline || '' %>" />
+            <input type="date" id="deadline" name="deadline" value="<%= opp.deadline || '' %>" />
           </div>
 
           <div class="form-group">
-            <label for="duration">Duree</label>
-            <input type="text" id="duration" name="duration" value="<%= opportunity.duration || '' %>" />
+            <label for="duration">Durée</label>
+            <input type="text" id="duration" name="duration" value="<%= opp.duration || '' %>" />
           </div>
 
           <div class="form-group">
             <label for="link">Lien de candidature</label>
-            <input type="url" id="link" name="link" value="<%= opportunity.link || '' %>" />
+            <input type="url" id="link" name="link" value="<%= opp.link || '' %>" />
+          </div>
+
+          <div class="form-group">
+            <label for="tags">Tags / Domaines</label>
+            <input type="text" id="tags" name="tags" value="<%= Array.isArray(opp.tags) ? opp.tags.join(', ') : '' %>" />
           </div>
         </div>
 
         <div class="form-group">
           <label for="description">Description</label>
-          <textarea id="description" name="description" rows="4"><%= opportunity.description || '' %></textarea>
+          <textarea id="description" name="description" rows="4"><%= opp.description || '' %></textarea>
         </div>
 
         <div class="form-group">
-          <label for="extra">Profil / Conditions / Infos complementaires</label>
-          <textarea id="extra" name="extra" rows="4"><%= opportunity.extra || '' %></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="featured" value="1" <%= opportunity.featured ? 'checked' : '' %> />
-            Mettre cette opportunite en avant (section mise en avant sur la page d accueil)
-          </label>
+          <label for="extra">Profil / Conditions / Infos complémentaires</label>
+          <textarea id="extra" name="extra" rows="4"><%= opp.extra || '' %></textarea>
         </div>
 
         <div class="admin-actions">
-          <a href="/admin/opportunities" class="btn-secondary">Annuler</a>
-          <button type="submit" class="btn-primary">Enregistrer les modifications</button>
+          <a href="/admin" class="btn-secondary">Annuler</a>
+          <button type="submit" class="btn-primary">Enregistrer</button>
         </div>
       </form>
     </div>

@@ -1,59 +1,67 @@
-<%- include('partials/header', { title: 'Administration – Opportunites', page: 'admin' }) %>
+<%- include('partials/header', { title: "Administration – Opportunités", page: 'admin', baseUrl }) %>
 
 <main class="main-layout">
   <section class="admin-section">
     <div class="admin-form-card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-        <h1 style="margin:0;">Administration – Opportunites</h1>
+        <h1 style="margin:0;">Administration – Opportunités</h1>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <a href="/" class="btn-secondary">← Retour au site</a>
-          <a href="/admin/new" class="btn-primary">+ Nouvelle opportunite</a>
+          <a href="/admin/new" class="btn-primary">+ Nouvelle opportunité</a>
+          <form action="/admin/logout" method="post">
+            <button type="submit" class="btn-secondary">Se déconnecter</button>
+          </form>
         </div>
       </div>
 
-      <div class="admin-table-wrapper">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Titre</th>
-              <th>Pays</th>
-              <th>Type</th>
-              <th>Domaine</th>
-              <th>Deadline</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if (!opportunities.length) { %>
+      <p class="admin-intro">
+        Liste des opportunités actuelles. Tu peux les modifier ou les supprimer.
+      </p>
+
+      <% if (!opportunities.length) { %>
+        <p>Aucune opportunité pour le moment.</p>
+      <% } else { %>
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
               <tr>
-                <td colspan="7">Aucune opportunite pour le moment.</td>
+                <th>Titre</th>
+                <th>Pays</th>
+                <th>Type</th>
+                <th>Financement</th>
+                <th>Deadline</th>
+                <th>Tags</th>
+                <th style="width:140px;">Actions</th>
               </tr>
-            <% } %>
-            <% opportunities.forEach(function(o) { %>
-              <tr>
-                <td><%= o.id %></td>
-                <td>
-                  <%= o.title %>
-                  <% if (o.featured) { %>
-                    <span title="Mise en avant" style="color:#f59e0b;margin-left:4px;">★</span>
-                  <% } %>
-                </td>
-                <td><%= o.country || '' %></td>
-                <td><%= o.type || '' %></td>
-                <td><%= o.domain || '' %></td>
-                <td><%= o.deadline || '' %></td>
-                <td class="admin-actions-cell">
-                  <a href="/admin/opportunities/<%= o.id %>/edit" class="btn-secondary btn-sm">Modifier</a>
-                  <form action="/admin/opportunities/<%= o.id %>...e;" onsubmit="return confirm('Supprimer cette opportunite ?');">
-                    <button type="submit" class="btn-primary btn-sm" style="background:#dc2626;">Supprimer</button>
-                  </form>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              <% opportunities.forEach(function(o) { %>
+                <tr>
+                  <td><%= o.title %></td>
+                  <td><%= o.country || "" %></td>
+                  <td><%= o.type || "" %></td>
+                  <td><%= o.funding || "" %></td>
+                  <td><%= o.deadline || "" %></td>
+                  <td>
+                    <% if (Array.isArray(o.tags)) { %>
+                      <%= o.tags.join(", ") %>
+                    <% } %>
+                  </td>
+                  <td>
+                    <div class="admin-actions-row">
+                      <a href="/admin/edit/<%= o.id %>" class="btn-secondary btn-sm">Éditer</a>
+                      <form action="/admin/delete/<%= o.id %>" method="post" onsubmit="return confirm('Supprimer cette opportunité ?');">
+                        <button type="submit" class="btn-secondary btn-sm" style="border-color:#fecaca;background:#fef2f2;color:#b91c1c;">
+                          Supprimer
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
     </div>
   </section>
 </main>

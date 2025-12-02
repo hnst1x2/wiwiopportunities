@@ -1,35 +1,32 @@
-<%- include('partials/header', { title: 'Connexion admin - WiwiOpportunity', page: 'admin' }) %>
+<%- include('partials/header', { title: "Connexion admin – WiwiOpportunity", page: 'admin', baseUrl }) %>
 
 <main class="main-layout">
   <section class="admin-section">
     <div class="admin-form-card">
-      <h1>Connexion admin</h1>
+      <h1>Connexion administrateur</h1>
       <p class="admin-intro">
-        Identifie-toi pour acceder a la gestion des opportunites.
+        Accès réservé pour gérer les opportunités publiées sur WiwiOpportunity.
       </p>
+
+      <% if (error) { %>
+        <p style="color:#dc2626;font-size:0.9rem;margin-bottom:10px;"><%= error %></p>
+      <% } %>
 
       <form action="/admin/login" method="post" class="admin-form">
         <div class="admin-grid">
           <div class="form-group">
-            <label for="username">Nom d utilisateur</label>
-            <input type="text" id="username" name="username" required />
+            <label for="username">Nom d'utilisateur</label>
+            <input id="username" name="username" required />
           </div>
-
           <div class="form-group">
             <label for="password">Mot de passe</label>
-            <input type="password" id="password" name="password" required />
+            <input id="password" type="password" name="password" required />
           </div>
         </div>
 
         <div class="admin-actions">
           <button type="submit" class="btn-primary">Se connecter</button>
         </div>
-
-        <% if (typeof error !== 'undefined' && error) { %>
-          <p class="admin-note" style="color:#dc2626;margin-top:10px;">
-            <%= error %>
-          </p>
-        <% } %>
       </form>
     </div>
   </section>

@@ -166,8 +166,4 @@ $(document).ready(function () {
 
   // Premier chargement
   fetchOpportunities();
-  // Les mises en avant sont calculees a partir de la liste complete
-  $(document).ajaxComplete(function () {
-    renderFeatured();
-  });
 });
