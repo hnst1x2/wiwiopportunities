@@ -7,7 +7,7 @@
 
       <form action="/admin/edit/<%= opp.id %>" method="post" class="admin-form">
         <div class="admin-grid">
-          <input type="checkbox" name="featured" value="1" <%= opportunity.featured ? 'checked' : '' %> />
+          <input type="checkbox" name="featured" value="1" <%= opp.featured ? 'checked' : '' %> />
 
           <div class="form-group">
             <label for="title">Titre <span class="required">*</span></label>
