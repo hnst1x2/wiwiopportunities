@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const session = require('express-session');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,6 +11,15 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// --- Session (pour admin login) ---
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'wiwiopportunity-secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
 
 
 // --- Vues EJS ---
