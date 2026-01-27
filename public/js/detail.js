@@ -1,17 +1,31 @@
 // public/js/detail.js
 $(document).ready(function () {
+  function t(key, vars) {
+    const parts = key.split('.');
+    let current = window.I18N && window.I18N.strings;
+    for (const part of parts) {
+      if (!current || typeof current !== 'object') return key;
+      current = current[part];
+    }
+    if (typeof current !== 'string') return key;
+    if (!vars) return current;
+    return current.replace(/\{(\w+)\}/g, function (_, k) {
+      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : `{${k}}`;
+    });
+  }
+
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
 
   if (!id) {
-    $('#detail-main').html("<p>Identifiant d’opportunité manquant.</p>");
+    $('#detail-main').html(`<p>${t('detail.missingId')}</p>`);
     return;
   }
 
   $.get(`/api/opportunities/${id}`, function (o) {
     renderDetail(o);
   }).fail(function () {
-    $('#detail-main').html('<p>Opportunité introuvable ou erreur serveur.</p>');
+    $('#detail-main').html(`<p>${t('detail.notFound')}</p>`);
   });
 
   function renderDetail(o) {
@@ -25,7 +39,7 @@ $(document).ready(function () {
       </header>
 
       <section class="detail-description">
-        <h2>Description</h2>
+        <h2>${t('detail.description')}</h2>
         <p>${(o.description || '').replace(/\n/g, '<br>')}</p>
       </section>
 
@@ -33,7 +47,7 @@ $(document).ready(function () {
         o.duration
           ? `
       <section class="detail-section">
-        <h2>Durée</h2>
+        <h2>${t('detail.duration')}</h2>
         <p>${o.duration}</p>
       </section>
       `
@@ -44,7 +58,7 @@ $(document).ready(function () {
         o.extra
           ? `
       <section class="detail-section">
-        <h2>Profil / Conditions</h2>
+        <h2>${t('detail.profile')}</h2>
         <p>${(o.extra || '').replace(/\n/g, '<br>')}</p>
       </section>
       `
@@ -56,7 +70,7 @@ $(document).ready(function () {
           ? `
       <section class="detail-section">
         <a href="${o.link}" target="_blank" class="btn-apply">
-          Postuler à cette opportunité
+          ${t('detail.apply')}
         </a>
       </section>
       `
@@ -72,17 +86,17 @@ $(document).ready(function () {
 
     const sidebarHtml = `
       <div class="detail-card">
-        <h3>Infos clés</h3>
+        <h3>${t('detail.infoTitle')}</h3>
         <ul class="detail-info-list">
-          ${o.type ? `<li><strong>Type :</strong> ${o.type}</li>` : ''}
-          ${o.country ? `<li><strong>Pays :</strong> ${o.country}</li>` : ''}
-          ${o.city ? `<li><strong>Ville :</strong> ${o.city}</li>` : ''}
-          ${o.funding ? `<li><strong>Financement :</strong> ${o.funding}</li>` : ''}
-          ${o.deadline ? `<li><strong>Deadline :</strong> ${o.deadline}</li>` : ''}
-          ${o.duration ? `<li><strong>Durée :</strong> ${o.duration}</li>` : ''}
+          ${o.type ? `<li><strong>${t('detail.typeLabel')} :</strong> ${o.type}</li>` : ''}
+          ${o.country ? `<li><strong>${t('detail.countryLabel')} :</strong> ${o.country}</li>` : ''}
+          ${o.city ? `<li><strong>${t('detail.cityLabel')} :</strong> ${o.city}</li>` : ''}
+          ${o.funding ? `<li><strong>${t('detail.fundingLabel')} :</strong> ${o.funding}</li>` : ''}
+          ${o.deadline ? `<li><strong>${t('detail.deadlineLabel')} :</strong> ${o.deadline}</li>` : ''}
+          ${o.duration ? `<li><strong>${t('detail.durationLabel')} :</strong> ${o.duration}</li>` : ''}
           ${
             tagsHtml
-              ? `<li><strong>Tags :</strong> ${tagsHtml}</li>`
+              ? `<li><strong>${t('detail.tagsLabel')} :</strong> ${tagsHtml}</li>`
               : ''
           }
         </ul>
@@ -90,13 +104,13 @@ $(document).ready(function () {
         ${
           o.link
             ? `<a href="${o.link}" target="_blank" class="btn-primary full-width" style="margin-top:8px;">
-                 Postuler maintenant
+                 ${t('detail.applyNow')}
                </a>`
             : ''
         }
 
         <a href="/#opps" class="btn-secondary full-width" style="margin-top:10px;">
-          ← Retour aux opportunités
+          ${t('detail.back')}
         </a>
       </div>
     `;

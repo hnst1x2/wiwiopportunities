@@ -1,9 +1,9 @@
-<%- include('partials/header', { title: "Détail de l'opportunité – WiwiOpportunity", page: 'detail', baseUrl }) %>
+<%- include('partials/header', { title: t('meta.detailTitle'), page: 'detail', baseUrl }) %>
 
 <main class="main-layout">
   <article class="detail-layout">
     <section class="detail-main" id="detail-main">
-      <p>Chargement de l'opportunité...</p>
+      <p><%= t('detail.loading') %></p>
     </section>
 
     <aside class="detail-sidebar" id="detail-sidebar">
@@ -13,8 +13,8 @@
 
   <section class="detail-social-promo">
     <div class="detail-social-card">
-      <h3>Ne rate pas les prochaines opportunités</h3>
-      <p>On publie régulièrement des nouvelles offres et conseils sur les réseaux :</p>
+      <h3><%= t('detail.socialTitle') %></h3>
+      <p><%= t('detail.socialText') %></p>
       <div class="social-cta-links">
         <%- include('partials/social-links') %>
       </div>

@@ -1,24 +1,25 @@
-<%- include('partials/header', { title: "Contact – WiwiOpportunity", page: 'contact', baseUrl }) %>
+<%- include('partials/header', { title: t('meta.contactTitle'), page: 'contact', baseUrl }) %>
 
 <main class="main-layout">
   <section class="info-section">
     <div class="info-card">
-      <h1>Contact</h1>
+      <h1><%= t('contact.title') %></h1>
       <p>
-        Tu peux nous contacter pour&nbsp;:
+        <%= t('contact.intro') %>
       </p>
       <ul>
-        <li>Proposer une opportunité (stage, bourse, programme...)</li>
-        <li>Signaler une erreur ou un lien invalide</li>
-        <li>Proposer un partenariat ou une collaboration</li>
+        <li><%= t('contact.offer') %></li>
+        <li><%= t('contact.report') %></li>
+        <li><%= t('contact.partner') %></li>
       </ul>
 
       <p>
-        <strong>Email :</strong> <a href="mailto:contact@wiwiopportunity.com">contact@wiwiopportunity.com</a>
+        <strong><%= t('contact.emailLabel') %></strong>
+        <a href="mailto:contact@wiwiopportunity.com">contact@wiwiopportunity.com</a>
       </p>
 
       <p>
-        Tu peux aussi nous écrire sur nos réseaux :
+        <%= t('contact.socialIntro') %>
       </p>
       <ul>
         <li><a href="<%= site.social.instagram %>" target="_blank">Instagram</a></li>

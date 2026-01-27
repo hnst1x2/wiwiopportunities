@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<%= lang %>">
 <head>
   <meta charset="UTF-8" />
-  <title><%= title || 'WiwiOpportunity - Opportunités internationales' %></title>
+  <title><%= title || t('meta.defaultTitle') %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="WiwiOpportunity recense des opportunités de stages, études, bourses et volontariats à l international pour les étudiants et jeunes francophones." />
+  <meta name="description" content="<%= t('meta.defaultDescription') %>" />
   <meta name="keywords" content="stage, bourse, volontariat, etudes a l etranger, opportunites, jeunes, francophones" />
 
   <!-- OpenGraph / Social -->
-  <meta property="og:title" content="<%= title || 'WiwiOpportunity - Opportunités internationales' %>" />
-  <meta property="og:description" content="Trouve des stages, bourses, etudes et volontariats a l etranger adaptes a ton profil." />
+  <meta property="og:title" content="<%= title || t('meta.defaultTitle') %>" />
+  <meta property="og:description" content="<%= t('meta.ogDescription') %>" />
   <meta property="og:type" content="website" />
   <!-- Mets ton image OG ici si tu veux -->
   <meta property="og:image" content="https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg" />
@@ -45,10 +45,15 @@
         </a>
       </div>
       <nav class="nav-links">
-        <a href="/#opps">Opportunités</a>
-        <a href="/archive">Archives</a>
-        <a href="/about">À propos</a>
-        <a href="/#newsletter" class="nav-cta">Newsletter</a>
+        <a href="/#opps"><%= t('nav.opps') %></a>
+        <a href="/archive"><%= t('nav.archive') %></a>
+        <a href="/about"><%= t('nav.about') %></a>
+        <a href="/#newsletter" class="nav-cta"><%= t('nav.newsletter') %></a>
+        <div class="lang-switch" aria-label="<%= t('nav.langLabel') %>">
+          <button type="button" class="<%= lang === 'fr' ? 'active' : '' %>" data-lang="fr">FR</button>
+          <span aria-hidden="true">|</span>
+          <button type="button" class="<%= lang === 'en' ? 'active' : '' %>" data-lang="en">EN</button>
+        </div>
       </nav>
     </div>
   </header>

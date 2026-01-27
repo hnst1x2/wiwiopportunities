@@ -1,12 +1,11 @@
-<%- include('partials/header', { title: 'WiwiOpportunity - Opportunites internationales', page: 'home' }) %>
+<%- include('partials/header', { title: t('meta.homeTitle'), page: 'home' }) %>
 
 <section class="hero">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <h1>Decouvre des opportunites de stages, bourses, etudes et volontariats a l international.</h1>
+    <h1><%= t('home.heroTitle') %></h1>
     <p>
-      WiwiOpportunity aide les etudiants et jeunes francophones a trouver des experiences
-      marquantes : stages a l etranger, bourses, volontariats, jobs et plus encore.
+      <%= t('home.heroText') %>
     </p>
 
     <div class="hero-search">
@@ -14,23 +13,23 @@
         <input
           type="text"
           id="search"
-          placeholder="Rechercher une opportunite (ex : stage marketing Berlin, bourse France...)"
+          placeholder="<%= t('home.heroSearchPlaceholder') %>"
         />
       </div>
-      <button id="btn-hero-search">Rechercher</button>
+      <button id="btn-hero-search"><%= t('home.heroSearchButton') %></button>
     </div>
 
     <div class="hero-tags">
-      <span>Suggestions :</span>
-      <button class="chip" data-type="Stage">Stages</button>
-      <button class="chip" data-type="Bourse">Bourses</button>
-      <button class="chip" data-type="Volontariat">Volontariats</button>
-      <button class="chip" data-country="France">France</button>
-      <button class="chip" data-country="Allemagne">Allemagne</button>
+      <span><%= t('home.suggestionsLabel') %></span>
+      <button class="chip" data-type="Stage"><%= t('home.chips.stage') %></button>
+      <button class="chip" data-type="Bourse"><%= t('home.chips.scholarship') %></button>
+      <button class="chip" data-type="Volontariat"><%= t('home.chips.volunteering') %></button>
+      <button class="chip" data-country="France"><%= t('home.chips.france') %></button>
+      <button class="chip" data-country="Allemagne"><%= t('home.chips.germany') %></button>
     </div>
 
     <div class="social-cta-bar">
-      <span class="social-cta-text">Suivez WiwiOpportunity sur les reseaux :</span>
+      <span class="social-cta-text"><%= t('home.socialCta') %></span>
       <div class="social-cta-links">
         <%- include('partials/social-links') %>
       </div>
@@ -42,13 +41,13 @@
   <div class="main-layout">
     <div class="featured-header">
       <div>
-        <h2>Opportunites mises en avant</h2>
+        <h2><%= t('home.featuredTitle') %></h2>
         <p class="featured-subtitle">
-          Une selection rapide d opportunites interessantes choisies manuellement dans le back-office.
+          <%= t('home.featuredSubtitle') %>
         </p>
       </div>
       <p class="featured-hint">
-        Tu peux gerer cette selection dans l espace admin (case "Mettre en avant").
+        <%= t('home.featuredHint') %>
       </p>
     </div>
     <div id="featured-list" class="featured-cards">
@@ -62,62 +61,62 @@
   <section id="opps" class="opportunities-section">
     <div class="layout-grid">
       <aside class="filters-panel">
-        <h2>Filtrer les opportunites</h2>
+        <h2><%= t('home.filtersTitle') %></h2>
 
         <div class="filter-group">
-          <label for="filter-country">Pays</label>
+          <label for="filter-country"><%= t('filters.country') %></label>
           <select id="filter-country">
-            <option value="">Tous les pays</option>
-            <option value="France">France</option>
-            <option value="Allemagne">Allemagne</option>
-            <option value="Maroc">Maroc</option>
+            <option value=""><%= t('filters.allCountries') %></option>
+            <option value="France"><%= t('options.countries.france') %></option>
+            <option value="Allemagne"><%= t('options.countries.germany') %></option>
+            <option value="Maroc"><%= t('options.countries.morocco') %></option>
           </select>
         </div>
 
         <div class="filter-group">
-          <label for="filter-type">Type d opportunite</label>
+          <label for="filter-type"><%= t('filters.type') %></label>
           <select id="filter-type">
-            <option value="">Tous les types</option>
-            <option value="Stage">Stage</option>
-            <option value="Bourse">Bourse</option>
-            <option value="Volontariat">Volontariat</option>
-            <option value="Job">Job</option>
+            <option value=""><%= t('filters.allTypes') %></option>
+            <option value="Stage"><%= t('options.types.stage') %></option>
+            <option value="Bourse"><%= t('options.types.scholarship') %></option>
+            <option value="Volontariat"><%= t('options.types.volunteering') %></option>
+            <option value="Job"><%= t('options.types.job') %></option>
           </select>
         </div>
 
         <div class="filter-group">
-          <label for="filter-funding">Financement</label>
+          <label for="filter-funding"><%= t('filters.funding') %></label>
           <select id="filter-funding">
-            <option value="">Tous les financements</option>
-            <option value="Fully funded">Fully funded</option>
-            <option value="Partially funded">Partially funded</option>
-            <option value="Non finance">Non finance</option>
+            <option value=""><%= t('filters.allFunding') %></option>
+            <option value="Fully funded"><%= t('options.funding.fully') %></option>
+            <option value="Partially funded"><%= t('options.funding.partial') %></option>
+            <option value="Non finance"><%= t('options.funding.none') %></option>
           </select>
         </div>
 
         <div class="filter-group">
-          <label for="filter-tag">Domaine</label>
+          <label for="filter-tag"><%= t('filters.domain') %></label>
           <select id="filter-tag">
-            <option value="">Tous les domaines</option>
-            <option value="IT">IT / Tech</option>
-            <option value="Marketing">Marketing / Communication</option>
-            <option value="Business">Business / Management</option>
-            <option value="Etudes">Etudes / Academique</option>
-            <option value="Humanitaire">Humanitaire / Social</option>
+            <option value=""><%= t('filters.allDomains') %></option>
+            <option value="IT"><%= t('options.domains.it') %></option>
+            <option value="Marketing"><%= t('options.domains.marketing') %></option>
+            <option value="Business"><%= t('options.domains.business') %></option>
+            <option value="Etudes"><%= t('options.domains.studies') %></option>
+            <option value="Humanitaire"><%= t('options.domains.humanitarian') %></option>
           </select>
         </div>
 
-        <button id="btn-reset" class="btn-secondary full-width">Reinitialiser les filtres</button>
+        <button id="btn-reset" class="btn-secondary full-width"><%= t('common.reset') %></button>
         <p class="filters-hint">
-          Astuce : tu peux combiner la recherche texte (en haut) avec les filtres ci-dessus.
+          <%= t('home.filtersHint') %>
         </p>
       </aside>
 
       <section class="results-panel">
         <div class="results-header">
-          <h2>Opportunites disponibles</h2>
+          <h2><%= t('home.resultsTitle') %></h2>
           <div class="results-meta">
-            <span id="results-count">Chargement...</span>
+            <span id="results-count"><%= t('common.loading') %></span>
           </div>
         </div>
 
@@ -132,30 +131,30 @@
 
   <section id="about" class="about-section">
     <div class="about-card">
-      <h2>A propos de WiwiOpportunity</h2>
+      <h2><%= t('home.aboutTitle') %></h2>
       <p>
-        WiwiOpportunity est une plateforme independante pour rendre plus accessibles les
-        opportunites a l international pour les jeunes francophones.
+        <%= t('home.aboutText') %>
       </p>
     </div>
   </section>
 
   <section id="newsletter" class="newsletter-section">
     <div class="newsletter-card">
-      <h2>Reste informe(e)</h2>
+      <h2><%= t('home.newsletterTitle') %></h2>
       <p>
-        Inscris-toi pour recevoir prochainement une selection d opportunites adaptees a ton profil.
+        <%= t('home.newsletterText') %>
       </p>
       <form id="newsletter-form" class="newsletter-form">
-        <input type="email" id="newsletter-email" placeholder="Ton email" required />
-        <button class="btn-primary" type="submit">S inscrire</button>
+        <input type="email" id="newsletter-email" placeholder="<%= t('home.newsletterPlaceholder') %>" required />
+        <button class="btn-primary" type="submit"><%= t('home.newsletterButton') %></button>
       </form>
       <p class="newsletter-note" id="newsletter-message"></p>
 
       <div class="social-inline-note">
-        En attendant, on partage deja des opportunites sur
+        <%= t('home.socialInlineLead') %>
         <a href="<%= site.social.instagram %>" target="_blank">Instagram</a>,
-        <a href="<%= site.social.tiktok %>" target="_blank">TikTok</a> et
+        <a href="<%= site.social.tiktok %>" target="_blank">TikTok</a>
+        <%= t('common.and') %>
         <a href="<%= site.social.linkedin %>" target="_blank">LinkedIn</a>.
       </div>
     </div>

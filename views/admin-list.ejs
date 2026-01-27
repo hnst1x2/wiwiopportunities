@@ -1,59 +1,59 @@
-<%- include('partials/header', { title: "Administration – Opportunités", page: 'admin', baseUrl }) %>
+<%- include('partials/header', { title: t('meta.adminListTitle'), page: 'admin', baseUrl }) %>
 
 <main class="main-layout">
   <section class="admin-section">
     <div class="admin-form-card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-        <h1 style="margin:0;">Administration – Opportunités</h1>
+        <h1 style="margin:0;"><%= t('admin.listTitle') %></h1>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <a href="/admin/new" class="btn-primary">+ Nouvelle opportunité</a>
+          <a href="/admin/new" class="btn-primary"><%= t('admin.addNew') %></a>
           <form action="/admin/logout" method="post">
-            <button type="submit" class="btn-secondary">Se déconnecter</button>
+            <button type="submit" class="btn-secondary"><%= t('admin.logout') %></button>
           </form>
         </div>
       </div>
 
       <p class="admin-intro">
-        Liste des opportunités actuelles. Tu peux les modifier ou les supprimer.
+        <%= t('admin.listIntro') %>
       </p>
 
       <div class="admin-filters" id="admin-filters">
         <div class="filter-group">
-          <label for="admin-search">Recherche</label>
-          <input id="admin-search" type="text" placeholder="Titre, orga, pays, tags..." />
+          <label for="admin-search"><%= t('admin.search') %></label>
+          <input id="admin-search" type="text" placeholder="<%= t('admin.searchPlaceholder') %>" />
         </div>
         <div class="filter-group">
-          <label for="admin-country">Pays</label>
+          <label for="admin-country"><%= t('filters.country') %></label>
           <select id="admin-country">
-            <option value="">Tous</option>
+            <option value=""><%= t('filters.allCountries') %></option>
           </select>
         </div>
         <div class="filter-group">
-          <label for="admin-type">Type</label>
+          <label for="admin-type"><%= t('filters.type') %></label>
           <select id="admin-type">
-            <option value="">Tous</option>
+            <option value=""><%= t('filters.allTypes') %></option>
           </select>
         </div>
         <div class="filter-group">
-          <label for="admin-funding">Financement</label>
+          <label for="admin-funding"><%= t('filters.funding') %></label>
           <select id="admin-funding">
-            <option value="">Tous</option>
+            <option value=""><%= t('filters.allFunding') %></option>
           </select>
         </div>
         <div class="filter-group">
-          <label for="admin-featured">Mise en avant</label>
+          <label for="admin-featured"><%= t('admin.featured') %></label>
           <select id="admin-featured">
-            <option value="">Tous</option>
-            <option value="true">Oui</option>
-            <option value="false">Non</option>
+            <option value=""><%= t('common.all') %></option>
+            <option value="true"><%= t('common.yes') %></option>
+            <option value="false"><%= t('common.no') %></option>
           </select>
         </div>
         <div class="filter-group">
-          <label for="admin-tag">Tag</label>
-          <input id="admin-tag" type="text" placeholder="ex : Marketing" />
+          <label for="admin-tag"><%= t('admin.tag') %></label>
+          <input id="admin-tag" type="text" placeholder="<%= t('admin.tagPlaceholder') %>" />
         </div>
         <div class="filter-actions">
-          <button id="admin-reset" class="btn-secondary btn-sm" type="button">Réinitialiser</button>
+          <button id="admin-reset" class="btn-secondary btn-sm" type="button"><%= t('admin.reset') %></button>
         </div>
       </div>
 
@@ -62,19 +62,19 @@
       </div>
 
       <% if (!opportunities.length) { %>
-        <p>Aucune opportunité pour le moment.</p>
+        <p><%= t('admin.none') %></p>
       <% } else { %>
         <div class="admin-table-wrapper">
           <table class="admin-table" id="admin-table">
             <thead>
               <tr>
-                <th data-sort="title">Titre</th>
-                <th data-sort="country">Pays</th>
-                <th data-sort="type">Type</th>
-                <th data-sort="funding">Financement</th>
-                <th data-sort="deadline">Deadline</th>
-                <th data-sort="tags">Tags</th>
-                <th style="width:140px;">Actions</th>
+                <th data-sort="title"><%= t('admin.table.title') %></th>
+                <th data-sort="country"><%= t('admin.table.country') %></th>
+                <th data-sort="type"><%= t('admin.table.type') %></th>
+                <th data-sort="funding"><%= t('admin.table.funding') %></th>
+                <th data-sort="deadline"><%= t('admin.table.deadline') %></th>
+                <th data-sort="tags"><%= t('admin.table.tags') %></th>
+                <th style="width:140px;"><%= t('admin.table.actions') %></th>
               </tr>
             </thead>
             <tbody id="admin-table-body"></tbody>

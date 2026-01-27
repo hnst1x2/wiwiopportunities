@@ -1,27 +1,22 @@
-<%- include('partials/header', { title: "À propos – WiwiOpportunity", page: 'about', baseUrl }) %>
+<%- include('partials/header', { title: t('meta.aboutTitle'), page: 'about', baseUrl }) %>
 
 <main class="main-layout">
   <section class="info-section">
     <div class="info-card">
-      <h1>À propos de WiwiOpportunity</h1>
+      <h1><%= t('about.title') %></h1>
       <p>
-        WiwiOpportunity est un projet indépendant créé pour aider les étudiants et jeunes
-        francophones à accéder à des opportunités à l'international : stages, bourses, études,
-        volontariats, jobs saisonniers, programmes d'échange, etc.
+        <%= t('about.p1') %>
       </p>
       <p>
-        Notre objectif est de centraliser des opportunités fiables, de les présenter de manière claire
-        et d'offrir une expérience de recherche simple et agréable.
+        <%= t('about.p2') %>
       </p>
       <p>
-        Le projet est pensé pour évoluer progressivement&nbsp;: nouvelles sources d'opportunités,
-        nouveaux filtres, intégration de témoignages, automatisation de la collecte des offres, etc.
+        <%= t('about.p3') %>
       </p>
 
-      <h2>Comment nous utilisons vos retours</h2>
+      <h2><%= t('about.feedbackTitle') %></h2>
       <p>
-        Chaque retour nous aide à améliorer la plateforme&nbsp;: ergonomie, types d'opportunités
-        mises en avant, filtres, contenu explicatif (guides, conseils de candidature, etc.).
+        <%= t('about.feedbackText') %>
       </p>
     </div>
   </section>

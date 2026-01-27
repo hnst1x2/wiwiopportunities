@@ -4,9 +4,11 @@ const path = require('path');
 const fs = require('fs');
 const session = require('express-session');
 const site = require('./config/site');
+const translations = require('./i18n/translations');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DEFAULT_LANG = 'fr';
 
 // --- Middlewares globaux ---
 app.use(cors());
@@ -25,6 +27,32 @@ app.use(
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 app.locals.site = site;
+
+function getCookieLang(req) {
+  const cookie = req.headers.cookie || '';
+  const match = cookie.match(/(?:^|;\s*)wiwi_lang=([^;]+)/);
+  if (!match) return null;
+  const value = decodeURIComponent(match[1]);
+  return translations[value] ? value : null;
+}
+
+function getTranslation(lang, key) {
+  const parts = key.split('.');
+  let current = translations[lang];
+  for (const part of parts) {
+    if (!current || typeof current !== 'object') return key;
+    current = current[part];
+  }
+  return current || key;
+}
+
+app.use((req, res, next) => {
+  const lang = getCookieLang(req) || DEFAULT_LANG;
+  res.locals.lang = lang;
+  res.locals.t = (key) => getTranslation(lang, key);
+  res.locals.i18n = translations[lang];
+  next();
+});
 
 // --- Static ---
 app.use(express.static(path.join(__dirname, '../public')));
@@ -88,7 +116,7 @@ function requireAdmin(req, res, next) {
 app.get('/', (req, res) => {
   res.render('index', {
     page: 'home',
-    title: "WiwiOpportunity – Opportunités à l'international",
+    title: res.locals.t('meta.homeTitle'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
@@ -97,7 +125,7 @@ app.get('/', (req, res) => {
 app.get('/detail', (req, res) => {
   res.render('detail', {
     page: 'detail',
-    title: "Détail de l'opportunité – WiwiOpportunity",
+    title: res.locals.t('meta.detailTitle'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
@@ -106,7 +134,7 @@ app.get('/detail', (req, res) => {
 app.get('/about', (req, res) => {
   res.render('about', {
     page: 'about',
-    title: "À propos – WiwiOpportunity",
+    title: res.locals.t('meta.aboutTitle'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
@@ -115,7 +143,7 @@ app.get('/about', (req, res) => {
 app.get('/contact', (req, res) => {
   res.render('contact', {
     page: 'contact',
-    title: 'Contact – WiwiOpportunity',
+    title: res.locals.t('meta.contactTitle'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
@@ -124,7 +152,7 @@ app.get('/contact', (req, res) => {
 app.get('/archive', (req, res) => {
   res.render('archive', {
     page: 'archive',
-    title: 'Archives – WiwiOpportunity',
+    title: res.locals.t('meta.archiveTitle'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
@@ -133,7 +161,7 @@ app.get('/archive', (req, res) => {
 app.post('/newsletter', (req, res) => {
   const email = (req.body.email || '').trim().toLowerCase();
   if (!email) {
-    return res.status(400).json({ success: false, message: 'Email requis' });
+    return res.status(400).json({ success: false, message: res.locals.t('errors.emailRequired') });
   }
   const list = getNewsletterList();
   if (!list.includes(email)) {
@@ -151,7 +179,7 @@ app.get('/admin/login', (req, res) => {
   }
   res.render('admin-login', {
     page: 'admin-login',
-    title: 'Connexion admin – WiwiOpportunity',
+    title: res.locals.t('meta.adminLoginTitle'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
     error: null,
   });
@@ -170,8 +198,8 @@ app.post('/admin/login', (req, res) => {
 
   return res.status(401).render('admin-login', {
     page: 'admin-login',
-    title: 'Connexion admin – WiwiOpportunity',
-    error: 'Identifiants invalides',
+    title: res.locals.t('meta.adminLoginTitle'),
+    error: res.locals.t('admin.invalidCredentials'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
@@ -189,7 +217,7 @@ app.get('/admin', requireAdmin, (req, res) => {
   const data = getOpportunities();
   res.render('admin-list', {
     page: 'admin',
-    title: 'Administration – Opportunités',
+    title: res.locals.t('meta.adminListTitle'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
     opportunities: data,
   });
@@ -200,7 +228,7 @@ app.get('/admin/new', requireAdmin, (req, res) => {
   res.render('admin-new', {
     page: 'admin',
     baseUrl: process.env.PUBLIC_BASE_URL || '',
-    title: 'Ajouter une opportunité – WiwiOpportunity',
+    title: res.locals.t('meta.adminNewTitle'),
   });
 });
 
@@ -210,7 +238,7 @@ app.post('/admin/new', requireAdmin, (req, res) => {
     req.body;
 
   if (!title || !country || !type) {
-    return res.status(400).send("Les champs 'Titre', 'Pays' et 'Type' sont obligatoires.");
+    return res.status(400).send(res.locals.t('errors.requiredFields'));
   }
 
   const data = getOpportunities();
@@ -248,12 +276,12 @@ app.get('/admin/edit/:id', requireAdmin, (req, res) => {
   const data = getOpportunities();
   const opp = data.find((o) => o.id === id);
   if (!opp) {
-    return res.status(404).send('Opportunité non trouvée');
+    return res.status(404).send(res.locals.t('errors.notFound'));
   }
   res.render('admin-edit', {
     page: 'admin',
     baseUrl: process.env.PUBLIC_BASE_URL || '',
-    title: 'Modifier une opportunité – WiwiOpportunity',
+    title: res.locals.t('meta.adminEditTitle'),
     opp,
   });
 });
@@ -264,7 +292,7 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
   const data = getOpportunities();
   const index = data.findIndex((o) => o.id === id);
   if (index === -1) {
-    return res.status(404).send('Opportunité non trouvée');
+    return res.status(404).send(res.locals.t('errors.notFound'));
   }
 
   const { title, organization, country, city, type, funding, deadline, duration, link, description, extra, tags, featured } =
@@ -354,7 +382,7 @@ app.get('/api/opportunities/:id', (req, res) => {
   const data = getOpportunities();
   const opp = data.find((o) => o.id === id);
 
-  if (!opp) return res.status(404).json({ error: 'Opportunité non trouvée' });
+  if (!opp) return res.status(404).json({ error: res.locals.t('errors.notFound') });
   res.json(opp);
 });
 
@@ -362,7 +390,7 @@ app.get('/api/opportunities/:id', (req, res) => {
 app.post('/api/opportunities', (req, res) => {
   const newOpp = req.body;
   if (!newOpp.title || !newOpp.country || !newOpp.type) {
-    return res.status(400).json({ error: 'title, country, type sont obligatoires' });
+    return res.status(400).json({ error: res.locals.t('errors.apiRequired') });
   }
   const data = getOpportunities();
   newOpp.id = Date.now();

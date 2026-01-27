@@ -1,5 +1,24 @@
 // public/js/app.js
 $(document).ready(function () {
+  function t(key, vars) {
+    const parts = key.split('.');
+    let current = window.I18N && window.I18N.strings;
+    for (const part of parts) {
+      if (!current || typeof current !== 'object') return key;
+      current = current[part];
+    }
+    if (typeof current !== 'string') return key;
+    if (!vars) return current;
+    return current.replace(/\{(\w+)\}/g, function (_, k) {
+      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : `{${k}}`;
+    });
+  }
+
+  function tCount(baseKey, count) {
+    const key = count === 1 ? `${baseKey}.one` : `${baseKey}.other`;
+    return t(key, { count });
+  }
+
   const API_URL = '/api/opportunities';
   let allOpportunities = [];
   let filtered = [];
@@ -24,8 +43,8 @@ $(document).ready(function () {
       renderOpportunities();
       renderPagination();
     }).fail(function () {
-      $('#opportunities-list').html('<p>Erreur lors du chargement des opportunités.</p>');
-      $('#results-count').text('Erreur');
+      $('#opportunities-list').html(`<p>${t('home.loadError')}</p>`);
+      $('#results-count').text(t('common.error'));
     });
   }
 
@@ -39,10 +58,10 @@ $(document).ready(function () {
     const $list = $('#opportunities-list');
     $list.empty();
 
-    $('#results-count').text(`${filtered.length} opportunité(s) trouvée(s)`);
+    $('#results-count').text(tCount('home.resultsCount', filtered.length));
 
     if (!filtered.length) {
-      $list.html('<p>Aucune opportunité trouvée avec ces filtres.</p>');
+      $list.html(`<p>${t('home.noResults')}</p>`);
       return;
     }
 
@@ -74,14 +93,14 @@ $(document).ready(function () {
           </div>
           <div class="card-footer">
             <div class="tags">
-              <span class="tag">${o.type || 'Opportunité'}</span>
+              <span class="tag">${o.type || t('common.opportunity')}</span>
               ${o.funding ? `<span class="tag tag-warning">${o.funding}</span>` : ''}
-              ${o.deadline ? `<span class="tag tag-deadline">Deadline: ${o.deadline}</span>` : ''}
+              ${o.deadline ? `<span class="tag tag-deadline">${t('home.deadlineLabel')}: ${o.deadline}</span>` : ''}
               ${tagsHtml}
             </div>
             <div class="card-actions">
-              <a href="${detailUrl}" class="btn-secondary btn-sm">Détails</a>
-              ${o.link ? `<a href="${o.link}" target="_blank" class="btn-apply">Postuler</a>` : ''}
+              <a href="${detailUrl}" class="btn-secondary btn-sm">${t('common.details')}</a>
+              ${o.link ? `<a href="${o.link}" target="_blank" class="btn-apply">${t('common.apply')}</a>` : ''}
             </div>
           </div>
         </article>
@@ -156,13 +175,13 @@ $(document).ready(function () {
 
     $.post('/newsletter', { email }, function (res) {
       if (res && res.success) {
-        $msg.text('Merci ! Ton email est bien enregistré ✅').css('color', '#15803d');
+        $msg.text(t('home.newsletterSuccess')).css('color', '#15803d');
         $('#newsletter-email').val('');
       } else {
-        $msg.text('Une erreur est survenue.').css('color', '#b91c1c');
+        $msg.text(t('home.newsletterError')).css('color', '#b91c1c');
       }
     }).fail(function () {
-      $msg.text('Erreur réseau. Réessaie plus tard.').css('color', '#b91c1c');
+      $msg.text(t('home.newsletterNetworkError')).css('color', '#b91c1c');
     });
   });
 
@@ -189,7 +208,7 @@ $(document).ready(function () {
 
       const card = `
       <article class="featured-card">
-        <div class="featured-badge">Mis en avant</div>
+        <div class="featured-badge">${t('home.featuredBadge')}</div>
         <h3><a href="${detailUrl}" class="card-title-link">${o.title}</a></h3>
         <div class="featured-meta">
           ${(o.organization || '')}${o.organization && (o.city || o.country) ? ' · ' : ''}${o.city || ''}${o.city && o.country ? ', ' : ''}${o.country || ''}
@@ -198,9 +217,9 @@ $(document).ready(function () {
           ${tagsHtml}
         </div>
         <div class="featured-actions">
-          <a href="${detailUrl}" class="btn-primary btn-sm">Voir le detail</a>
+          <a href="${detailUrl}" class="btn-primary btn-sm">${t('home.featuredButton')}</a>
           <div class="featured-deadline">
-            ${o.deadline ? `Jusqu au ${o.deadline}` : ''}
+            ${o.deadline ? t('home.featuredUntil', { date: o.deadline }) : ''}
           </div>
         </div>
       </article>

@@ -1,11 +1,11 @@
-<%- include('partials/header', { title: "Connexion admin – WiwiOpportunity", page: 'admin', baseUrl }) %>
+<%- include('partials/header', { title: t('meta.adminLoginTitle'), page: 'admin', baseUrl }) %>
 
 <main class="main-layout">
   <section class="admin-section">
     <div class="admin-form-card">
-      <h1>Connexion administrateur</h1>
+      <h1><%= t('admin.loginTitle') %></h1>
       <p class="admin-intro">
-        Accès réservé pour gérer les opportunités publiées sur WiwiOpportunity.
+        <%= t('admin.loginIntro') %>
       </p>
 
       <% if (error) { %>
@@ -15,17 +15,17 @@
       <form action="/admin/login" method="post" class="admin-form">
         <div class="admin-grid">
           <div class="form-group">
-            <label for="username">Nom d'utilisateur</label>
+            <label for="username"><%= t('admin.username') %></label>
             <input id="username" name="username" required />
           </div>
           <div class="form-group">
-            <label for="password">Mot de passe</label>
+            <label for="password"><%= t('admin.password') %></label>
             <input id="password" type="password" name="password" required />
           </div>
         </div>
 
         <div class="admin-actions">
-          <button type="submit" class="btn-primary">Se connecter</button>
+          <button type="submit" class="btn-primary"><%= t('admin.loginButton') %></button>
         </div>
       </form>
     </div>

@@ -1,6 +1,6 @@
   <footer>
     <p>
-      © <span id="year"></span> WiwiOpportunity · Suivez-nous sur
+      © <span id="year"></span> WiwiOpportunity · <%= t('home.socialCta') %>
       <a href="<%= site.social.instagram %>" target="_blank">Instagram</a>,
       <a href="<%= site.social.tiktok %>" target="_blank">TikTok</a>,
       <a href="<%= site.social.linkedin %>" target="_blank">LinkedIn</a>.
@@ -15,6 +15,46 @@
         el.textContent = new Date().getFullYear();
       }
     });
+  </script>
+  <script>
+    window.I18N = {
+      lang: "<%= lang %>",
+      strings: <%- JSON.stringify(i18n) %>
+    };
+    (function () {
+      var key = 'wiwi_lang';
+      var current = "<%= lang %>";
+      function setCookie(value) {
+        document.cookie = 'wiwi_lang=' + encodeURIComponent(value) + '; Max-Age=31536000; Path=/; SameSite=Lax';
+      }
+      var stored = null;
+      try {
+        stored = localStorage.getItem(key);
+      } catch (e) {}
+      if (stored && stored !== current) {
+        setCookie(stored);
+        window.location.reload();
+        return;
+      }
+      if (!stored) {
+        try {
+          localStorage.setItem(key, current);
+        } catch (e) {}
+        setCookie(current);
+      }
+      var buttons = document.querySelectorAll('[data-lang]');
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var lang = btn.getAttribute('data-lang');
+          if (!lang) return;
+          try {
+            localStorage.setItem(key, lang);
+          } catch (e) {}
+          setCookie(lang);
+          window.location.reload();
+        });
+      });
+    })();
   </script>
 
   <% if (page === 'home') { %>

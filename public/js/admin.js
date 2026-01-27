@@ -1,5 +1,24 @@
 // public/js/admin.js
 $(document).ready(function () {
+  function t(key, vars) {
+    const parts = key.split('.');
+    let current = window.I18N && window.I18N.strings;
+    for (const part of parts) {
+      if (!current || typeof current !== 'object') return key;
+      current = current[part];
+    }
+    if (typeof current !== 'string') return key;
+    if (!vars) return current;
+    return current.replace(/\{(\w+)\}/g, function (_, k) {
+      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : `{${k}}`;
+    });
+  }
+
+  function tCount(baseKey, count) {
+    const key = count === 1 ? `${baseKey}.one` : `${baseKey}.other`;
+    return t(key, { count });
+  }
+
   const data = Array.isArray(window.__ADMIN_OPPORTUNITIES__) ? window.__ADMIN_OPPORTUNITIES__ : [];
   const $tbody = $('#admin-table-body');
   const $results = $('#admin-results-count');
@@ -102,18 +121,18 @@ $(document).ready(function () {
       const tags = Array.isArray(o.tags) ? o.tags.join(', ') : '';
       const row = `
         <tr>
-          <td data-label="Titre">${o.title || ''}</td>
-          <td data-label="Pays">${o.country || ''}</td>
-          <td data-label="Type">${o.type || ''}</td>
-          <td data-label="Financement">${o.funding || ''}</td>
-          <td data-label="Deadline">${o.deadline || ''}</td>
-          <td data-label="Tags">${tags}</td>
-          <td data-label="Actions">
+          <td data-label="${t('admin.table.title')}">${o.title || ''}</td>
+          <td data-label="${t('admin.table.country')}">${o.country || ''}</td>
+          <td data-label="${t('admin.table.type')}">${o.type || ''}</td>
+          <td data-label="${t('admin.table.funding')}">${o.funding || ''}</td>
+          <td data-label="${t('admin.table.deadline')}">${o.deadline || ''}</td>
+          <td data-label="${t('admin.table.tags')}">${tags}</td>
+          <td data-label="${t('admin.table.actions')}">
             <div class="admin-actions-row">
-              <a href="/admin/edit/${o.id}" class="btn-secondary btn-sm">Éditer</a>
-              <form action="/admin/delete/${o.id}" method="post" onsubmit="return confirm('Supprimer cette opportunité ?');">
+              <a href="/admin/edit/${o.id}" class="btn-secondary btn-sm">${t('common.edit')}</a>
+              <form action="/admin/delete/${o.id}" method="post" onsubmit="return confirm('${t('admin.confirmDelete')}');">
                 <button type="submit" class="btn-secondary btn-sm" style="border-color:#fecaca;background:#fef2f2;color:#b91c1c;">
-                  Supprimer
+                  ${t('common.delete')}
                 </button>
               </form>
             </div>
@@ -147,7 +166,7 @@ $(document).ready(function () {
     const start = (state.page - 1) * state.pageSize;
     const pageItems = sorted.slice(start, start + state.pageSize);
 
-    $results.text(`${filtered.length} opportunité(s)`);
+    $results.text(tCount('admin.resultsCount', filtered.length));
     renderRows(pageItems);
     renderPagination(filtered.length);
   }

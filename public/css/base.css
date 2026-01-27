@@ -112,6 +112,27 @@ video {
   width: 100%;
 }
 
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  margin-left: 6px;
+}
+
+.lang-switch button {
+  border: none;
+  background: transparent;
+  color: #374151;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 2px 4px;
+}
+
+.lang-switch button.active {
+  color: var(--color-primary);
+}
+
 /* Special CTA in nav */
 
 .nav-cta {
