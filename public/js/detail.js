@@ -4,7 +4,7 @@ $(document).ready(function () {
   const id = params.get('id');
 
   if (!id) {
-    $('#detail-main').html('<p>Identifiant d’opportunité manquant.</p>');
+    $('#detail-main').html("<p>Identifiant d’opportunité manquant.</p>");
     return;
   }
 

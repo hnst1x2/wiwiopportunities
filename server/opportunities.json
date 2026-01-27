@@ -6,8 +6,8 @@
     "country": "Allemagne",
     "city": "Berlin",
     "type": "Stage",
-    "funding": "Non financé",
-    "deadline": "2025-12-31",
+    "funding": "Non finance",
+    "deadline": "2026-03-15",
     "duration": "6 mois",
     "link": "https://example.com/stage-berlin",
     "description": "Stage en marketing digital pour étudiants francophones, anglais B2 requis.",
@@ -55,6 +55,956 @@
       "Volontariat",
       "Afrique",
       "Éducation"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Stage Data Analyst a Madrid",
+    "organization": "DataLab Iberia",
+    "country": "Espagne",
+    "city": "Madrid",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-09-30",
+    "duration": "5 mois",
+    "link": "https://example.com/stage-data-madrid",
+    "description": "Stage en analyse de donnees pour soutenir les equipes produit et marketing.",
+    "extra": "Profil : Excel, SQL basique, curiosite pour les chiffres.",
+    "tags": [
+      "Data",
+      "Analytics",
+      "Marketing"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Bourse de recherche en biologie marine",
+    "organization": "Oceanic Institute",
+    "country": "Portugal",
+    "city": "Lisbonne",
+    "type": "Bourse",
+    "funding": "Fully funded",
+    "deadline": "2026-05-20",
+    "duration": "12 mois",
+    "link": "https://example.com/bourse-biologie-marine",
+    "description": "Programme de recherche sur la biodiversite marine et le suivi des habitats.",
+    "extra": "Profil : master en biologie ou environnement, anglais B2.",
+    "tags": [
+      "Recherche",
+      "Biologie",
+      "Environnement"
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Volontariat en education a Dakar",
+    "organization": "Education Solidaire",
+    "country": "Senegal",
+    "city": "Dakar",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-06-20",
+    "duration": "2 mois",
+    "link": "https://example.com/volontariat-dakar",
+    "description": "Appui aux cours de soutien et ateliers d'orientation pour lyceens.",
+    "extra": "Profil : pedagogie, patience, experience associative appreciee.",
+    "tags": [
+      "Education",
+      "Afrique",
+      "Social"
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Stage UX/UI a Amsterdam",
+    "organization": "FlowDesign",
+    "country": "Pays-Bas",
+    "city": "Amsterdam",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-10-10",
+    "duration": "4 mois",
+    "link": "https://example.com/stage-ux-amsterdam",
+    "description": "Participation a la conception d'interfaces web et mobile.",
+    "extra": "Profil : Figma, prototypage, portfolio requis.",
+    "tags": [
+      "Design",
+      "UX",
+      "UI"
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Job saisonnier en station de ski",
+    "organization": "Alpine Resorts",
+    "country": "Suisse",
+    "city": "Zermatt",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-11-15",
+    "duration": "4 mois",
+    "link": "https://example.com/job-ski-suisse",
+    "description": "Poste polyvalent en accueil et service client pendant la saison d'hiver.",
+    "extra": "Profil : francais/anglais, bonne condition physique.",
+    "tags": [
+      "Tourisme",
+      "Saisonnier",
+      "Service"
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Bourse doctorale en intelligence artificielle",
+    "organization": "Tech University",
+    "country": "Canada",
+    "city": "Montreal",
+    "type": "Bourse",
+    "funding": "Fully funded",
+    "deadline": "2026-09-01",
+    "duration": "3 ans",
+    "link": "https://example.com/bourse-ia-montreal",
+    "description": "Financement complet pour un doctorat en IA appliquee a la sante.",
+    "extra": "Profil : master informatique, publications appreciees.",
+    "tags": [
+      "IA",
+      "Recherche",
+      "Sante"
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Stage marketing digital a Rome",
+    "organization": "TravelBoost",
+    "country": "Italie",
+    "city": "Rome",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-07-01",
+    "duration": "6 mois",
+    "link": "https://example.com/stage-marketing-rome",
+    "description": "Gestion de campagnes social media et newsletters.",
+    "extra": "Profil : notions SEO/SEA, creativite, anglais B1.",
+    "tags": [
+      "Marketing",
+      "Digital",
+      "Tourisme"
+    ]
+  },
+  {
+    "id": 11,
+    "title": "Programme d'echange universitaire",
+    "organization": "Global Campus",
+    "country": "Japon",
+    "city": "Osaka",
+    "type": "Etudes",
+    "funding": "Partially funded",
+    "deadline": "2025-04-30",
+    "duration": "1 semestre",
+    "link": "https://example.com/echange-osaka",
+    "description": "Semestre d'etudes avec cours en anglais en business et tech.",
+    "extra": "Profil : niveau B2 anglais, dossier academique.",
+    "tags": [
+      "Etudes",
+      "Echange",
+      "Asie"
+    ]
+  },
+  {
+    "id": 12,
+    "title": "Volontariat environnemental en Islande",
+    "organization": "GreenNorth",
+    "country": "Islande",
+    "city": "Akureyri",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-06-01",
+    "duration": "1 mois",
+    "link": "https://example.com/volontariat-islande",
+    "description": "Projet de reforestation et sensibilisation locale.",
+    "extra": "Profil : aime le terrain, conditions climatiques froides.",
+    "tags": [
+      "Environnement",
+      "Nature",
+      "Volontariat"
+    ]
+  },
+  {
+    "id": 13,
+    "title": "Stage developpeur web a Prague",
+    "organization": "BohemiaTech",
+    "country": "Republique Tcheque",
+    "city": "Prague",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-08-25",
+    "duration": "5 mois",
+    "link": "https://example.com/stage-web-prague",
+    "description": "Participation au developpement d'une plateforme SaaS.",
+    "extra": "Profil : JavaScript, Node.js, bases HTML/CSS.",
+    "tags": [
+      "IT",
+      "Web",
+      "SaaS"
+    ]
+  },
+  {
+    "id": 14,
+    "title": "Bourse MBA en Afrique du Sud",
+    "organization": "Cape Business School",
+    "country": "Afrique du Sud",
+    "city": "Le Cap",
+    "type": "Bourse",
+    "funding": "Fully funded",
+    "deadline": "2026-01-30",
+    "duration": "2 ans",
+    "link": "https://example.com/bourse-mba-cape",
+    "description": "MBA international avec focus entrepreneuriat social.",
+    "extra": "Profil : experience pro requise, GMAT souhaite.",
+    "tags": [
+      "MBA",
+      "Business",
+      "Afrique"
+    ]
+  },
+  {
+    "id": 15,
+    "title": "Stage communication a Bruxelles",
+    "organization": "EuroCom",
+    "country": "Belgique",
+    "city": "Bruxelles",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-05-30",
+    "duration": "4 mois",
+    "link": "https://example.com/stage-communication-bruxelles",
+    "description": "Support aux relations publiques et creation de contenu.",
+    "extra": "Profil : redaction, Canva/Adobe, francais/anglais.",
+    "tags": [
+      "Communication",
+      "Media",
+      "Europe"
+    ]
+  },
+  {
+    "id": 16,
+    "title": "Job assistant logistique",
+    "organization": "Nordic Logistics",
+    "country": "Suede",
+    "city": "Stockholm",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-10-05",
+    "duration": "CDD 6 mois",
+    "link": "https://example.com/job-logistique-stockholm",
+    "description": "Coordination des expeditions et suivi des stocks.",
+    "extra": "Profil : organisation, maitrise Excel, anglais B2.",
+    "tags": [
+      "Logistique",
+      "Operations",
+      "Supply Chain"
+    ]
+  },
+  {
+    "id": 17,
+    "title": "Stage finance a Londres",
+    "organization": "FinEdge",
+    "country": "Royaume-Uni",
+    "city": "Londres",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-08-01",
+    "duration": "3 mois",
+    "link": "https://example.com/stage-finance-londres",
+    "description": "Support analyste pour reporting mensuel et modeles financiers.",
+    "extra": "Profil : finance/eco, Excel avance.",
+    "tags": [
+      "Finance",
+      "Analyse",
+      "Banque"
+    ]
+  },
+  {
+    "id": 18,
+    "title": "Volontariat culturel en Grece",
+    "organization": "Heritage Hub",
+    "country": "Grece",
+    "city": "Athenes",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-07-20",
+    "duration": "6 semaines",
+    "link": "https://example.com/volontariat-grece",
+    "description": "Animation d'ateliers culturels pour jeunes.",
+    "extra": "Profil : interet pour l'art et l'histoire.",
+    "tags": [
+      "Culture",
+      "Europe",
+      "Jeunesse"
+    ]
+  },
+  {
+    "id": 19,
+    "title": "Bourse master en energie renouvelable",
+    "organization": "Green Energy Institute",
+    "country": "Allemagne",
+    "city": "Hambourg",
+    "type": "Bourse",
+    "funding": "Fully funded",
+    "deadline": "2026-06-10",
+    "duration": "2 ans",
+    "link": "https://example.com/bourse-energie-hambourg",
+    "description": "Master specialise en eolien et solaire.",
+    "extra": "Profil : ingenierie ou sciences, anglais B2.",
+    "tags": [
+      "Energie",
+      "Renouvelable",
+      "Ingenierie"
+    ]
+  },
+  {
+    "id": 20,
+    "title": "Stage RH a Casablanca",
+    "organization": "TalentWave",
+    "country": "Maroc",
+    "city": "Casablanca",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-06-10",
+    "duration": "3 mois",
+    "link": "https://example.com/stage-rh-casa",
+    "description": "Participation au recrutement et integration.",
+    "extra": "Profil : RH/psycho, aisance relationnelle.",
+    "tags": [
+      "RH",
+      "Recrutement",
+      "Maroc"
+    ]
+  },
+  {
+    "id": 21,
+    "title": "Job support client a Dublin",
+    "organization": "CloudHelp",
+    "country": "Irlande",
+    "city": "Dublin",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-09-05",
+    "duration": "CDI",
+    "link": "https://example.com/job-support-dublin",
+    "description": "Support client pour une solution SaaS internationale.",
+    "extra": "Profil : anglais courant, sens du service.",
+    "tags": [
+      "Support",
+      "Customer Success",
+      "SaaS"
+    ]
+  },
+  {
+    "id": 22,
+    "title": "Stage journalisme a Montreal",
+    "organization": "MediaNord",
+    "country": "Canada",
+    "city": "Montreal",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-07-15",
+    "duration": "4 mois",
+    "link": "https://example.com/stage-journalisme-mtl",
+    "description": "Redaction d'articles et reportages terrain.",
+    "extra": "Profil : ecriture, curiosite, portfolio.",
+    "tags": [
+      "Journalisme",
+      "Media",
+      "Canada"
+    ]
+  },
+  {
+    "id": 23,
+    "title": "Bourse de stage en architecture",
+    "organization": "Urban Studio",
+    "country": "Danemark",
+    "city": "Copenhague",
+    "type": "Bourse",
+    "funding": "Partially funded",
+    "deadline": "2025-08-10",
+    "duration": "6 mois",
+    "link": "https://example.com/bourse-architecture-cph",
+    "description": "Stage en cabinet avec soutien financier.",
+    "extra": "Profil : architecture, portfolio requis.",
+    "tags": [
+      "Architecture",
+      "Design",
+      "Europe"
+    ]
+  },
+  {
+    "id": 24,
+    "title": "Volontariat social en Colombie",
+    "organization": "Comunidad Viva",
+    "country": "Colombie",
+    "city": "Medellin",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-05-25",
+    "duration": "2 mois",
+    "link": "https://example.com/volontariat-colombie",
+    "description": "Soutien aux projets communautaires et ateliers jeunes.",
+    "extra": "Profil : espagnol basique, ouverture culturelle.",
+    "tags": [
+      "Social",
+      "Amerique latine",
+      "Jeunesse"
+    ]
+  },
+  {
+    "id": 25,
+    "title": "Stage data science a Paris",
+    "organization": "AI Pulse",
+    "country": "France",
+    "city": "Paris",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-06-30",
+    "duration": "6 mois",
+    "link": "https://example.com/stage-ds-paris",
+    "description": "Modeles predictifs pour la recommandation.",
+    "extra": "Profil : Python, ML, Git.",
+    "tags": [
+      "Data",
+      "IA",
+      "Tech"
+    ]
+  },
+  {
+    "id": 26,
+    "title": "Job assistant marketing a Vienne",
+    "organization": "CityBrand",
+    "country": "Autriche",
+    "city": "Vienne",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-09-18",
+    "duration": "CDD 12 mois",
+    "link": "https://example.com/job-marketing-vienne",
+    "description": "Coordination de campagnes locales et partenariats.",
+    "extra": "Profil : organisation, bonne communication.",
+    "tags": [
+      "Marketing",
+      "Communication",
+      "Europe"
+    ]
+  },
+  {
+    "id": 27,
+    "title": "Bourse master en sante publique",
+    "organization": "Global Health School",
+    "country": "Royaume-Uni",
+    "city": "Manchester",
+    "type": "Bourse",
+    "funding": "Fully funded",
+    "deadline": "2026-02-18",
+    "duration": "1 an",
+    "link": "https://example.com/bourse-sante-manchester",
+    "description": "Master en epidemiologie et politiques de sante.",
+    "extra": "Profil : sciences/medecine, anglais B2.",
+    "tags": [
+      "Sante",
+      "Epidemiologie",
+      "Master"
+    ]
+  },
+  {
+    "id": 28,
+    "title": "Stage QA logiciel a Varsovie",
+    "organization": "Polaris Soft",
+    "country": "Pologne",
+    "city": "Varsovie",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-07-05",
+    "duration": "4 mois",
+    "link": "https://example.com/stage-qa-varsovie",
+    "description": "Tests fonctionnels et automatisation.",
+    "extra": "Profil : rigueur, notions Selenium.",
+    "tags": [
+      "IT",
+      "QA",
+      "Software"
+    ]
+  },
+  {
+    "id": 29,
+    "title": "Volontariat conservation a Nairobi",
+    "organization": "WildCare",
+    "country": "Kenya",
+    "city": "Nairobi",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-06-30",
+    "duration": "1 mois",
+    "link": "https://example.com/volontariat-kenya",
+    "description": "Suivi de la faune et education environnementale.",
+    "extra": "Profil : motivation, terrain.",
+    "tags": [
+      "Environnement",
+      "Faune",
+      "Afrique"
+    ]
+  },
+  {
+    "id": 30,
+    "title": "Stage graphic design a Barcelone",
+    "organization": "Studio Luma",
+    "country": "Espagne",
+    "city": "Barcelone",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-08-12",
+    "duration": "3 mois",
+    "link": "https://example.com/stage-design-barcelone",
+    "description": "Creation d'identites visuelles et supports digitaux.",
+    "extra": "Profil : Adobe CC, portfolio requis.",
+    "tags": [
+      "Design",
+      "Graphisme",
+      "Creatif"
+    ]
+  },
+  {
+    "id": 31,
+    "title": "Job assistant administratif a Geneve",
+    "organization": "Helvetic Services",
+    "country": "Suisse",
+    "city": "Geneve",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-09-25",
+    "duration": "CDD 8 mois",
+    "link": "https://example.com/job-admin-geneve",
+    "description": "Gestion de dossiers et support equipes.",
+    "extra": "Profil : bureautique, rigueur, francais.",
+    "tags": [
+      "Administration",
+      "Bureau",
+      "Suisse"
+    ]
+  },
+  {
+    "id": 32,
+    "title": "Bourse d'etudes en informatique",
+    "organization": "Tech Scholars",
+    "country": "Etats-Unis",
+    "city": "Boston",
+    "type": "Bourse",
+    "funding": "Fully funded",
+    "deadline": "2026-11-05",
+    "duration": "4 ans",
+    "link": "https://example.com/bourse-informatique-boston",
+    "description": "Bourse complete pour licence en informatique.",
+    "extra": "Profil : excellent dossier academique.",
+    "tags": [
+      "Informatique",
+      "Bourse",
+      "USA"
+    ]
+  },
+  {
+    "id": 33,
+    "title": "Stage supply chain a Milan",
+    "organization": "FashionFlow",
+    "country": "Italie",
+    "city": "Milan",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-08-18",
+    "duration": "6 mois",
+    "link": "https://example.com/stage-supply-milan",
+    "description": "Optimisation logistique pour une marque mode.",
+    "extra": "Profil : gestion, Excel, anglais.",
+    "tags": [
+      "Supply Chain",
+      "Mode",
+      "Operations"
+    ]
+  },
+  {
+    "id": 34,
+    "title": "Volontariat sante communautaire a Lima",
+    "organization": "Salud Para Todos",
+    "country": "Perou",
+    "city": "Lima",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-07-12",
+    "duration": "6 semaines",
+    "link": "https://example.com/volontariat-perou",
+    "description": "Appui aux campagnes de prevention et ateliers.",
+    "extra": "Profil : interet sante publique, espagnol.",
+    "tags": [
+      "Sante",
+      "Social",
+      "Amerique latine"
+    ]
+  },
+  {
+    "id": 35,
+    "title": "Stage product management a Berlin",
+    "organization": "NovaApps",
+    "country": "Allemagne",
+    "city": "Berlin",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-09-01",
+    "duration": "5 mois",
+    "link": "https://example.com/stage-pm-berlin",
+    "description": "Support au suivi roadmap et tests utilisateurs.",
+    "extra": "Profil : esprit produit, analytique.",
+    "tags": [
+      "Produit",
+      "Tech",
+      "Startup"
+    ]
+  },
+  {
+    "id": 36,
+    "title": "Bourse en sciences politiques",
+    "organization": "Civic Fellows",
+    "country": "Belgique",
+    "city": "Bruxelles",
+    "type": "Bourse",
+    "funding": "Partially funded",
+    "deadline": "2025-10-05",
+    "duration": "1 an",
+    "link": "https://example.com/bourse-scpo-bruxelles",
+    "description": "Programme de specialisation en politiques publiques.",
+    "extra": "Profil : sciences sociales, anglais B2.",
+    "tags": [
+      "Sciences politiques",
+      "Europe",
+      "Public"
+    ]
+  },
+  {
+    "id": 37,
+    "title": "Job assistant e-commerce",
+    "organization": "NordicMart",
+    "country": "Norvege",
+    "city": "Oslo",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-08-28",
+    "duration": "CDI",
+    "link": "https://example.com/job-ecommerce-oslo",
+    "description": "Gestion du catalogue et support operationnel.",
+    "extra": "Profil : rigueur, anglais B2.",
+    "tags": [
+      "E-commerce",
+      "Operations",
+      "Nordic"
+    ]
+  },
+  {
+    "id": 38,
+    "title": "Stage communication scientifique",
+    "organization": "ScienceNow",
+    "country": "France",
+    "city": "Lyon",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-06-15",
+    "duration": "4 mois",
+    "link": "https://example.com/stage-comm-science",
+    "description": "Vulgarisation et creation de contenus scientifiques.",
+    "extra": "Profil : sciences, ecriture claire.",
+    "tags": [
+      "Communication",
+      "Science",
+      "Contenu"
+    ]
+  },
+  {
+    "id": 39,
+    "title": "Volontariat humanitaire en Jordanie",
+    "organization": "Relief Bridge",
+    "country": "Jordanie",
+    "city": "Amman",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-09-12",
+    "duration": "2 mois",
+    "link": "https://example.com/volontariat-jor",
+    "description": "Support logistique et animation de centres communautaires.",
+    "extra": "Profil : resilience, esprit d'equipe.",
+    "tags": [
+      "Humanitaire",
+      "Moyen-Orient",
+      "Social"
+    ]
+  },
+  {
+    "id": 40,
+    "title": "Stage comptabilite a Luxembourg",
+    "organization": "FinLux",
+    "country": "Luxembourg",
+    "city": "Luxembourg",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-07-25",
+    "duration": "3 mois",
+    "link": "https://example.com/stage-compta-lux",
+    "description": "Aide a la preparation des comptes mensuels.",
+    "extra": "Profil : comptabilite/gestion.",
+    "tags": [
+      "Comptabilite",
+      "Finance",
+      "Europe"
+    ]
+  },
+  {
+    "id": 41,
+    "title": "Bourse d'etudes en design industriel",
+    "organization": "Design Future",
+    "country": "Suede",
+    "city": "Goteborg",
+    "type": "Bourse",
+    "funding": "Fully funded",
+    "deadline": "2026-08-22",
+    "duration": "2 ans",
+    "link": "https://example.com/bourse-design-goteborg",
+    "description": "Master en design industriel et innovation.",
+    "extra": "Profil : design/ingenierie, portfolio.",
+    "tags": [
+      "Design",
+      "Innovation",
+      "Scandinavie"
+    ]
+  },
+  {
+    "id": 42,
+    "title": "Stage business development a Dubai",
+    "organization": "GrowthMENA",
+    "country": "Emirats arabes unis",
+    "city": "Dubai",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-09-22",
+    "duration": "4 mois",
+    "link": "https://example.com/stage-bd-dubai",
+    "description": "Prospection et analyse de marche MENA.",
+    "extra": "Profil : business, anglais B2.",
+    "tags": [
+      "Business",
+      "Ventes",
+      "MENA"
+    ]
+  },
+  {
+    "id": 43,
+    "title": "Job assistant pedagogy",
+    "organization": "LearnBridge",
+    "country": "Irlande",
+    "city": "Cork",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-10-02",
+    "duration": "CDD 9 mois",
+    "link": "https://example.com/job-pedago-cork",
+    "description": "Support a l'equipe de formation et suivi des apprenants.",
+    "extra": "Profil : organisation, anglais courant.",
+    "tags": [
+      "Education",
+      "Formation",
+      "Support"
+    ]
+  },
+  {
+    "id": 44,
+    "title": "Stage cybersécurité a Tallinn",
+    "organization": "SecureNord",
+    "country": "Estonie",
+    "city": "Tallinn",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-08-30",
+    "duration": "5 mois",
+    "link": "https://example.com/stage-cyber-tallinn",
+    "description": "Analyse de vulnerabilites et sensibilisation interne.",
+    "extra": "Profil : bases reseau, securite.",
+    "tags": [
+      "Cybersecurite",
+      "IT",
+      "Securite"
+    ]
+  },
+  {
+    "id": 45,
+    "title": "Volontariat agriculture durable",
+    "organization": "AgriFuture",
+    "country": "Costa Rica",
+    "city": "San Jose",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-06-18",
+    "duration": "1 mois",
+    "link": "https://example.com/volontariat-costa-rica",
+    "description": "Participation a des fermes urbaines et ateliers.",
+    "extra": "Profil : motivation, respect environnement.",
+    "tags": [
+      "Agriculture",
+      "Durable",
+      "Amerique latine"
+    ]
+  },
+  {
+    "id": 46,
+    "title": "Stage legal a Geneve",
+    "organization": "LexBridge",
+    "country": "Suisse",
+    "city": "Geneve",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-07-28",
+    "duration": "3 mois",
+    "link": "https://example.com/stage-legal-geneve",
+    "description": "Support juridique et recherche documentaire.",
+    "extra": "Profil : droit, francais/anglais.",
+    "tags": [
+      "Droit",
+      "Legal",
+      "Suisse"
+    ]
+  },
+  {
+    "id": 47,
+    "title": "Bourse master en relations internationales",
+    "organization": "Global Policy Institute",
+    "country": "Espagne",
+    "city": "Valence",
+    "type": "Bourse",
+    "funding": "Partially funded",
+    "deadline": "2025-09-08",
+    "duration": "2 ans",
+    "link": "https://example.com/bourse-ri-valence",
+    "description": "Programme oriente diplomatie et cooperation.",
+    "extra": "Profil : sciences sociales, anglais B2.",
+    "tags": [
+      "Relations internationales",
+      "Master",
+      "Europe"
+    ]
+  },
+  {
+    "id": 48,
+    "title": "Job assistant laboratoire",
+    "organization": "BioLab",
+    "country": "France",
+    "city": "Toulouse",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-08-05",
+    "duration": "CDD 10 mois",
+    "link": "https://example.com/job-lab-toulouse",
+    "description": "Preparation d'echantillons et support tests.",
+    "extra": "Profil : bac+2 sciences, rigueur.",
+    "tags": [
+      "Laboratoire",
+      "Biologie",
+      "Science"
+    ]
+  },
+  {
+    "id": 49,
+    "title": "Stage communication digitale a Tunis",
+    "organization": "Maghreb Media",
+    "country": "Tunisie",
+    "city": "Tunis",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-06-05",
+    "duration": "3 mois",
+    "link": "https://example.com/stage-digital-tunis",
+    "description": "Creation de contenu et gestion de communautes.",
+    "extra": "Profil : reseaux sociaux, Canva.",
+    "tags": [
+      "Digital",
+      "Communication",
+      "Afrique"
+    ]
+  },
+  {
+    "id": 50,
+    "title": "Volontariat sports pour jeunes",
+    "organization": "PlayForward",
+    "country": "Italie",
+    "city": "Naples",
+    "type": "Volontariat",
+    "funding": "Partially funded",
+    "deadline": "2025-07-03",
+    "duration": "6 semaines",
+    "link": "https://example.com/volontariat-sport-naples",
+    "description": "Encadrement d'activites sportives et tournois.",
+    "extra": "Profil : animation, energie.",
+    "tags": [
+      "Sport",
+      "Jeunesse",
+      "Social"
+    ]
+  },
+  {
+    "id": 51,
+    "title": "Stage audit interne a Bruxelles",
+    "organization": "AuditPlus",
+    "country": "Belgique",
+    "city": "Bruxelles",
+    "type": "Stage",
+    "funding": "Non finance",
+    "deadline": "2025-09-30",
+    "duration": "4 mois",
+    "link": "https://example.com/stage-audit-bruxelles",
+    "description": "Participation aux missions d'audit et controle interne.",
+    "extra": "Profil : finance/gestion, rigueur.",
+    "tags": [
+      "Audit",
+      "Finance",
+      "Europe"
+    ]
+  },
+  {
+    "id": 52,
+    "title": "Bourse pour formation UX research",
+    "organization": "Human Centered Lab",
+    "country": "Pays-Bas",
+    "city": "Utrecht",
+    "type": "Bourse",
+    "funding": "Partially funded",
+    "deadline": "2025-10-12",
+    "duration": "9 mois",
+    "link": "https://example.com/bourse-ux-utrecht",
+    "description": "Programme intensif en recherche utilisateur.",
+    "extra": "Profil : design/psycho, curiosite.",
+    "tags": [
+      "UX",
+      "Recherche",
+      "Design"
+    ]
+  },
+  {
+    "id": 53,
+    "title": "Job assistant evenementiel",
+    "organization": "Eventify",
+    "country": "France",
+    "city": "Nice",
+    "type": "Job",
+    "funding": "Non finance",
+    "deadline": "2025-07-22",
+    "duration": "CDD 6 mois",
+    "link": "https://example.com/job-event-nice",
+    "description": "Organisation de salons et coordination logistique.",
+    "extra": "Profil : dynamique, sens du detail.",
+    "tags": [
+      "Evenementiel",
+      "Organisation",
+      "Tourisme"
     ]
   }
 ]

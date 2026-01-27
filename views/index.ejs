@@ -32,15 +32,7 @@
     <div class="social-cta-bar">
       <span class="social-cta-text">Suivez WiwiOpportunity sur les reseaux :</span>
       <div class="social-cta-links">
-        <a href="https://www.instagram.com/wiwiopportunity" target="_blank" class="social-pill insta">
-          <i class="fa-brands fa-instagram"></i><span>Instagram</span>
-        </a>
-        <a href="https://www.tiktok.com/@wiwiopportunity" target="_blank" class="social-pill tiktok">
-          <i class="fa-brands fa-tiktok"></i><span>TikTok</span>
-        </a>
-        <a href="https://www.linkedin.com/company/wiwiopportunity" target="_blank" class="social-pill linkedin">
-          <i class="fa-brands fa-linkedin"></i><span>LinkedIn</span>
-        </a>
+        <%- include('partials/social-links') %>
       </div>
     </div>
   </div>
@@ -104,8 +96,8 @@
         </div>
 
         <div class="filter-group">
-          <label for="filter-domain">Domaine</label>
-          <select id="filter-domain">
+          <label for="filter-tag">Domaine</label>
+          <select id="filter-tag">
             <option value="">Tous les domaines</option>
             <option value="IT">IT / Tech</option>
             <option value="Marketing">Marketing / Communication</option>
@@ -133,11 +125,7 @@
           <!-- cartes generees par app.js -->
         </div>
 
-        <div id="pagination" class="pagination">
-          <button id="prev-page" disabled>Precedent</button>
-          <span id="page-info">Page 1 / 1</span>
-          <button id="next-page" disabled>Suivant</button>
-        </div>
+        <div id="pagination" class="pagination-bar"></div>
       </section>
     </div>
   </section>
@@ -166,9 +154,9 @@
 
       <div class="social-inline-note">
         En attendant, on partage deja des opportunites sur
-        <a href="https://www.instagram.com/wiwiopportunity" target="_blank">Instagram</a>,
-        <a href="https://www.tiktok.com/@wiwiopportunity" target="_blank">TikTok</a> et
-        <a href="https://www.linkedin.com/company/wiwiopportunity" target="_blank">LinkedIn</a>.
+        <a href="<%= site.social.instagram %>" target="_blank">Instagram</a>,
+        <a href="<%= site.social.tiktok %>" target="_blank">TikTok</a> et
+        <a href="<%= site.social.linkedin %>" target="_blank">LinkedIn</a>.
       </div>
     </div>
   </section>

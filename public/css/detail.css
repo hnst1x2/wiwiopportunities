@@ -57,6 +57,12 @@
   margin-top: 4px;
 }
 
+.detail-card .btn-primary,
+.detail-card .btn-secondary {
+  display: block;
+  text-align: center;
+}
+
 /* Bloc réseaux sur détail */
 
 .detail-social-promo {

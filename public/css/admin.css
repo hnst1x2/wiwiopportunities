@@ -21,6 +21,75 @@
   margin-bottom: 16px;
 }
 
+.admin-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-filters .filter-group label {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
+.admin-filters input,
+.admin-filters select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.admin-results-meta {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-bottom: 10px;
+}
+
+.admin-table thead th[data-sort] {
+  cursor: pointer;
+}
+
+.admin-table thead th.sorted-asc::after {
+  content: " ▲";
+  font-size: 0.75rem;
+}
+
+.admin-table thead th.sorted-desc::after {
+  content: " ▼";
+  font-size: 0.75rem;
+}
+
+.admin-pagination {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-pagination button {
+  border-radius: var(--radius-pill);
+  border: 1px solid #d1d5db;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.admin-pagination button.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
 .admin-intro code {
   font-family: ui-monospace;
   background: #e5e7eb;

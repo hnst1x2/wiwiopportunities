@@ -17,53 +17,77 @@
         Liste des opportunités actuelles. Tu peux les modifier ou les supprimer.
       </p>
 
+      <div class="admin-filters" id="admin-filters">
+        <div class="filter-group">
+          <label for="admin-search">Recherche</label>
+          <input id="admin-search" type="text" placeholder="Titre, orga, pays, tags..." />
+        </div>
+        <div class="filter-group">
+          <label for="admin-country">Pays</label>
+          <select id="admin-country">
+            <option value="">Tous</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="admin-type">Type</label>
+          <select id="admin-type">
+            <option value="">Tous</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="admin-funding">Financement</label>
+          <select id="admin-funding">
+            <option value="">Tous</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="admin-featured">Mise en avant</label>
+          <select id="admin-featured">
+            <option value="">Tous</option>
+            <option value="true">Oui</option>
+            <option value="false">Non</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="admin-tag">Tag</label>
+          <input id="admin-tag" type="text" placeholder="ex : Marketing" />
+        </div>
+        <div class="filter-actions">
+          <button id="admin-reset" class="btn-secondary btn-sm" type="button">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="admin-results-meta">
+        <span id="admin-results-count"></span>
+      </div>
+
       <% if (!opportunities.length) { %>
         <p>Aucune opportunité pour le moment.</p>
       <% } else { %>
         <div class="admin-table-wrapper">
-          <table class="admin-table">
+          <table class="admin-table" id="admin-table">
             <thead>
               <tr>
-                <th>Titre</th>
-                <th>Pays</th>
-                <th>Type</th>
-                <th>Financement</th>
-                <th>Deadline</th>
-                <th>Tags</th>
+                <th data-sort="title">Titre</th>
+                <th data-sort="country">Pays</th>
+                <th data-sort="type">Type</th>
+                <th data-sort="funding">Financement</th>
+                <th data-sort="deadline">Deadline</th>
+                <th data-sort="tags">Tags</th>
                 <th style="width:140px;">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              <% opportunities.forEach(function(o) { %>
-                <tr>
-                  <td><%= o.title %></td>
-                  <td><%= o.country || "" %></td>
-                  <td><%= o.type || "" %></td>
-                  <td><%= o.funding || "" %></td>
-                  <td><%= o.deadline || "" %></td>
-                  <td>
-                    <% if (Array.isArray(o.tags)) { %>
-                      <%= o.tags.join(", ") %>
-                    <% } %>
-                  </td>
-                  <td>
-                    <div class="admin-actions-row">
-                      <a href="/admin/edit/<%= o.id %>" class="btn-secondary btn-sm">Éditer</a>
-                      <form action="/admin/delete/<%= o.id %>" method="post" onsubmit="return confirm('Supprimer cette opportunité ?');">
-                        <button type="submit" class="btn-secondary btn-sm" style="border-color:#fecaca;background:#fef2f2;color:#b91c1c;">
-                          Supprimer
-                        </button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              <% }); %>
-            </tbody>
+            <tbody id="admin-table-body"></tbody>
           </table>
         </div>
+        <div id="admin-pagination" class="admin-pagination"></div>
       <% } %>
     </div>
   </section>
 </main>
 
 <%- include('partials/footer', { page: 'admin' }) %>
+
+<script>
+  window.__ADMIN_OPPORTUNITIES__ = <%- JSON.stringify(opportunities || []) %>;
+</script>

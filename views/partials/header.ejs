@@ -2,19 +2,20 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title><%= title || 'WiwiOpportunity - Opportunites internationales' %></title>
+  <title><%= title || 'WiwiOpportunity - Opportunités internationales' %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="WiwiOpportunity recense des opportunites de stages, etudes, bourses et volontariats a l international pour les etudiants et jeunes francophones." />
+  <meta name="description" content="WiwiOpportunity recense des opportunités de stages, études, bourses et volontariats à l international pour les étudiants et jeunes francophones." />
   <meta name="keywords" content="stage, bourse, volontariat, etudes a l etranger, opportunites, jeunes, francophones" />
 
   <!-- OpenGraph / Social -->
-  <meta property="og:title" content="<%= title || 'WiwiOpportunity - Opportunites internationales' %>" />
+  <meta property="og:title" content="<%= title || 'WiwiOpportunity - Opportunités internationales' %>" />
   <meta property="og:description" content="Trouve des stages, bourses, etudes et volontariats a l etranger adaptes a ton profil." />
   <meta property="og:type" content="website" />
   <!-- Mets ton image OG ici si tu veux -->
   <meta property="og:image" content="https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg" />
   <meta name="twitter:card" content="summary_large_image" />
 
+  <link rel="icon" type="image/svg+xml" href="/img/logo.svg" />
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
@@ -24,7 +25,8 @@
   />
   <link rel="stylesheet" href="/css/base.css" />
   <link rel="stylesheet" href="/css/social.css" />
-  <% if (page === 'home') { %>
+  <link rel="stylesheet" href="/css/info.css" />
+  <% if (page === 'home' || page === 'archive') { %>
     <link rel="stylesheet" href="/css/home.css" />
   <% } %>
   <% if (page === 'detail') { %>
@@ -39,12 +41,13 @@
     <div class="topbar-inner">
       <div class="logo">
         <a href="/" style="text-decoration:none;color:inherit;">
-          Wiwi<span>Opportunity</span>
+          <img src="/img/logo-header.svg" alt="WiwiOpportunity" />
         </a>
       </div>
       <nav class="nav-links">
-        <a href="/#opps">Opportunites</a>
-        <a href="/about">A propos</a>
+        <a href="/#opps">Opportunités</a>
+        <a href="/archive">Archives</a>
+        <a href="/about">À propos</a>
         <a href="/#newsletter" class="nav-cta">Newsletter</a>
       </nav>
     </div>

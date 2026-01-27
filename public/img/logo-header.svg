@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="220" viewBox="0 0 980 220" role="img" aria-label="WiwiOpportunity logo">
+  <defs>
+    <linearGradient id="woGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00C2FF"/>
+      <stop offset="1" stop-color="#00E6A8"/>
+    </linearGradient>
+
+    <style>
+      .word { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif; }
+    </style>
+  </defs>
+
+  <g transform="translate(40,30)">
+    <circle cx="80" cy="80" r="74" fill="none" stroke="url(#woGrad)" stroke-width="12"/>
+
+    <ellipse cx="80" cy="80" rx="42" ry="74" fill="none" stroke="#0B1320" stroke-opacity="0.18" stroke-width="6"/>
+    <ellipse cx="80" cy="80" rx="74" ry="42" fill="none" stroke="#0B1320" stroke-opacity="0.18" stroke-width="6"/>
+    <path d="M14 80 H146" stroke="#0B1320" stroke-opacity="0.18" stroke-width="6" stroke-linecap="round"/>
+    <path d="M80 14 V146" stroke="#0B1320" stroke-opacity="0.18" stroke-width="6" stroke-linecap="round"/>
+
+    <path d="M66 106 L66 64 C66 54 74 46 84 46 L96 46"
+          fill="none" stroke="url(#woGrad)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M96 46 L96 66" fill="none" stroke="url(#woGrad)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M96 46 L116 46" fill="none" stroke="url(#woGrad)" stroke-width="12" stroke-linecap="round"/>
+
+    <circle cx="122" cy="38" r="6" fill="#00E6A8"/>
+  </g>
+
+  <g class="word" transform="translate(220,70)">
+    <text x="0" y="55" font-size="64" font-weight="800" fill="#0B1320" letter-spacing="-0.8">
+      Wiwi<tspan fill="url(#woGrad)">Opportunity</tspan>
+    </text>
+    <text x="2" y="92" font-size="18" font-weight="600" fill="#0B1320" opacity="0.62" letter-spacing="0.2">
+      Scholarships • Internships • Volunteering • Study Abroad
+    </text>
+  </g>
+</svg>

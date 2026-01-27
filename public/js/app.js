@@ -7,6 +7,7 @@ $(document).ready(function () {
   const pageSize = 9;
 
   function fetchOpportunities() {
+    const status = window.__OPPS_STATUS__;
     const params = {
       search: $('#search').val() || '',
       country: $('#filter-country').val() || '',
@@ -14,6 +15,7 @@ $(document).ready(function () {
       funding: $('#filter-funding').val() || '',
       tag: $('#filter-tag').val() || '',
     };
+    if (status) params.status = status;
 
     $.get(API_URL, params, function (data) {
       allOpportunities = data || [];
@@ -154,38 +156,38 @@ $(document).ready(function () {
 
     $.post('/newsletter', { email }, function (res) {
       if (res && res.success) {
-        $msg.text("Merci ! Ton email est bien enregistré ✅").css('color', '#15803d');
+        $msg.text('Merci ! Ton email est bien enregistré ✅').css('color', '#15803d');
         $('#newsletter-email').val('');
       } else {
-        $msg.text("Une erreur est survenue.").css('color', '#b91c1c');
+        $msg.text('Une erreur est survenue.').css('color', '#b91c1c');
       }
     }).fail(function () {
-      $msg.text("Erreur réseau. Réessaie plus tard.").css('color', '#b91c1c');
+      $msg.text('Erreur réseau. Réessaie plus tard.').css('color', '#b91c1c');
     });
   });
 
   function renderFeatured() {
-  const $featured = $('#featured-list');
-  if (!$featured.length) return;
+    const $featured = $('#featured-list');
+    if (!$featured.length) return;
 
-  const featured = (allOpportunities || []).filter((o) => o.featured);
-  if (!featured.length) {
-    $('.featured-section').hide();
-    return;
-  }
+    const featured = (allOpportunities || []).filter((o) => o.featured);
+    if (!featured.length) {
+      $('.featured-section').hide();
+      return;
+    }
 
-  $('.featured-section').show();
-  $featured.empty();
+    $('.featured-section').show();
+    $featured.empty();
 
-  const top = featured.slice(0, 3);
+    const top = featured.slice(0, 3);
 
-  top.forEach((o) => {
-    const detailUrl = `/detail?id=${o.id}`;
-    const tagsHtml = (o.tags || [])
-      .map((t) => `<span>${t}</span>`)
-      .join('');
+    top.forEach((o) => {
+      const detailUrl = `/detail?id=${o.id}`;
+      const tagsHtml = (o.tags || [])
+        .map((t) => `<span>${t}</span>`)
+        .join('');
 
-    const card = `
+      const card = `
       <article class="featured-card">
         <div class="featured-badge">Mis en avant</div>
         <h3><a href="${detailUrl}" class="card-title-link">${o.title}</a></h3>
@@ -203,15 +205,13 @@ $(document).ready(function () {
         </div>
       </article>
     `;
-    $featured.append(card);
-  });
-}
-
+      $featured.append(card);
+    });
+  }
 
   // Premier chargement
   fetchOpportunities();
   $(document).ajaxComplete(function () {
-  renderFeatured();
-});
-
+    renderFeatured();
+  });
 });

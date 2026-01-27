@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const session = require('express-session');
+const site = require('./config/site');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,11 +21,10 @@ app.use(
   })
 );
 
-
-
 // --- Vues EJS ---
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
+app.locals.site = site;
 
 // --- Static ---
 app.use(express.static(path.join(__dirname, '../public')));
@@ -32,6 +32,20 @@ app.use(express.static(path.join(__dirname, '../public')));
 // --- Helpers data ---
 const oppFilePath = path.join(__dirname, 'opportunities.json');
 const newsletterFilePath = path.join(__dirname, 'newsletter.json');
+
+function getTodayString() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function isActiveOpportunity(o) {
+  if (!o || !o.deadline) return true;
+  const today = getTodayString();
+  return String(o.deadline) >= today;
+}
 
 function getOpportunities() {
   if (!fs.existsSync(oppFilePath)) return [];
@@ -101,7 +115,16 @@ app.get('/about', (req, res) => {
 app.get('/contact', (req, res) => {
   res.render('contact', {
     page: 'contact',
-    title: "Contact – WiwiOpportunity",
+    title: 'Contact – WiwiOpportunity',
+    baseUrl: process.env.PUBLIC_BASE_URL || '',
+  });
+});
+
+// Archives
+app.get('/archive', (req, res) => {
+  res.render('archive', {
+    page: 'archive',
+    title: 'Archives – WiwiOpportunity',
     baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
@@ -149,7 +172,7 @@ app.post('/admin/login', (req, res) => {
     page: 'admin-login',
     title: 'Connexion admin – WiwiOpportunity',
     error: 'Identifiants invalides',
-    baseUrl: process.env.PUBLIC_BASE_URL || ''
+    baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
 
@@ -210,8 +233,7 @@ app.post('/admin/new', requireAdmin, (req, res) => {
           .map((t) => t.trim())
           .filter(Boolean)
       : [],
-        featured: featured === '1' || featured === 'on' || featured === 'true',
-  
+    featured: featured === '1' || featured === 'on' || featured === 'true',
   };
 
   data.push(newOpp);
@@ -267,8 +289,7 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
           .map((t) => t.trim())
           .filter(Boolean)
       : [],
-        featured: featured === '1' || featured === 'on' || featured === 'true',
-  
+    featured: featured === '1' || featured === 'on' || featured === 'true',
   };
 
   saveOpportunities(data);
@@ -287,8 +308,14 @@ app.post('/admin/delete/:id', requireAdmin, (req, res) => {
 // --- API ---
 // GET /api/opportunities avec filtres + tags
 app.get('/api/opportunities', (req, res) => {
-  const { country, type, funding, search, tag } = req.query;
+  const { country, type, funding, search, tag, status } = req.query;
   let data = getOpportunities();
+
+  if (status === 'archived') {
+    data = data.filter((o) => !isActiveOpportunity(o));
+  } else if (status !== 'all') {
+    data = data.filter((o) => isActiveOpportunity(o));
+  }
 
   if (country) {
     data = data.filter((o) => (o.country || '').toLowerCase() === country.toLowerCase());

@@ -11,8 +11,7 @@
     "cors": "^2.8.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
-  "express-session": "^1.17.3",
-  "path": "^0.12.7"
+    "express-session": "^1.17.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

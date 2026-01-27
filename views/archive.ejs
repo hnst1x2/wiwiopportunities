@@ -1,0 +1,77 @@
+<%- include('partials/header', { title: 'Archives – WiwiOpportunity', page: 'archive', baseUrl }) %>
+
+<main class="main-layout">
+  <section class="opportunities-section">
+    <div class="layout-grid">
+      <aside class="filters-panel">
+        <h2>Filtrer les opportunités archivées</h2>
+
+        <div class="filter-group">
+          <label for="filter-country">Pays</label>
+          <select id="filter-country">
+            <option value="">Tous les pays</option>
+            <option value="France">France</option>
+            <option value="Allemagne">Allemagne</option>
+            <option value="Maroc">Maroc</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-type">Type d opportunité</label>
+          <select id="filter-type">
+            <option value="">Tous les types</option>
+            <option value="Stage">Stage</option>
+            <option value="Bourse">Bourse</option>
+            <option value="Volontariat">Volontariat</option>
+            <option value="Job">Job</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-funding">Financement</label>
+          <select id="filter-funding">
+            <option value="">Tous les financements</option>
+            <option value="Fully funded">Fully funded</option>
+            <option value="Partially funded">Partially funded</option>
+            <option value="Non finance">Non finance</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-tag">Domaine</label>
+          <select id="filter-tag">
+            <option value="">Tous les domaines</option>
+            <option value="IT">IT / Tech</option>
+            <option value="Marketing">Marketing / Communication</option>
+            <option value="Business">Business / Management</option>
+            <option value="Etudes">Etudes / Academique</option>
+            <option value="Humanitaire">Humanitaire / Social</option>
+          </select>
+        </div>
+
+        <button id="btn-reset" class="btn-secondary full-width">Reinitialiser les filtres</button>
+      </aside>
+
+      <section class="results-panel">
+        <div class="results-header">
+          <h2>Opportunités archivées</h2>
+          <div class="results-meta">
+            <span id="results-count">Chargement...</span>
+          </div>
+        </div>
+
+        <div id="opportunities-list" class="cards-container">
+          <!-- cartes generees par app.js -->
+        </div>
+
+        <div id="pagination" class="pagination-bar"></div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<script>
+  window.__OPPS_STATUS__ = 'archived';
+</script>
+
+<%- include('partials/footer', { page: 'archive' }) %>

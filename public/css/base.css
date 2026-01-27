@@ -50,10 +50,25 @@ body {
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 800;
   font-size: 1.25rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.logo img {
+  height: 46px;
+  width: auto;
+  display: block;
+}
+
+@media (max-width: 800px) {
+  .logo img {
+    height: 34px;
+  }
 }
 
 .logo span {
