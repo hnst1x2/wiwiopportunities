@@ -16,6 +16,12 @@
   <meta name="twitter:card" content="summary_large_image" />
 
   <link rel="icon" type="image/svg+xml" href="/img/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
@@ -40,14 +46,20 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="logo">
-        <a href="/" style="text-decoration:none;color:inherit;">
+        <a href="/" class="logo-link">
           <img src="/img/logo-header.svg" alt="WiwiOpportunity" />
         </a>
       </div>
-      <nav class="nav-links">
+      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="primary-nav">
+        <span class="nav-toggle-icon" aria-hidden="true"></span>
+        <span class="nav-toggle-text"><%= t('nav.menu') %></span>
+      </button>
+      <nav id="primary-nav" class="nav-links" aria-label="<%= t('nav.mainLabel') %>">
+        <a href="/"><%= t('nav.home') %></a>
         <a href="/#opps"><%= t('nav.opps') %></a>
         <a href="/archive"><%= t('nav.archive') %></a>
         <a href="/about"><%= t('nav.about') %></a>
+        <a href="/contact"><%= t('nav.contact') %></a>
         <a href="/#newsletter" class="nav-cta"><%= t('nav.newsletter') %></a>
         <div class="lang-switch" aria-label="<%= t('nav.langLabel') %>">
           <button type="button" class="<%= lang === 'fr' ? 'active' : '' %>" data-lang="fr">FR</button>

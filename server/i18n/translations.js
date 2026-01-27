@@ -17,10 +17,14 @@ const translations = {
       adminEditTitle: 'Modifier une opportunité – WiwiOpportunity',
     },
     nav: {
+      home: 'Accueil',
       opps: 'Opportunités',
       archive: 'Archives',
       about: 'À propos',
+      contact: 'Contact',
       newsletter: 'Newsletter',
+      menu: 'Menu',
+      mainLabel: 'Navigation principale',
       langLabel: 'Langue',
     },
     common: {
@@ -73,7 +77,9 @@ const translations = {
         one: '{count} opportunité trouvée',
         other: '{count} opportunités trouvées',
       },
+      noResultsTitle: 'Aucune opportunité trouvée.',
       noResults: 'Aucune opportunité trouvée avec ces filtres.',
+      noResultsHint: 'Astuce : essaie de retirer un filtre ou de modifier ta recherche.',
       loadError: 'Erreur lors du chargement des opportunités.',
       featuredBadge: 'Mis en avant',
       featuredButton: 'Voir le détail',
@@ -97,6 +103,9 @@ const translations = {
       filtersTitle: 'Filtrer les opportunités archivées',
     },
     filters: {
+      toggle: 'Filtres',
+      searchLabel: 'Recherche',
+      searchPlaceholder: 'Mots-clés, pays, tags...',
       country: 'Pays',
       type: "Type d'opportunité",
       funding: 'Financement',
@@ -105,6 +114,7 @@ const translations = {
       allTypes: 'Tous les types',
       allFunding: 'Tous les financements',
       allDomains: 'Tous les domaines',
+      clear: 'Effacer les filtres',
     },
     options: {
       types: {
@@ -262,10 +272,14 @@ const translations = {
       adminEditTitle: 'Edit an opportunity – WiwiOpportunity',
     },
     nav: {
+      home: 'Home',
       opps: 'Opportunities',
       archive: 'Archive',
       about: 'About',
+      contact: 'Contact',
       newsletter: 'Newsletter',
+      menu: 'Menu',
+      mainLabel: 'Main navigation',
       langLabel: 'Language',
     },
     common: {
@@ -318,7 +332,9 @@ const translations = {
         one: '{count} opportunity found',
         other: '{count} opportunities found',
       },
+      noResultsTitle: 'No opportunities found.',
       noResults: 'No opportunities found with these filters.',
+      noResultsHint: 'Tip: try removing a filter or adjusting your search.',
       loadError: 'Error loading opportunities.',
       featuredBadge: 'Featured',
       featuredButton: 'View details',
@@ -342,6 +358,9 @@ const translations = {
       filtersTitle: 'Filter archived opportunities',
     },
     filters: {
+      toggle: 'Filters',
+      searchLabel: 'Search',
+      searchPlaceholder: 'Keywords, country, tags...',
       country: 'Country',
       type: 'Opportunity type',
       funding: 'Funding',
@@ -350,6 +369,7 @@ const translations = {
       allTypes: 'All types',
       allFunding: 'All funding',
       allDomains: 'All fields',
+      clear: 'Clear filters',
     },
     options: {
       types: {

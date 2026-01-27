@@ -3,8 +3,17 @@
 <main class="main-layout">
   <section class="opportunities-section">
     <div class="layout-grid">
-      <aside class="filters-panel">
-        <h2><%= t('archive.filtersTitle') %></h2>
+      <aside class="filters-panel is-open">
+        <div class="filters-header">
+          <h2><%= t('archive.filtersTitle') %></h2>
+          <button type="button" class="filters-toggle" aria-expanded="true"><%= t('filters.toggle') %></button>
+        </div>
+        <div class="filters-body">
+
+        <div class="filter-group filter-search">
+          <label for="search-alt"><%= t('filters.searchLabel') %></label>
+          <input id="search-alt" type="text" placeholder="<%= t('filters.searchPlaceholder') %>" />
+        </div>
 
         <div class="filter-group">
           <label for="filter-country"><%= t('filters.country') %></label>
@@ -49,15 +58,19 @@
           </select>
         </div>
 
-        <button id="btn-reset" class="btn-secondary full-width"><%= t('common.reset') %></button>
+        <button id="btn-reset" class="btn-secondary full-width"><%= t('filters.clear') %></button>
+        </div>
       </aside>
 
       <section class="results-panel">
         <div class="results-header">
-          <h2><%= t('archive.title') %></h2>
-          <div class="results-meta">
-            <span id="results-count"><%= t('common.loading') %></span>
+          <div>
+            <h2><%= t('archive.title') %></h2>
+            <div class="results-meta">
+              <span id="results-count"><%= t('common.loading') %></span>
+            </div>
           </div>
+          <div id="active-filters" class="active-filters" aria-live="polite"></div>
         </div>
 
         <div id="opportunities-list" class="cards-container">

@@ -19,29 +19,118 @@ $(document).ready(function () {
     return t(key, { count });
   }
 
+  function debounce(fn, delay) {
+    let timer = null;
+    return function () {
+      const context = this;
+      const args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        fn.apply(context, args);
+      }, delay);
+    };
+  }
+
   const API_URL = '/api/opportunities';
   let allOpportunities = [];
   let filtered = [];
   let currentPage = 1;
   const pageSize = 9;
+  let lastQueryKey = '';
 
-  function fetchOpportunities() {
-    const status = window.__OPPS_STATUS__;
-    const params = {
-      search: $('#search').val() || '',
+  function syncSearchInputs(value) {
+    if ($('#search').length) {
+      $('#search').val(value);
+    }
+    if ($('#search-alt').length) {
+      $('#search-alt').val(value);
+    }
+  }
+
+  function getSearchValue() {
+    return ($('#search').val() || $('#search-alt').val() || '').trim();
+  }
+
+  function getFiltersFromUI() {
+    return {
+      search: getSearchValue(),
       country: $('#filter-country').val() || '',
       type: $('#filter-type').val() || '',
       funding: $('#filter-funding').val() || '',
       tag: $('#filter-tag').val() || '',
     };
+  }
+
+  function applyFiltersToUI(filters) {
+    syncSearchInputs(filters.search || '');
+    if ($('#filter-country').length) $('#filter-country').val(filters.country || '');
+    if ($('#filter-type').length) $('#filter-type').val(filters.type || '');
+    if ($('#filter-funding').length) $('#filter-funding').val(filters.funding || '');
+    if ($('#filter-tag').length) $('#filter-tag').val(filters.tag || '');
+  }
+
+  function buildQueryKey(filters) {
+    return [filters.search, filters.country, filters.type, filters.funding, filters.tag].join('|');
+  }
+
+  function updateUrl(filters, page) {
+    const params = new URLSearchParams();
+    if (filters.search) params.set('q', filters.search);
+    if (filters.country) params.set('country', filters.country);
+    if (filters.type) params.set('type', filters.type);
+    if (filters.funding) params.set('funding', filters.funding);
+    if (filters.tag) params.set('tag', filters.tag);
+    if (page && page > 1) params.set('page', String(page));
+    const query = params.toString();
+    const hash = window.location.hash || '';
+    const nextUrl = query ? `${window.location.pathname}?${query}${hash}` : `${window.location.pathname}${hash}`;
+    window.history.replaceState(null, '', nextUrl);
+  }
+
+  function readFiltersFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const page = parseInt(params.get('page'), 10);
+    return {
+      filters: {
+        search: params.get('q') || '',
+        country: params.get('country') || '',
+        type: params.get('type') || '',
+        funding: params.get('funding') || '',
+        tag: params.get('tag') || '',
+      },
+      page: Number.isNaN(page) ? 1 : Math.max(page, 1),
+    };
+  }
+
+  function fetchOpportunities(options) {
+    const opts = options || {};
+    const status = window.__OPPS_STATUS__;
+    const filters = getFiltersFromUI();
+    const queryKey = buildQueryKey(filters);
+
+    if (!opts.preservePage && (opts.resetPage || queryKey !== lastQueryKey)) {
+      currentPage = 1;
+    }
+
+    lastQueryKey = queryKey;
+    updateUrl(filters, currentPage);
+
+    const params = {
+      search: filters.search,
+      country: filters.country,
+      type: filters.type,
+      funding: filters.funding,
+      tag: filters.tag,
+    };
     if (status) params.status = status;
 
     $.get(API_URL, params, function (data) {
       allOpportunities = data || [];
-      currentPage = 1;
       filtered = allOpportunities;
       renderOpportunities();
       renderPagination();
+      renderActiveFilters(filters);
+      renderFeatured();
     }).fail(function () {
       $('#opportunities-list').html(`<p>${t('home.loadError')}</p>`);
       $('#results-count').text(t('common.error'));
@@ -54,6 +143,44 @@ $(document).ready(function () {
     return filtered.slice(start, end);
   }
 
+  function renderActiveFilters(filters) {
+    const $container = $('#active-filters');
+    if (!$container.length) return;
+
+    const chips = [];
+    if (filters.search) {
+      chips.push({ label: t('filters.searchLabel'), value: filters.search });
+    }
+    if (filters.country) {
+      chips.push({ label: t('filters.country'), value: $('#filter-country option:selected').text() });
+    }
+    if (filters.type) {
+      chips.push({ label: t('filters.type'), value: $('#filter-type option:selected').text() });
+    }
+    if (filters.funding) {
+      chips.push({ label: t('filters.funding'), value: $('#filter-funding option:selected').text() });
+    }
+    if (filters.tag) {
+      chips.push({ label: t('filters.domain'), value: $('#filter-tag option:selected').text() });
+    }
+
+    $container.empty();
+
+    if (!chips.length) {
+      return;
+    }
+
+    chips.forEach(function (chip) {
+      const $chip = $('<span class="filter-chip"></span>');
+      $chip.text(`${chip.label}: ${chip.value}`);
+      $container.append($chip);
+    });
+
+    const $clear = $('<button type="button" class="filters-clear" id="btn-clear-inline"></button>');
+    $clear.text(t('filters.clear'));
+    $container.append($clear);
+  }
+
   function renderOpportunities() {
     const $list = $('#opportunities-list');
     $list.empty();
@@ -61,7 +188,13 @@ $(document).ready(function () {
     $('#results-count').text(tCount('home.resultsCount', filtered.length));
 
     if (!filtered.length) {
-      $list.html(`<p>${t('home.noResults')}</p>`);
+      $list.html(
+        `<div class="empty-state">
+          <h3>${t('home.noResultsTitle')}</h3>
+          <p>${t('home.noResultsHint')}</p>
+          <button type="button" class="btn-secondary btn-sm" id="btn-empty-clear">${t('filters.clear')}</button>
+        </div>`
+      );
       return;
     }
 
@@ -71,11 +204,18 @@ $(document).ready(function () {
       const detailUrl = `/detail?id=${o.id}`;
 
       const tagsHtml = (o.tags || [])
-        .map((t) => `<span class="tag">${t}</span>`)
+        .map((tag) => `<span class="tag">${tag}</span>`)
         .join('');
 
       const card = `
         <article class="card">
+          <div class="card-top">
+            <div class="card-badges">
+              ${o.type ? `<span class="badge">${o.type}</span>` : ''}
+              ${o.funding ? `<span class="badge badge-funding">${o.funding}</span>` : ''}
+              ${o.deadline ? `<span class="badge badge-deadline">${t('home.deadlineLabel')}: ${o.deadline}</span>` : ''}
+            </div>
+          </div>
           <div class="card-header">
             <div class="card-title">
               <a href="${detailUrl}" class="card-title-link">
@@ -83,19 +223,20 @@ $(document).ready(function () {
               </a>
             </div>
             <div class="card-meta">
-              ${o.organization ? o.organization + ' · ' : ''}${o.city || ''}${
-        o.city ? ', ' : ''
-      }${o.country || ''}
+              ${o.organization ? `${o.organization} &middot; ` : ''}${o.city || ''}${o.city ? ', ' : ''}${o.country || ''}
             </div>
+          </div>
+          <div class="card-facts">
+            ${o.country ? `<span><i class="fa-solid fa-location-dot"></i>${o.country}</span>` : ''}
+            ${o.type ? `<span><i class="fa-solid fa-briefcase"></i>${o.type}</span>` : ''}
+            ${o.funding ? `<span><i class="fa-solid fa-circle-check"></i>${o.funding}</span>` : ''}
+            ${o.deadline ? `<span><i class="fa-solid fa-calendar"></i>${t('home.deadlineLabel')}: ${o.deadline}</span>` : ''}
           </div>
           <div class="card-description">
             ${o.description || ''}
           </div>
           <div class="card-footer">
             <div class="tags">
-              <span class="tag">${o.type || t('common.opportunity')}</span>
-              ${o.funding ? `<span class="tag tag-warning">${o.funding}</span>` : ''}
-              ${o.deadline ? `<span class="tag tag-deadline">${t('home.deadlineLabel')}: ${o.deadline}</span>` : ''}
               ${tagsHtml}
             </div>
             <div class="card-actions">
@@ -125,34 +266,47 @@ $(document).ready(function () {
         currentPage = i;
         renderOpportunities();
         renderPagination();
+        updateUrl(getFiltersFromUI(), currentPage);
       });
       $p.append(btn);
     }
   }
 
-  // Filtres
-  $('#search, #filter-country, #filter-type, #filter-funding, #filter-tag').on('change keyup', function (e) {
-    if (e.type === 'keyup' && e.key !== 'Enter') {
-      // pour la recherche texte, on peut déclencher à chaque frappe
-    }
-    fetchOpportunities();
-  });
-
-  $('#btn-reset').on('click', function () {
-    $('#search').val('');
+  function clearFilters() {
+    syncSearchInputs('');
     $('#filter-country').val('');
     $('#filter-type').val('');
     $('#filter-funding').val('');
     $('#filter-tag').val('');
-    fetchOpportunities();
+    fetchOpportunities({ resetPage: true });
+  }
+
+  const debouncedFetch = debounce(function () {
+    fetchOpportunities({ resetPage: true });
+  }, 300);
+
+  $('#search, #search-alt').on('input', function () {
+    syncSearchInputs($(this).val());
+    debouncedFetch();
   });
 
-  // Bouton de recherche du hero
+  $('#filter-country, #filter-type, #filter-funding, #filter-tag').on('change', function () {
+    fetchOpportunities({ resetPage: true });
+  });
+
+  $('#btn-reset').on('click', function () {
+    clearFilters();
+  });
+
+  $(document).on('click', '#btn-clear-inline, #btn-empty-clear', function () {
+    clearFilters();
+  });
+
   $('#btn-hero-search').on('click', function () {
-    fetchOpportunities();
+    syncSearchInputs($('#search').val() || '');
+    fetchOpportunities({ resetPage: true });
   });
 
-  // Chips rapides
   $(document).on('click', '.chip', function () {
     const country = $(this).data('country');
     const type = $(this).data('type');
@@ -162,10 +316,15 @@ $(document).ready(function () {
     if (type) $('#filter-type').val(type);
     if (tag) $('#filter-tag').val(tag);
 
-    fetchOpportunities();
+    fetchOpportunities({ resetPage: true });
   });
 
-  // Newsletter submit
+  $(document).on('click', '.filters-toggle', function () {
+    const $panel = $(this).closest('.filters-panel');
+    const isOpen = $panel.toggleClass('is-open').hasClass('is-open');
+    $(this).attr('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
   $('#newsletter-form').on('submit', function (e) {
     e.preventDefault();
     const email = $('#newsletter-email').val();
@@ -203,7 +362,7 @@ $(document).ready(function () {
     top.forEach((o) => {
       const detailUrl = `/detail?id=${o.id}`;
       const tagsHtml = (o.tags || [])
-        .map((t) => `<span>${t}</span>`)
+        .map((tag) => `<span>${tag}</span>`)
         .join('');
 
       const card = `
@@ -211,7 +370,7 @@ $(document).ready(function () {
         <div class="featured-badge">${t('home.featuredBadge')}</div>
         <h3><a href="${detailUrl}" class="card-title-link">${o.title}</a></h3>
         <div class="featured-meta">
-          ${(o.organization || '')}${o.organization && (o.city || o.country) ? ' · ' : ''}${o.city || ''}${o.city && o.country ? ', ' : ''}${o.country || ''}
+          ${(o.organization || '')}${o.organization && (o.city || o.country) ? ' &middot; ' : ''}${o.city || ''}${o.city && o.country ? ', ' : ''}${o.country || ''}
         </div>
         <div class="featured-tags">
           ${tagsHtml}
@@ -228,9 +387,11 @@ $(document).ready(function () {
     });
   }
 
-  // Premier chargement
-  fetchOpportunities();
-  $(document).ajaxComplete(function () {
-    renderFeatured();
-  });
+  const initial = readFiltersFromUrl();
+  applyFiltersToUI(initial.filters);
+  currentPage = initial.page;
+  lastQueryKey = buildQueryKey(initial.filters);
+  renderActiveFilters(getFiltersFromUI());
+
+  fetchOpportunities({ preservePage: true });
 });

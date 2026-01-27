@@ -33,7 +33,7 @@ $(document).ready(function () {
       <header class="detail-header">
         <h1>${o.title}</h1>
         <div class="detail-meta">
-          ${o.organization ? `<span>${o.organization}</span> · ` : ''}
+          ${o.organization ? `<span>${o.organization}</span> &middot; ` : ''}
           <span>${o.city || ''}${o.city ? ', ' : ''}${o.country || ''}</span>
         </div>
       </header>
@@ -81,7 +81,7 @@ $(document).ready(function () {
     $('#detail-main').html(mainHtml);
 
     const tagsHtml = (o.tags || [])
-      .map((t) => `<span class="tag">${t}</span>`)
+      .map((tag) => `<span class="tag">${tag}</span>`)
       .join('');
 
     const sidebarHtml = `
