@@ -362,6 +362,21 @@
   }
 }
 
+@media (max-width: 600px) {
+  .hero-search {
+    flex-direction: column;
+  }
+
+  .hero-search button {
+    width: 100%;
+  }
+
+  .cards-container,
+  .featured-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 /* Subtle card hover animation */
 .card {

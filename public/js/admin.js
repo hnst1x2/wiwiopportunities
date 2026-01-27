@@ -102,13 +102,13 @@ $(document).ready(function () {
       const tags = Array.isArray(o.tags) ? o.tags.join(', ') : '';
       const row = `
         <tr>
-          <td>${o.title || ''}</td>
-          <td>${o.country || ''}</td>
-          <td>${o.type || ''}</td>
-          <td>${o.funding || ''}</td>
-          <td>${o.deadline || ''}</td>
-          <td>${tags}</td>
-          <td>
+          <td data-label="Titre">${o.title || ''}</td>
+          <td data-label="Pays">${o.country || ''}</td>
+          <td data-label="Type">${o.type || ''}</td>
+          <td data-label="Financement">${o.funding || ''}</td>
+          <td data-label="Deadline">${o.deadline || ''}</td>
+          <td data-label="Tags">${tags}</td>
+          <td data-label="Actions">
             <div class="admin-actions-row">
               <a href="/admin/edit/${o.id}" class="btn-secondary btn-sm">Éditer</a>
               <form action="/admin/delete/${o.id}" method="post" onsubmit="return confirm('Supprimer cette opportunité ?');">

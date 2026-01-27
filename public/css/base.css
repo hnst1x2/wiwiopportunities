@@ -29,6 +29,13 @@ body {
   color: var(--color-text);
 }
 
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Topbar / Nav */
 
 .topbar {
@@ -47,6 +54,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .logo {
@@ -233,5 +241,10 @@ footer a:hover {
   .nav-links {
     flex-wrap: wrap;
     gap: 10px;
+    width: 100%;
+  }
+
+  .logo img {
+    height: 34px;
   }
 }

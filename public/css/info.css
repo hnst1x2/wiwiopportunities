@@ -17,6 +17,7 @@
 .info-card li {
   font-size: 0.95rem;
   color: #374151;
+  word-wrap: break-word;
 }
 
 .info-card ul {
