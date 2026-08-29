@@ -1,120 +1,90 @@
-// public/js/detail.js
-$(document).ready(function () {
-  function t(key, vars) {
-    const parts = key.split('.');
-    let current = window.I18N && window.I18N.strings;
-    for (const part of parts) {
-      if (!current || typeof current !== 'object') return key;
-      current = current[part];
-    }
-    if (typeof current !== 'string') return key;
-    if (!vars) return current;
-    return current.replace(/\{(\w+)\}/g, function (_, k) {
-      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : `{${k}}`;
-    });
+// public/js/detail.js — opportunity detail page (renders /api/opportunities/:id)
+$(function () {
+  'use strict';
+
+  var W = window.Wiwi;
+  var t = W.t;
+  var esc = W.esc;
+  var $root = $('#detail');
+
+  if (!$root.length) return;
+
+  var id = new URLSearchParams(window.location.search).get('id');
+
+  function missingHtml(message) {
+    return '<p class="detail-missing">' + esc(message) + '</p>';
   }
 
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get('id');
+  function blockHtml(label, text) {
+    return (
+      '<div class="detail-block">' +
+      '<div class="micro-label">' + esc(label) + '</div>' +
+      '<p class="detail-text detail-text--pre">' + esc(text) + '</p>' +
+      '</div>'
+    );
+  }
+
+  function infoRowHtml(label, value) {
+    return (
+      '<div class="info-row">' +
+      '<span class="info-row-label">' + esc(label) + '</span>' +
+      '<span class="info-row-value">' + esc(value || '—') + '</span>' +
+      '</div>'
+    );
+  }
+
+  function render(o) {
+    var rows = [
+      infoRowHtml(t('detail.type'), W.typeLabel(o)),
+      infoRowHtml(t('detail.country'), W.countryLabel(o.country)),
+      infoRowHtml(t('detail.city'), o.city),
+      infoRowHtml(t('detail.funding'), W.fundingLabel(o)),
+      infoRowHtml(t('detail.deadline'), o.deadline ? W.formatDate(o.deadline) : ''),
+      infoRowHtml(t('detail.duration'), o.duration),
+    ].join('');
+
+    var tags = (Array.isArray(o.tags) ? o.tags : [])
+      .map(function (tag) {
+        return '<span class="tag">' + esc(tag) + '</span>';
+      })
+      .join('');
+
+    var link = W.safeUrl(o.link);
+    var meta = [o.organization, W.placeLabel(o)].filter(Boolean).join(' · ');
+
+    $root.html(
+      '<article class="detail-card">' +
+        '<div class="detail-badges">' + W.typeBadge(o, ' badge--lg') + W.fundingBadge(o, ' badge--lg') + '</div>' +
+        '<h1 class="detail-title">' + esc(o.title) + '</h1>' +
+        (meta ? '<div class="detail-meta">' + esc(meta) + '</div>' : '') +
+        '<div class="detail-grid">' +
+          '<div class="detail-main">' +
+            (o.description ? blockHtml(t('detail.description'), o.description) : '') +
+            (o.extra ? blockHtml(t('detail.profile'), o.extra) : '') +
+            (tags ? '<div class="detail-tags">' + tags + '</div>' : '') +
+          '</div>' +
+          '<aside class="detail-aside">' +
+            '<div class="info-card"><div class="micro-label">' + esc(t('detail.info')) + '</div>' + rows + '</div>' +
+            (link
+              ? '<a class="btn btn--gradient btn--block detail-apply" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' +
+                esc(t('detail.apply')) + ' ↗</a>'
+              : '') +
+          '</aside>' +
+        '</div>' +
+      '</article>'
+    );
+
+    if (o.title) document.title = o.title + ' – WiwiOpportunity';
+  }
 
   if (!id) {
-    $('#detail-main').html(`<p>${t('detail.missingId')}</p>`);
+    $root.html(missingHtml(t('detail.missingId')));
     return;
   }
 
-  $.get(`/api/opportunities/${id}`, function (o) {
-    renderDetail(o);
-  }).fail(function () {
-    $('#detail-main').html(`<p>${t('detail.notFound')}</p>`);
-  });
-
-  function renderDetail(o) {
-    const mainHtml = `
-      <header class="detail-header">
-        <h1>${o.title}</h1>
-        <div class="detail-meta">
-          ${o.organization ? `<span>${o.organization}</span> &middot; ` : ''}
-          <span>${o.city || ''}${o.city ? ', ' : ''}${o.country || ''}</span>
-        </div>
-      </header>
-
-      <section class="detail-description">
-        <h2>${t('detail.description')}</h2>
-        <p>${(o.description || '').replace(/\n/g, '<br>')}</p>
-      </section>
-
-      ${
-        o.duration
-          ? `
-      <section class="detail-section">
-        <h2>${t('detail.duration')}</h2>
-        <p>${o.duration}</p>
-      </section>
-      `
-          : ''
-      }
-
-      ${
-        o.extra
-          ? `
-      <section class="detail-section">
-        <h2>${t('detail.profile')}</h2>
-        <p>${(o.extra || '').replace(/\n/g, '<br>')}</p>
-      </section>
-      `
-          : ''
-      }
-
-      ${
-        o.link
-          ? `
-      <section class="detail-section">
-        <a href="${o.link}" target="_blank" class="btn-apply">
-          ${t('detail.apply')}
-        </a>
-      </section>
-      `
-          : ''
-      }
-    `;
-
-    $('#detail-main').html(mainHtml);
-
-    const tagsHtml = (o.tags || [])
-      .map((tag) => `<span class="tag">${tag}</span>`)
-      .join('');
-
-    const sidebarHtml = `
-      <div class="detail-card">
-        <h3>${t('detail.infoTitle')}</h3>
-        <ul class="detail-info-list">
-          ${o.type ? `<li><strong>${t('detail.typeLabel')} :</strong> ${o.type}</li>` : ''}
-          ${o.country ? `<li><strong>${t('detail.countryLabel')} :</strong> ${o.country}</li>` : ''}
-          ${o.city ? `<li><strong>${t('detail.cityLabel')} :</strong> ${o.city}</li>` : ''}
-          ${o.funding ? `<li><strong>${t('detail.fundingLabel')} :</strong> ${o.funding}</li>` : ''}
-          ${o.deadline ? `<li><strong>${t('detail.deadlineLabel')} :</strong> ${o.deadline}</li>` : ''}
-          ${o.duration ? `<li><strong>${t('detail.durationLabel')} :</strong> ${o.duration}</li>` : ''}
-          ${
-            tagsHtml
-              ? `<li><strong>${t('detail.tagsLabel')} :</strong> ${tagsHtml}</li>`
-              : ''
-          }
-        </ul>
-
-        ${
-          o.link
-            ? `<a href="${o.link}" target="_blank" class="btn-primary full-width" style="margin-top:8px;">
-                 ${t('detail.applyNow')}
-               </a>`
-            : ''
-        }
-
-        <a href="/#opps" class="btn-secondary full-width" style="margin-top:10px;">
-          ${t('detail.back')}
-        </a>
-      </div>
-    `;
-
-    $('#detail-sidebar').html(sidebarHtml);
-  }
+  $.get('/api/opportunities/' + encodeURIComponent(id))
+    .done(render)
+    .fail(function () {
+      $root.html(missingHtml(t('detail.notFound')));
+    });
 });

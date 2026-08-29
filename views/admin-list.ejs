@@ -1,93 +1,39 @@
 <%- include('partials/header', { title: t('meta.adminListTitle'), page: 'admin', baseUrl }) %>
 
-<main class="main-layout">
-  <section class="admin-section">
-    <div class="admin-form-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-        <h1 style="margin:0;"><%= t('admin.listTitle') %></h1>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <a href="/admin/new" class="btn-primary"><%= t('admin.addNew') %></a>
-          <form action="/admin/logout" method="post">
-            <button type="submit" class="btn-secondary"><%= t('admin.logout') %></button>
-          </form>
-        </div>
-      </div>
+<main id="main" class="container admin-page">
+  <%- include('partials/admin-header') %>
 
-      <p class="admin-intro">
-        <%= t('admin.listIntro') %>
-      </p>
-
-      <div class="admin-filters" id="admin-filters">
-        <div class="filter-group">
-          <label for="admin-search"><%= t('admin.search') %></label>
-          <input id="admin-search" type="text" placeholder="<%= t('admin.searchPlaceholder') %>" />
-        </div>
-        <div class="filter-group">
-          <label for="admin-country"><%= t('filters.country') %></label>
-          <select id="admin-country">
-            <option value=""><%= t('filters.allCountries') %></option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="admin-type"><%= t('filters.type') %></label>
-          <select id="admin-type">
-            <option value=""><%= t('filters.allTypes') %></option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="admin-funding"><%= t('filters.funding') %></label>
-          <select id="admin-funding">
-            <option value=""><%= t('filters.allFunding') %></option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="admin-featured"><%= t('admin.featured') %></label>
-          <select id="admin-featured">
-            <option value=""><%= t('common.all') %></option>
-            <option value="true"><%= t('common.yes') %></option>
-            <option value="false"><%= t('common.no') %></option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="admin-tag"><%= t('admin.tag') %></label>
-          <input id="admin-tag" type="text" placeholder="<%= t('admin.tagPlaceholder') %>" />
-        </div>
-        <div class="filter-actions">
-          <button id="admin-reset" class="btn-secondary btn-sm" type="button"><%= t('admin.reset') %></button>
-        </div>
-      </div>
-
-      <div class="admin-results-meta">
-        <span id="admin-results-count"></span>
-      </div>
-
-      <% if (!opportunities.length) { %>
-        <p><%= t('admin.none') %></p>
-      <% } else { %>
-        <div class="admin-table-wrapper">
-          <table class="admin-table" id="admin-table">
-            <thead>
-              <tr>
-                <th data-sort="title"><%= t('admin.table.title') %></th>
-                <th data-sort="country"><%= t('admin.table.country') %></th>
-                <th data-sort="type"><%= t('admin.table.type') %></th>
-                <th data-sort="funding"><%= t('admin.table.funding') %></th>
-                <th data-sort="deadline"><%= t('admin.table.deadline') %></th>
-                <th data-sort="tags"><%= t('admin.table.tags') %></th>
-                <th style="width:140px;"><%= t('admin.table.actions') %></th>
-              </tr>
-            </thead>
-            <tbody id="admin-table-body"></tbody>
-          </table>
-        </div>
-        <div id="admin-pagination" class="admin-pagination"></div>
-      <% } %>
+  <div class="admin-list">
+    <div class="admin-toolbar">
+      <label for="admin-search" class="sr-only"><%= t('admin.search') %></label>
+      <input id="admin-search" type="search" class="field field--pill admin-search" placeholder="<%= t('admin.searchPlaceholder') %>" autocomplete="off" />
+      <span id="admin-results-count" class="admin-count" role="status" aria-live="polite"></span>
+      <span id="admin-message" class="admin-message" role="status" aria-live="polite"></span>
     </div>
-  </section>
+
+    <% if (!opportunities.length) { %>
+    <p class="admin-empty"><%= t('admin.none') %></p>
+    <% } else { %>
+    <div class="admin-table-wrap">
+      <div class="admin-table" role="table" aria-label="<%= t('admin.tableLabel') %>">
+        <div class="admin-row admin-row--head" role="row">
+          <span role="columnheader"><%= t('admin.table.title') %></span>
+          <span role="columnheader"><%= t('admin.table.country') %></span>
+          <span role="columnheader"><%= t('admin.table.type') %></span>
+          <span role="columnheader"><%= t('admin.table.deadline') %></span>
+          <span role="columnheader"><%= t('admin.table.featured') %></span>
+          <span role="columnheader"><%= t('admin.table.actions') %></span>
+        </div>
+        <div id="admin-table-body" role="rowgroup"></div>
+      </div>
+    </div>
+    <% } %>
+  </div>
 </main>
 
-<%- include('partials/footer', { page: 'admin' }) %>
-
 <script>
-  window.__ADMIN_OPPORTUNITIES__ = <%- JSON.stringify(opportunities || []) %>;
+  <%# "<" is escaped so a "</script>" inside a record cannot break out of this tag. %>
+  window.__ADMIN_OPPORTUNITIES__ = <%- JSON.stringify(opportunities || []).replace(/</g, String.fromCharCode(92) + 'u003c') %>;
 </script>
+
+<%- include('partials/footer', { page: 'admin' }) %>

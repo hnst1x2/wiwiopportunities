@@ -1,0 +1,92 @@
+/* WiwiOpportunity rebrand — design tokens (drop into public/css/, load before other sheets) */
+@font-face{font-family:Manrope;src:url("../fonts/Manrope-Regular.otf") format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:Manrope;src:url("../fonts/Manrope-Medium.otf") format("opentype");font-weight:500;font-display:swap}
+@font-face{font-family:Manrope;src:url("../fonts/Manrope-SemiBold.otf") format("opentype");font-weight:600;font-display:swap}
+@font-face{font-family:Manrope;src:url("../fonts/Manrope-Bold.otf") format("opentype");font-weight:700;font-display:swap}
+@font-face{font-family:Manrope;src:url("../fonts/Manrope-ExtraBold.otf") format("opentype");font-weight:800;font-display:swap}
+
+:root{
+  /* palette */
+  --violet-nuit:#2e1451;
+  --violet-nuit-hover:#432179;
+  --lilas:#9196fa;
+  --lilas-hover:#a3a8fb;
+  --link:#5b61e0;
+  --mauve:#d1baf6;
+  --indigo-nuit:#010920;
+  --danger:#d0342e;
+
+  /* surfaces */
+  --bg-page:#f7f7fa;
+  --bg-card:#ffffff;
+  --bg-dark:var(--violet-nuit);
+  --bg-footer:var(--indigo-nuit);
+  --bg-chip:rgba(46,20,81,0.06);
+
+  /* text */
+  --ink:#2e1451;
+  --ink-2:rgba(46,20,81,0.75);
+  --ink-3:rgba(46,20,81,0.6);
+  --ink-4:rgba(46,20,81,0.5);
+  --ink-on-dark:#ffffff;
+  --ink-on-dark-2:rgba(255,255,255,0.75);
+
+  /* borders */
+  --border-subtle:rgba(46,20,81,0.08);
+  --border-default:rgba(46,20,81,0.16);
+  --border-strong:rgba(46,20,81,0.18);
+
+  /* badges */
+  --badge-stage-bg:rgba(145,150,250,0.20);   --badge-stage-fg:#4348c8;
+  --badge-bourse-bg:rgba(209,186,246,0.35);  --badge-bourse-fg:#6d28c9;
+  --badge-volont-bg:rgba(148,222,171,0.28);  --badge-volont-fg:#1f7a3a;
+  --badge-job-bg:rgba(245,181,68,0.22);      --badge-job-fg:#8a5a00;
+  --badge-etudes-bg:rgba(46,20,81,0.08);     --badge-etudes-fg:#2e1451;
+  --fund-fully-bg:rgba(148,222,171,0.25);    --fund-fully-fg:#1f7a3a;
+  --fund-partial-bg:rgba(245,181,68,0.20);   --fund-partial-fg:#8a5a00;
+  --fund-none-bg:rgba(46,20,81,0.07);        --fund-none-fg:rgba(46,20,81,0.6);
+  --tag-bg:rgba(209,186,246,0.28);           --tag-fg:#5c2ba8;
+
+  /* gradients */
+  --grad-brand:linear-gradient(135deg,#7a80f7 0%,#2e1451 78%);
+  --grad-text:linear-gradient(90deg,#9196fa,#d1baf6);
+  --grad-card-dark:linear-gradient(135deg,#4b2687,#2e1451);
+  --grad-cta:linear-gradient(90deg,#7a80f7,#4b2687);
+
+  /* shadows — violet-tinted, never gray */
+  --shadow-xs:0 1px 2px rgba(46,20,81,0.05);
+  --shadow-sm:0 2px 6px rgba(46,20,81,0.05);
+  --shadow-md:0 8px 20px rgba(46,20,81,0.08);
+  --shadow-lg:0 16px 40px rgba(46,20,81,0.13);
+  --shadow-hero:0 24px 60px rgba(1,9,32,0.35);
+  --focus-ring:0 0 0 5px rgba(145,150,250,0.22);
+
+  /* type */
+  --font-sans:Manrope,"Segoe UI",Helvetica,sans-serif;
+  --h1-hero:clamp(32px,5.4vw,64px);
+  --h1-page:clamp(26px,3.6vw,40px);
+  --h2-section:clamp(24px,3.2vw,34px);
+
+  /* layout */
+  --container:1180px;
+  --pad-x:clamp(16px,4vw,32px);
+  --pad-section:clamp(44px,6vw,72px);
+
+  /* radii */
+  --r-pill:999px;
+  --r-card:16px;
+  --r-panel:24px;
+  --r-block:32px;
+  --r-field:12px;
+
+  /* motion */
+  --ease:ease;
+  --t-fast:0.15s;
+  --t-base:0.18s;
+}
+
+body{font-family:var(--font-sans);background:var(--bg-page);color:var(--ink)}
+a{color:var(--link);text-decoration:none}
+a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+::selection{background:rgba(145,150,250,0.35)}
+::placeholder{color:rgba(46,20,81,0.38)}

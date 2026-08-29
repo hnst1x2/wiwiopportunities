@@ -1,25 +1,54 @@
-  <footer>
-    <p>
-      &copy; <span id="year"></span> WiwiOpportunity &middot; <%= t('home.socialCta') %>
-      <a href="<%= site.social.instagram %>" target="_blank">Instagram</a>,
-      <a href="<%= site.social.tiktok %>" target="_blank">TikTok</a>,
-      <a href="<%= site.social.linkedin %>" target="_blank">LinkedIn</a>.
-    </p>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a href="/" class="brand brand--dark" aria-label="<%= t('nav.brandLabel') %>">
+          <svg class="brand-mark" width="30" height="30" viewBox="0 0 128 128" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="wg-footer" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#9196fa"></stop>
+                <stop offset="1" stop-color="#d1baf6"></stop>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="128" height="128" rx="30" fill="rgba(255,255,255,0.08)"></rect>
+            <circle cx="64" cy="64" r="34" fill="none" stroke="url(#wg-footer)" stroke-width="6"></circle>
+            <path d="M56 78 V50 C56 46 60 42 64 42 H72" fill="none" stroke="url(#wg-footer)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M72 42 V54" stroke="url(#wg-footer)" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M72 42 H84" stroke="url(#wg-footer)" stroke-width="6" stroke-linecap="round"></path>
+          </svg>
+          <span class="brand-word">Wiwi<span class="brand-word-accent">Opportunity</span></span>
+        </a>
+        <p class="footer-tag"><%= t('footer.tag') %></p>
+      </div>
+
+      <nav class="footer-links" aria-label="<%= t('nav.footerLabel') %>">
+        <a href="/"><%= t('nav.home') %></a>
+        <a href="/#opps"><%= t('nav.opps') %></a>
+        <a href="/archive"><%= t('nav.archive') %></a>
+        <a href="/about"><%= t('nav.about') %></a>
+        <a href="/contact"><%= t('nav.contact') %></a>
+      </nav>
+
+      <div class="footer-social">
+        <%# resolved relative to this partial's directory %>
+        <%- include('social-links') %>
+        <a href="/admin" class="btn btn--ghost-light btn--xs footer-admin"><%= t('nav.admin') %></a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <span><%= t('footer.rights').replace('{year}', String(new Date().getFullYear())) %></span>
+        <span><%= t('footer.made') %></span>
+      </div>
+    </div>
   </footer>
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      var el = document.getElementById('year');
-      if (el) {
-        el.textContent = new Date().getFullYear();
-      }
-    });
-  </script>
-  <script>
+    <%# JSON embedded in a <script>: "<" is escaped so a "</script>" inside a string cannot break out. %>
     window.I18N = {
       lang: "<%= lang %>",
-      strings: <%- JSON.stringify(i18n) %>
+      strings: <%- JSON.stringify(i18n).replace(/</g, String.fromCharCode(92) + 'u003c') %>
     };
     (function () {
       var key = 'wiwi_lang';
@@ -46,7 +75,7 @@
       buttons.forEach(function (btn) {
         btn.addEventListener('click', function () {
           var lang = btn.getAttribute('data-lang');
-          if (!lang) return;
+          if (!lang || lang === current) return;
           try {
             localStorage.setItem(key, lang);
           } catch (e) {}
@@ -57,18 +86,15 @@
     })();
   </script>
 
-  <script src="/js/base.js"></script>
-  <% if (page === 'home') { %>
-    <script src="/js/app.js"></script>
+  <script src="/js/shared.js"></script>
+  <% if (page === 'home' || page === 'archive') { %>
+  <script src="/js/app.js"></script>
   <% } %>
   <% if (page === 'detail') { %>
-    <script src="/js/detail.js"></script>
-  <% } %>
-  <% if (page === 'archive') { %>
-    <script src="/js/app.js"></script>
+  <script src="/js/detail.js"></script>
   <% } %>
   <% if (page === 'admin') { %>
-    <script src="/js/admin.js"></script>
+  <script src="/js/admin.js"></script>
   <% } %>
 </body>
 </html>

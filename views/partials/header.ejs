@@ -5,67 +5,70 @@
   <title><%= title || t('meta.defaultTitle') %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="<%= t('meta.defaultDescription') %>" />
-  <meta name="keywords" content="stage, bourse, volontariat, etudes a l etranger, opportunites, jeunes, francophones" />
+  <meta name="keywords" content="<%= t('meta.keywords') %>" />
+  <meta name="theme-color" content="#2e1451" />
 
   <!-- OpenGraph / Social -->
   <meta property="og:title" content="<%= title || t('meta.defaultTitle') %>" />
   <meta property="og:description" content="<%= t('meta.ogDescription') %>" />
   <meta property="og:type" content="website" />
-  <!-- Mets ton image OG ici si tu veux -->
+  <meta property="og:site_name" content="WiwiOpportunity" />
+  <% if (typeof baseUrl !== 'undefined' && baseUrl) { %>
+  <meta property="og:url" content="<%= baseUrl %>" />
+  <% } %>
   <meta property="og:image" content="https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <link rel="icon" type="image/svg+xml" href="/img/logo.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+  <link rel="preload" href="/fonts/Manrope-Regular.otf" as="font" type="font/otf" crossorigin />
+  <link rel="preload" href="/fonts/Manrope-ExtraBold.otf" as="font" type="font/otf" crossorigin />
+  <link rel="stylesheet" href="/css/brand-tokens.css" />
   <link rel="stylesheet" href="/css/base.css" />
   <link rel="stylesheet" href="/css/social.css" />
-  <link rel="stylesheet" href="/css/info.css" />
   <% if (page === 'home' || page === 'archive') { %>
-    <link rel="stylesheet" href="/css/home.css" />
+  <link rel="stylesheet" href="/css/home.css" />
   <% } %>
   <% if (page === 'detail') { %>
-    <link rel="stylesheet" href="/css/detail.css" />
+  <link rel="stylesheet" href="/css/detail.css" />
+  <% } %>
+  <% if (page === 'about' || page === 'contact') { %>
+  <link rel="stylesheet" href="/css/info.css" />
   <% } %>
   <% if (page === 'admin') { %>
-    <link rel="stylesheet" href="/css/admin.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
   <% } %>
 </head>
 <body>
+  <a class="skip-link" href="#main"><%= t('nav.skip') %></a>
+
   <header class="topbar">
-    <div class="topbar-inner">
-      <div class="logo">
-        <a href="/" class="logo-link">
-          <img src="/img/logo-header.svg" alt="WiwiOpportunity" />
-        </a>
-      </div>
-      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="primary-nav">
-        <span class="nav-toggle-icon" aria-hidden="true"></span>
-        <span class="nav-toggle-text"><%= t('nav.menu') %></span>
-      </button>
-      <nav id="primary-nav" class="nav-links" aria-label="<%= t('nav.mainLabel') %>">
-        <a href="/"><%= t('nav.home') %></a>
-        <a href="/#opps"><%= t('nav.opps') %></a>
-        <a href="/archive"><%= t('nav.archive') %></a>
-        <a href="/about"><%= t('nav.about') %></a>
-        <a href="/contact"><%= t('nav.contact') %></a>
-        <a href="/#newsletter" class="nav-cta"><%= t('nav.newsletter') %></a>
-        <div class="lang-switch" aria-label="<%= t('nav.langLabel') %>">
-          <button type="button" class="<%= lang === 'fr' ? 'active' : '' %>" data-lang="fr">FR</button>
-          <span aria-hidden="true">|</span>
-          <button type="button" class="<%= lang === 'en' ? 'active' : '' %>" data-lang="en">EN</button>
-        </div>
+    <div class="container topbar-inner">
+      <a href="/" class="brand" aria-label="<%= t('nav.brandLabel') %>">
+        <img class="brand-mark" src="/img/logo-main.svg" alt="" width="34" height="34" />
+        <span class="brand-word">Wiwi<span class="brand-word-accent">Opportunity</span></span>
+      </a>
+
+      <%
+        const navItems = [
+          { href: '/', key: 'home', label: t('nav.home') },
+          { href: '/#opps', key: 'opps', label: t('nav.opps') },
+          { href: '/archive', key: 'archive', label: t('nav.archive') },
+          { href: '/about', key: 'about', label: t('nav.about') },
+          { href: '/contact', key: 'contact', label: t('nav.contact') },
+        ];
+      %>
+      <nav class="nav-links" aria-label="<%= t('nav.mainLabel') %>">
+        <% navItems.forEach((item) => { const isActive = item.key === page; %>
+        <a href="<%= item.href %>" class="nav-link<%= isActive ? ' is-active' : '' %>"<%- isActive ? ' aria-current="page"' : '' %>><%= item.label %></a>
+        <% }) %>
       </nav>
+
+      <div class="nav-tools">
+        <div class="lang-switch" role="group" aria-label="<%= t('nav.langLabel') %>">
+          <button type="button" class="lang-btn<%= lang === 'fr' ? ' is-active' : '' %>" data-lang="fr" aria-pressed="<%= lang === 'fr' %>" lang="fr">FR</button>
+          <button type="button" class="lang-btn<%= lang === 'en' ? ' is-active' : '' %>" data-lang="en" aria-pressed="<%= lang === 'en' %>" lang="en">EN</button>
+        </div>
+        <a href="/#newsletter" class="btn btn--accent btn--sm nav-cta"><%= t('nav.newsletter') %></a>
+      </div>
     </div>
   </header>

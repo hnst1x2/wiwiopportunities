@@ -1,24 +1,15 @@
 <%- include('partials/header', { title: t('meta.aboutTitle'), page: 'about', baseUrl }) %>
 
-<main class="main-layout">
-  <section class="info-section">
-    <div class="info-card">
-      <h1><%= t('about.title') %></h1>
-      <p>
-        <%= t('about.p1') %>
-      </p>
-      <p>
-        <%= t('about.p2') %>
-      </p>
-      <p>
-        <%= t('about.p3') %>
-      </p>
+<main id="main" class="container info-page">
+  <p class="eyebrow"><%= t('about.eyebrow') %></p>
+  <h1 class="h1-page"><%= t('about.title') %></h1>
+  <p class="info-text"><%= t('about.p1') %></p>
+  <p class="info-text info-text--muted"><%= t('about.p2') %></p>
+  <p class="info-text info-text--muted"><%= t('about.p3') %></p>
 
-      <h2><%= t('about.feedbackTitle') %></h2>
-      <p>
-        <%= t('about.feedbackText') %>
-      </p>
-    </div>
+  <section class="callout" aria-labelledby="feedback-heading">
+    <h2 id="feedback-heading"><%= t('about.feedbackTitle') %></h2>
+    <p><%= t('about.feedbackText') %></p>
   </section>
 </main>
 

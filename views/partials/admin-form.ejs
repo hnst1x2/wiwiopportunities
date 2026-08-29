@@ -1,0 +1,126 @@
+<%
+  // Shared create/edit form. Expects: action, formTitle, and optionally opp (the record being edited).
+  const record = typeof opp !== 'undefined' && opp ? opp : {};
+  const TYPE_OPTIONS = [
+    ['Stage', 'stage'],
+    ['Bourse', 'scholarship'],
+    ['Volontariat', 'volunteering'],
+    ['Job', 'job'],
+    ['Études', 'studies'],
+  ];
+  const FUNDING_OPTIONS = ['fully', 'partial', 'none'];
+  const DOMAIN_OPTIONS = ['it', 'marketing', 'business', 'studies', 'humanitarian'];
+  const LEGACY_FUNDING = {
+    fully: 'fully',
+    'fully funded': 'fully',
+    partial: 'partial',
+    'partially funded': 'partial',
+    none: 'none',
+    'non finance': 'none',
+    'non financé': 'none',
+    'not funded': 'none',
+  };
+  const currentType = String(record.type || '') === 'Etudes' ? 'Études' : String(record.type || '');
+  const currentFunding = LEGACY_FUNDING[String(record.funding || '').toLowerCase()] || '';
+  const currentDomain = String(record.domain || '');
+  const tagsValue = Array.isArray(record.tags) ? record.tags.join(', ') : record.tags || '';
+%>
+<form action="<%= action %>" method="post" class="admin-form-card" id="admin-form" novalidate>
+  <h2 class="admin-form-title"><%= formTitle %></h2>
+
+  <div class="form-grid">
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.title') %> <span class="required">*</span></span>
+      <input class="field" type="text" name="title" id="title" value="<%= record.title || '' %>" required />
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.organization') %></span>
+      <input class="field" type="text" name="organization" id="organization" value="<%= record.organization || '' %>" />
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.country') %> <span class="required">*</span></span>
+      <input class="field" type="text" name="country" id="country" value="<%= record.country || '' %>" placeholder="<%= t('admin.placeholders.country') %>" required />
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.city') %></span>
+      <input class="field" type="text" name="city" id="city" value="<%= record.city || '' %>" />
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.deadline') %></span>
+      <input class="field" type="date" name="deadline" id="deadline" value="<%= record.deadline || '' %>" />
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.duration') %></span>
+      <input class="field" type="text" name="duration" id="duration" value="<%= record.duration || '' %>" placeholder="<%= t('admin.placeholders.duration') %>" />
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.link') %></span>
+      <input class="field" type="url" name="link" id="link" value="<%= record.link || '' %>" placeholder="<%= t('admin.placeholders.link') %>" />
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.type') %> <span class="required">*</span></span>
+      <select class="field" name="type" id="type" required>
+        <option value=""><%= t('common.select') %></option>
+        <% TYPE_OPTIONS.forEach(([value, key]) => { %>
+        <option value="<%= value %>" <%= currentType === value ? 'selected' : '' %>><%= t('options.types.' + key) %></option>
+        <% }) %>
+      </select>
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.funding') %></span>
+      <select class="field" name="funding" id="funding">
+        <option value="" <%= !currentFunding ? 'selected' : '' %>><%= t('options.funding.unspecified') %></option>
+        <% FUNDING_OPTIONS.forEach((key) => { %>
+        <option value="<%= key %>" <%= currentFunding === key ? 'selected' : '' %>><%= t('options.funding.' + key) %></option>
+        <% }) %>
+      </select>
+    </label>
+
+    <label class="form-field">
+      <span class="field-label"><%= t('admin.fields.domain') %></span>
+      <select class="field" name="domain" id="domain">
+        <option value="" <%= !currentDomain ? 'selected' : '' %>><%= t('options.domains.unspecified') %></option>
+        <% DOMAIN_OPTIONS.forEach((key) => { %>
+        <option value="<%= key %>" <%= currentDomain === key ? 'selected' : '' %>><%= t('options.domains.' + key) %></option>
+        <% }) %>
+      </select>
+    </label>
+  </div>
+
+  <label class="form-field">
+    <span class="field-label"><%= t('admin.fields.description') %></span>
+    <textarea class="field" name="description" id="description" rows="3" placeholder="<%= t('admin.placeholders.description') %>"><%= record.description || '' %></textarea>
+  </label>
+
+  <label class="form-field">
+    <span class="field-label"><%= t('admin.fields.extra') %></span>
+    <textarea class="field" name="extra" id="extra" rows="3" placeholder="<%= t('admin.placeholders.extra') %>"><%= record.extra || '' %></textarea>
+  </label>
+
+  <label class="form-field">
+    <span class="field-label"><%= t('admin.fields.tags') %></span>
+    <input class="field" type="text" name="tags" id="tags" value="<%= tagsValue %>" placeholder="<%= t('admin.placeholders.tags') %>" />
+  </label>
+
+  <label class="form-check">
+    <input type="checkbox" name="featured" value="1" <%= record.featured ? 'checked' : '' %> />
+    <%= t('admin.featuredLabel') %>
+  </label>
+
+  <p class="form-error" id="form-error" role="alert" aria-live="polite"></p>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn--primary"><%= t('admin.save') %></button>
+    <a href="/admin" class="btn btn--ghost"><%= t('admin.cancel') %></a>
+  </div>
+
+  <p class="form-note"><span class="required">*</span> <%= t('admin.requiredNote') %></p>
+</form>

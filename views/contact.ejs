@@ -1,33 +1,26 @@
 <%- include('partials/header', { title: t('meta.contactTitle'), page: 'contact', baseUrl }) %>
 
-<main class="main-layout">
-  <section class="info-section">
-    <div class="info-card">
-      <h1><%= t('contact.title') %></h1>
-      <p>
-        <%= t('contact.intro') %>
-      </p>
-      <ul>
-        <li><%= t('contact.offer') %></li>
-        <li><%= t('contact.report') %></li>
-        <li><%= t('contact.partner') %></li>
-      </ul>
+<main id="main" class="container info-page">
+  <p class="eyebrow"><%= t('contact.eyebrow') %></p>
+  <h1 class="h1-page"><%= t('contact.title') %></h1>
+  <p class="info-text"><%= t('contact.intro') %></p>
 
-      <p>
-        <strong><%= t('contact.emailLabel') %></strong>
-        <a href="mailto:contact@wiwiopportunity.com">contact@wiwiopportunity.com</a>
-      </p>
+  <ul class="check-list">
+    <li><span class="check-icon" aria-hidden="true">✓</span><span><%= t('contact.offer') %></span></li>
+    <li><span class="check-icon" aria-hidden="true">✓</span><span><%= t('contact.report') %></span></li>
+    <li><span class="check-icon" aria-hidden="true">✓</span><span><%= t('contact.partner') %></span></li>
+  </ul>
 
-      <p>
-        <%= t('contact.socialIntro') %>
-      </p>
-      <ul>
-        <li><a href="<%= site.social.instagram %>" target="_blank">Instagram</a></li>
-        <li><a href="<%= site.social.tiktok %>" target="_blank">TikTok</a></li>
-        <li><a href="<%= site.social.linkedin %>" target="_blank">LinkedIn</a></li>
-      </ul>
+  <div class="contact-card">
+    <div>
+      <div class="micro-label"><%= t('contact.emailLabel') %></div>
+      <a href="mailto:contact@wiwiopportunity.com" class="contact-email">contact@wiwiopportunity.com</a>
     </div>
-  </section>
+    <div class="contact-social">
+      <span class="contact-social-intro"><%= t('contact.socialIntro') %></span>
+      <%- include('partials/social-links') %>
+    </div>
+  </div>
 </main>
 
 <%- include('partials/footer', { page: 'contact' }) %>

@@ -1,175 +1,123 @@
 <%- include('partials/header', { title: t('meta.homeTitle'), page: 'home' }) %>
 
-<section class="hero">
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <h1><%= t('home.heroTitle') %></h1>
-    <p>
-      <%= t('home.heroText') %>
-    </p>
+<main id="main">
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-blob hero-blob--1" aria-hidden="true"></div>
+    <div class="hero-blob hero-blob--2" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="eyebrow eyebrow--light"><%= t('hero.eyebrow') %></p>
+      <h1 id="hero-heading" class="hero-title"><%= t('hero.title1') %> <span class="text-gradient"><%= t('hero.titleAccent') %></span></h1>
+      <p class="hero-sub"><%= t('hero.sub') %></p>
 
-    <div class="hero-search">
-      <div class="hero-search-input">
-        <input
-          type="text"
-          id="search"
-          placeholder="<%= t('home.heroSearchPlaceholder') %>"
-        />
+      <form class="hero-search" id="hero-search-form" role="search">
+        <label for="search" class="sr-only"><%= t('common.search') %></label>
+        <input type="search" id="search" class="hero-search-input" placeholder="<%= t('hero.placeholder') %>" autocomplete="off" />
+        <button type="submit" class="btn btn--primary hero-search-btn" id="btn-hero-search"><%= t('hero.button') %></button>
+      </form>
+
+      <div class="hero-chips">
+        <span class="hero-chips-label"><%= t('hero.suggestions') %></span>
+        <button type="button" class="hero-chip" data-type="Stage"><%= t('hero.chips.stage') %></button>
+        <button type="button" class="hero-chip" data-type="Bourse"><%= t('hero.chips.scholarship') %></button>
+        <button type="button" class="hero-chip" data-type="Volontariat"><%= t('hero.chips.volunteering') %></button>
+        <button type="button" class="hero-chip" data-country="France"><%= t('hero.chips.france') %></button>
+        <button type="button" class="hero-chip" data-country="Allemagne"><%= t('hero.chips.germany') %></button>
       </div>
-      <button id="btn-hero-search"><%= t('home.heroSearchButton') %></button>
-    </div>
 
-    <div class="hero-tags">
-      <span><%= t('home.suggestionsLabel') %></span>
-      <button class="chip" data-type="Stage"><%= t('home.chips.stage') %></button>
-      <button class="chip" data-type="Bourse"><%= t('home.chips.scholarship') %></button>
-      <button class="chip" data-type="Volontariat"><%= t('home.chips.volunteering') %></button>
-      <button class="chip" data-country="France"><%= t('home.chips.france') %></button>
-      <button class="chip" data-country="Allemagne"><%= t('home.chips.germany') %></button>
-    </div>
-
-    <div class="social-cta-bar">
-      <span class="social-cta-text"><%= t('home.socialCta') %></span>
-      <div class="social-cta-links">
+      <div class="hero-social">
+        <span class="hero-social-label"><%= t('hero.social') %></span>
         <%- include('partials/social-links') %>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="featured-section">
-  <div class="main-layout">
-    <div class="featured-header">
-      <div>
-        <h2><%= t('home.featuredTitle') %></h2>
-        <p class="featured-subtitle">
-          <%= t('home.featuredSubtitle') %>
-        </p>
+  <%# Shown by app.js only when at least one active opportunity is flagged "featured" in the back-office %>
+  <section id="featured" class="container section featured-section" aria-labelledby="featured-heading" hidden>
+    <p class="eyebrow"><%= t('featured.eyebrow') %></p>
+    <h2 id="featured-heading" class="h2-section"><%= t('featured.title') %></h2>
+    <p class="section-sub"><%= t('featured.sub') %></p>
+    <div id="featured-list" class="featured-grid"></div>
+  </section>
+
+  <section id="opps" class="container section opps-section" aria-labelledby="opps-heading">
+    <p class="eyebrow"><%= t('list.eyebrow') %></p>
+    <h2 id="opps-heading" class="h2-section"><%= t('list.title') %></h2>
+
+    <%
+      // Chip values are the stored data values (type) or normalized keys (funding, domain).
+      const chipGroups = [
+        {
+          key: 'type',
+          values: [
+            ['Stage', 'options.types.stage'],
+            ['Bourse', 'options.types.scholarship'],
+            ['Volontariat', 'options.types.volunteering'],
+            ['Job', 'options.types.job'],
+            ['Études', 'options.types.studies'],
+          ],
+        },
+        {
+          key: 'funding',
+          values: [
+            ['fully', 'options.funding.fully'],
+            ['partial', 'options.funding.partial'],
+            ['none', 'options.funding.none'],
+          ],
+        },
+        {
+          key: 'domain',
+          values: [
+            ['it', 'options.domains.it'],
+            ['marketing', 'options.domains.marketing'],
+            ['business', 'options.domains.business'],
+            ['studies', 'options.domains.studies'],
+            ['humanitarian', 'options.domains.humanitarian'],
+          ],
+        },
+      ];
+    %>
+    <div class="filters-panel">
+      <div class="filters-row">
+        <label for="search-alt" class="sr-only"><%= t('common.search') %></label>
+        <input id="search-alt" type="search" class="field field--pill filters-search" placeholder="<%= t('list.searchPlaceholder') %>" autocomplete="off" />
+        <label for="filter-country" class="sr-only"><%= t('list.country') %></label>
+        <select id="filter-country" class="field field--pill filters-country">
+          <option value=""><%= t('list.allCountries') %></option>
+        </select>
       </div>
-      <p class="featured-hint">
-        <%= t('home.featuredHint') %>
-      </p>
+
+      <% chipGroups.forEach((group) => { %>
+      <div class="chip-group" role="group" aria-label="<%= t('list.groups.' + group.key) %>">
+        <span class="chip-group-label"><%= t('list.groups.' + group.key) %></span>
+        <% group.values.forEach(([value, labelKey]) => { %>
+        <button type="button" class="chip" data-group="<%= group.key %>" data-value="<%= value %>" aria-pressed="false"><%= t(labelKey) %></button>
+        <% }) %>
+      </div>
+      <% }) %>
     </div>
-    <div id="featured-list" class="featured-cards">
-      <!-- cartes mises en avant generees par JS -->
+
+    <div class="results-row">
+      <span id="results-count" class="results-count" role="status" aria-live="polite">…</span>
+      <button type="button" id="btn-clear" class="btn-clear" hidden>✕ <%= t('list.clear') %></button>
+      <span class="results-hint"><%= t('list.hint') %></span>
     </div>
-  </div>
-</section>
 
-
-<main class="main-layout">
-  <section id="opps" class="opportunities-section">
-    <div class="layout-grid">
-      <aside class="filters-panel is-open">
-        <div class="filters-header">
-          <h2><%= t('home.filtersTitle') %></h2>
-          <button type="button" class="filters-toggle" aria-expanded="true"><%= t('filters.toggle') %></button>
-        </div>
-        <div class="filters-body">
-
-        <div class="filter-group filter-search">
-          <label for="search-alt"><%= t('filters.searchLabel') %></label>
-          <input id="search-alt" type="text" placeholder="<%= t('filters.searchPlaceholder') %>" />
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-country"><%= t('filters.country') %></label>
-          <select id="filter-country">
-            <option value=""><%= t('filters.allCountries') %></option>
-            <option value="France"><%= t('options.countries.france') %></option>
-            <option value="Allemagne"><%= t('options.countries.germany') %></option>
-            <option value="Maroc"><%= t('options.countries.morocco') %></option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-type"><%= t('filters.type') %></label>
-          <select id="filter-type">
-            <option value=""><%= t('filters.allTypes') %></option>
-            <option value="Stage"><%= t('options.types.stage') %></option>
-            <option value="Bourse"><%= t('options.types.scholarship') %></option>
-            <option value="Volontariat"><%= t('options.types.volunteering') %></option>
-            <option value="Job"><%= t('options.types.job') %></option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-funding"><%= t('filters.funding') %></label>
-          <select id="filter-funding">
-            <option value=""><%= t('filters.allFunding') %></option>
-            <option value="Fully funded"><%= t('options.funding.fully') %></option>
-            <option value="Partially funded"><%= t('options.funding.partial') %></option>
-            <option value="Non finance"><%= t('options.funding.none') %></option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-tag"><%= t('filters.domain') %></label>
-          <select id="filter-tag">
-            <option value=""><%= t('filters.allDomains') %></option>
-            <option value="IT"><%= t('options.domains.it') %></option>
-            <option value="Marketing"><%= t('options.domains.marketing') %></option>
-            <option value="Business"><%= t('options.domains.business') %></option>
-            <option value="Etudes"><%= t('options.domains.studies') %></option>
-            <option value="Humanitaire"><%= t('options.domains.humanitarian') %></option>
-          </select>
-        </div>
-
-        <button id="btn-reset" class="btn-secondary full-width"><%= t('filters.clear') %></button>
-        <p class="filters-hint">
-          <%= t('home.filtersHint') %>
-        </p>
-        </div>
-      </aside>
-
-      <section class="results-panel">
-        <div class="results-header">
-          <div>
-            <h2><%= t('home.resultsTitle') %></h2>
-            <div class="results-meta">
-              <span id="results-count"><%= t('common.loading') %></span>
-            </div>
-          </div>
-          <div id="active-filters" class="active-filters" aria-live="polite"></div>
-        </div>
-
-        <div id="opportunities-list" class="cards-container">
-          <!-- cartes generees par app.js -->
-        </div>
-
-        <div id="pagination" class="pagination-bar"></div>
-      </section>
-    </div>
+    <div id="opportunities-list" class="cards-grid"></div>
+    <nav id="pagination" class="pagination" aria-label="<%= t('common.pagination') %>"></nav>
   </section>
 
-  <section id="about" class="about-section">
-    <div class="about-card">
-      <h2><%= t('home.aboutTitle') %></h2>
-      <p>
-        <%= t('home.aboutText') %>
-      </p>
-    </div>
-  </section>
-
-  <section id="newsletter" class="newsletter-section">
+  <section id="newsletter" class="container newsletter-section" aria-labelledby="newsletter-heading">
     <div class="newsletter-card">
-      <h2><%= t('home.newsletterTitle') %></h2>
-      <p>
-        <%= t('home.newsletterText') %>
-      </p>
-      <form id="newsletter-form" class="newsletter-form">
-        <input type="email" id="newsletter-email" placeholder="<%= t('home.newsletterPlaceholder') %>" required />
-        <button class="btn-primary" type="submit"><%= t('home.newsletterButton') %></button>
+      <p class="eyebrow eyebrow--soft"><%= t('newsletter.eyebrow') %></p>
+      <h2 id="newsletter-heading" class="newsletter-title"><%= t('newsletter.title') %></h2>
+      <p class="newsletter-text"><%= t('newsletter.text') %></p>
+      <form id="newsletter-form" class="newsletter-form" novalidate>
+        <label for="newsletter-email" class="sr-only"><%= t('common.email') %></label>
+        <input type="email" id="newsletter-email" name="email" placeholder="<%= t('newsletter.placeholder') %>" autocomplete="email" required />
+        <button type="submit" class="btn btn--primary"><%= t('newsletter.button') %></button>
       </form>
-      <p class="newsletter-note" id="newsletter-message"></p>
-
-      <div class="social-inline-note">
-        <%= t('home.socialInlineLead') %>
-        <a href="<%= site.social.instagram %>" target="_blank">Instagram</a>,
-        <a href="<%= site.social.tiktok %>" target="_blank">TikTok</a>
-        <%= t('common.and') %>
-        <a href="<%= site.social.linkedin %>" target="_blank">LinkedIn</a>.
-      </div>
+      <p id="newsletter-message" class="newsletter-status" role="status" aria-live="polite"></p>
+      <p class="newsletter-social"><%= t('newsletter.lead') %> <%- include('partials/social-links', { separator: '·' }) %></p>
     </div>
   </section>
 </main>

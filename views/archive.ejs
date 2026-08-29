@@ -1,86 +1,30 @@
 <%- include('partials/header', { title: t('meta.archiveTitle'), page: 'archive', baseUrl }) %>
 
-<main class="main-layout">
-  <section class="opportunities-section">
-    <div class="layout-grid">
-      <aside class="filters-panel is-open">
-        <div class="filters-header">
-          <h2><%= t('archive.filtersTitle') %></h2>
-          <button type="button" class="filters-toggle" aria-expanded="true"><%= t('filters.toggle') %></button>
-        </div>
-        <div class="filters-body">
+<main id="main" class="container archive-page">
+  <p class="eyebrow"><%= t('archive.eyebrow') %></p>
+  <h1 class="h1-page"><%= t('archive.title') %></h1>
+  <p class="page-sub"><%= t('archive.sub') %></p>
 
-        <div class="filter-group filter-search">
-          <label for="search-alt"><%= t('filters.searchLabel') %></label>
-          <input id="search-alt" type="text" placeholder="<%= t('filters.searchPlaceholder') %>" />
-        </div>
+  <%
+    const archiveTypes = [
+      ['Stage', 'options.types.stage'],
+      ['Bourse', 'options.types.scholarship'],
+      ['Volontariat', 'options.types.volunteering'],
+      ['Job', 'options.types.job'],
+      ['Études', 'options.types.studies'],
+    ];
+  %>
+  <div class="archive-toolbar">
+    <label for="search-alt" class="sr-only"><%= t('common.search') %></label>
+    <input id="search-alt" type="search" class="field field--pill archive-search" placeholder="<%= t('archive.searchPlaceholder') %>" autocomplete="off" />
+    <% archiveTypes.forEach(([value, labelKey]) => { %>
+    <button type="button" class="chip" data-group="type" data-value="<%= value %>" aria-pressed="false"><%= t(labelKey) %></button>
+    <% }) %>
+    <span id="results-count" class="results-count" role="status" aria-live="polite">…</span>
+  </div>
 
-        <div class="filter-group">
-          <label for="filter-country"><%= t('filters.country') %></label>
-          <select id="filter-country">
-            <option value=""><%= t('filters.allCountries') %></option>
-            <option value="France"><%= t('options.countries.france') %></option>
-            <option value="Allemagne"><%= t('options.countries.germany') %></option>
-            <option value="Maroc"><%= t('options.countries.morocco') %></option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-type"><%= t('filters.type') %></label>
-          <select id="filter-type">
-            <option value=""><%= t('filters.allTypes') %></option>
-            <option value="Stage"><%= t('options.types.stage') %></option>
-            <option value="Bourse"><%= t('options.types.scholarship') %></option>
-            <option value="Volontariat"><%= t('options.types.volunteering') %></option>
-            <option value="Job"><%= t('options.types.job') %></option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-funding"><%= t('filters.funding') %></label>
-          <select id="filter-funding">
-            <option value=""><%= t('filters.allFunding') %></option>
-            <option value="Fully funded"><%= t('options.funding.fully') %></option>
-            <option value="Partially funded"><%= t('options.funding.partial') %></option>
-            <option value="Non finance"><%= t('options.funding.none') %></option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-tag"><%= t('filters.domain') %></label>
-          <select id="filter-tag">
-            <option value=""><%= t('filters.allDomains') %></option>
-            <option value="IT"><%= t('options.domains.it') %></option>
-            <option value="Marketing"><%= t('options.domains.marketing') %></option>
-            <option value="Business"><%= t('options.domains.business') %></option>
-            <option value="Etudes"><%= t('options.domains.studies') %></option>
-            <option value="Humanitaire"><%= t('options.domains.humanitarian') %></option>
-          </select>
-        </div>
-
-        <button id="btn-reset" class="btn-secondary full-width"><%= t('filters.clear') %></button>
-        </div>
-      </aside>
-
-      <section class="results-panel">
-        <div class="results-header">
-          <div>
-            <h2><%= t('archive.title') %></h2>
-            <div class="results-meta">
-              <span id="results-count"><%= t('common.loading') %></span>
-            </div>
-          </div>
-          <div id="active-filters" class="active-filters" aria-live="polite"></div>
-        </div>
-
-        <div id="opportunities-list" class="cards-container">
-          <!-- cartes generees par app.js -->
-        </div>
-
-        <div id="pagination" class="pagination-bar"></div>
-      </section>
-    </div>
-  </section>
+  <div id="opportunities-list" class="cards-grid cards-grid--archive"></div>
+  <nav id="pagination" class="pagination" aria-label="<%= t('common.pagination') %>"></nav>
 </main>
 
 <script>

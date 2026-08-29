@@ -1,25 +1,17 @@
 <%- include('partials/header', { title: t('meta.detailTitle'), page: 'detail', baseUrl }) %>
 
-<main class="main-layout">
-  <article class="detail-layout">
-    <section class="detail-main" id="detail-main">
-      <p><%= t('detail.loading') %></p>
-    </section>
+<main id="main" class="container detail-page">
+  <a href="/#opps" class="back-link"><%= t('detail.back') %></a>
 
-    <aside class="detail-sidebar" id="detail-sidebar">
-      <!-- rempli par detail.js -->
-    </aside>
-  </article>
-
-  <section class="detail-social-promo">
-    <div class="detail-social-card">
-      <h3><%= t('detail.socialTitle') %></h3>
-      <p><%= t('detail.socialText') %></p>
-      <div class="social-cta-links">
-        <%- include('partials/social-links') %>
-      </div>
+  <%# Filled by detail.js; the skeleton keeps the layout stable while the record loads %>
+  <div id="detail">
+    <div class="detail-card detail-card--skeleton" aria-hidden="true">
+      <span class="sk sk--badge"></span>
+      <span class="sk sk--title"></span>
+      <span class="sk sk--line"></span>
+      <span class="sk sk--block"></span>
     </div>
-  </section>
+  </div>
 </main>
 
 <%- include('partials/footer', { page: 'detail' }) %>

@@ -1,9 +1,12 @@
-<a href="<%= site.social.instagram %>" target="_blank" class="social-pill insta">
-  <i class="fa-brands fa-instagram"></i><span>Instagram</span>
-</a>
-<a href="<%= site.social.tiktok %>" target="_blank" class="social-pill tiktok">
-  <i class="fa-brands fa-tiktok"></i><span>TikTok</span>
-</a>
-<a href="<%= site.social.linkedin %>" target="_blank" class="social-pill linkedin">
-  <i class="fa-brands fa-linkedin"></i><span>LinkedIn</span>
-</a>
+<%
+  // Renders the three social links (URLs from server/config/site.js).
+  // Pass { separator: '·' } to print a separator between links (inline contexts).
+  const socialLinks = [
+    { href: site.social.instagram, label: 'Instagram' },
+    { href: site.social.tiktok, label: 'TikTok' },
+    { href: site.social.linkedin, label: 'LinkedIn' },
+  ];
+  const socialSeparator = typeof separator === 'string' ? separator : '';
+%>
+<% socialLinks.forEach((link, index) => { %><% if (index > 0 && socialSeparator) { %><span class="social-sep" aria-hidden="true"><%= socialSeparator %></span><% } %><a href="<%= link.href %>" class="social-link" target="_blank" rel="noopener noreferrer"><%= link.label %></a>
+<% }) %>

@@ -1,246 +1,165 @@
-// public/js/admin.js
-$(document).ready(function () {
-  function t(key, vars) {
-    const parts = key.split('.');
-    let current = window.I18N && window.I18N.strings;
-    for (const part of parts) {
-      if (!current || typeof current !== 'object') return key;
-      current = current[part];
-    }
-    if (typeof current !== 'string') return key;
-    if (!vars) return current;
-    return current.replace(/\{(\w+)\}/g, function (_, k) {
-      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : `{${k}}`;
-    });
-  }
+// public/js/admin.js — back-office: list (search, featured toggle, delete confirm) + form validation
+$(function () {
+  'use strict';
 
-  function tCount(baseKey, count) {
-    const key = count === 1 ? `${baseKey}.one` : `${baseKey}.other`;
-    return t(key, { count });
-  }
+  var W = window.Wiwi;
+  var t = W.t;
+  var esc = W.esc;
 
-  const data = Array.isArray(window.__ADMIN_OPPORTUNITIES__) ? window.__ADMIN_OPPORTUNITIES__ : [];
-  const $tbody = $('#admin-table-body');
-  const $results = $('#admin-results-count');
-  const $pagination = $('#admin-pagination');
+  var REQUEST_TIMEOUT_MS = 8000;
 
-  if (!$tbody.length) return;
+  initList();
+  initForm();
 
-  const state = {
-    search: '',
-    country: '',
-    type: '',
-    funding: '',
-    featured: '',
-    tag: '',
-    sortKey: '',
-    sortDir: 'asc',
-    page: 1,
-    pageSize: 10,
-  };
+  // ---- list -------------------------------------------------------------------
 
-  function uniqueValues(items, key) {
-    const set = new Set();
-    items.forEach((o) => {
-      const value = (o[key] || '').toString().trim();
-      if (value) set.add(value);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
-  }
+  function initList() {
+    var $body = $('#admin-table-body');
+    if (!$body.length) return;
 
-  function populateSelect($select, values) {
-    values.forEach((v) => {
-      $select.append(`<option value="${v}">${v}</option>`);
-    });
-  }
+    var items = Array.isArray(window.__ADMIN_OPPORTUNITIES__) ? window.__ADMIN_OPPORTUNITIES__ : [];
+    var query = '';
+    var $count = $('#admin-results-count');
+    var $message = $('#admin-message');
 
-  populateSelect($('#admin-country'), uniqueValues(data, 'country'));
-  populateSelect($('#admin-type'), uniqueValues(data, 'type'));
-  populateSelect($('#admin-funding'), uniqueValues(data, 'funding'));
-
-  function matchesSearch(o, term) {
-    if (!term) return true;
-    const hay = [
-      o.title,
-      o.organization,
-      o.country,
-      o.city,
-      o.type,
-      o.funding,
-      o.deadline,
-      o.duration,
-      o.link,
-      o.description,
-      o.extra,
-      Array.isArray(o.tags) ? o.tags.join(' ') : '',
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-    return hay.includes(term);
-  }
-
-  function applyFilters(items) {
-    const term = state.search.toLowerCase().trim();
-    const tagTerm = state.tag.toLowerCase().trim();
-    return items.filter((o) => {
-      if (state.country && (o.country || '').toLowerCase() !== state.country.toLowerCase()) return false;
-      if (state.type && (o.type || '').toLowerCase() !== state.type.toLowerCase()) return false;
-      if (state.funding && (o.funding || '').toLowerCase() !== state.funding.toLowerCase()) return false;
-      if (state.featured) {
-        const isFeatured = !!o.featured;
-        if (state.featured === 'true' && !isFeatured) return false;
-        if (state.featured === 'false' && isFeatured) return false;
-      }
-      if (tagTerm) {
-        const tags = Array.isArray(o.tags) ? o.tags.map((t) => (t || '').toLowerCase()) : [];
-        if (!tags.some((t) => t.includes(tagTerm))) return false;
-      }
-      return matchesSearch(o, term);
-    });
-  }
-
-  function compare(a, b, key) {
-    const va = (a[key] || '').toString().toLowerCase();
-    const vb = (b[key] || '').toString().toLowerCase();
-    if (key === 'deadline') {
-      return va.localeCompare(vb);
-    }
-    return va.localeCompare(vb, 'fr', { sensitivity: 'base' });
-  }
-
-  function applySort(items) {
-    if (!state.sortKey) return items;
-    const sorted = [...items].sort((a, b) => compare(a, b, state.sortKey));
-    return state.sortDir === 'asc' ? sorted : sorted.reverse();
-  }
-
-  function renderRows(items) {
-    $tbody.empty();
-    items.forEach((o) => {
-      const tags = Array.isArray(o.tags) ? o.tags.join(', ') : '';
-      const row = `
-        <tr>
-          <td data-label="${t('admin.table.title')}">${o.title || ''}</td>
-          <td data-label="${t('admin.table.country')}">${o.country || ''}</td>
-          <td data-label="${t('admin.table.type')}">${o.type || ''}</td>
-          <td data-label="${t('admin.table.funding')}">${o.funding || ''}</td>
-          <td data-label="${t('admin.table.deadline')}">${o.deadline || ''}</td>
-          <td data-label="${t('admin.table.tags')}">${tags}</td>
-          <td data-label="${t('admin.table.actions')}">
-            <div class="admin-actions-row">
-              <a href="/admin/edit/${o.id}" class="btn-secondary btn-sm">${t('common.edit')}</a>
-              <form action="/admin/delete/${o.id}" method="post" onsubmit="return confirm('${t('admin.confirmDelete')}');">
-                <button type="submit" class="btn-secondary btn-sm" style="border-color:#fecaca;background:#fef2f2;color:#b91c1c;">
-                  ${t('common.delete')}
-                </button>
-              </form>
-            </div>
-          </td>
-        </tr>
-      `;
-      $tbody.append(row);
-    });
-  }
-
-  function renderPagination(totalItems) {
-    $pagination.empty();
-    const totalPages = Math.max(1, Math.ceil(totalItems / state.pageSize));
-    if (state.page > totalPages) state.page = totalPages;
-    if (totalPages <= 1) return;
-
-    for (let i = 1; i <= totalPages; i++) {
-      const btn = $(`<button type="button">${i}</button>`);
-      if (i === state.page) btn.addClass('active');
-      btn.on('click', function () {
-        state.page = i;
-        render();
+    function visibleItems() {
+      var needle = W.norm(query);
+      if (!needle) return items;
+      return items.filter(function (o) {
+        var haystack = [o.title, o.organization, o.country, W.countryLabel(o.country), o.city, (o.tags || []).join(' ')].join(' ');
+        return W.norm(haystack).indexOf(needle) !== -1;
       });
-      $pagination.append(btn);
     }
-  }
 
-  function render() {
-    const filtered = applyFilters(data);
-    const sorted = applySort(filtered);
-    const start = (state.page - 1) * state.pageSize;
-    const pageItems = sorted.slice(start, start + state.pageSize);
+    function rowHtml(o) {
+      var deadline = W.deadlineInfo(o);
+      var deadlineClass = '';
+      if (deadline && deadline.expired) deadlineClass = ' is-expired';
+      else if (deadline && deadline.urgent) deadlineClass = ' is-urgent';
+      var isOn = Boolean(o.featured);
 
-    $results.text(tCount('admin.resultsCount', filtered.length));
-    renderRows(pageItems);
-    renderPagination(filtered.length);
-  }
-
-  function resetFilters() {
-    state.search = '';
-    state.country = '';
-    state.type = '';
-    state.funding = '';
-    state.featured = '';
-    state.tag = '';
-    state.page = 1;
-
-    $('#admin-search').val('');
-    $('#admin-country').val('');
-    $('#admin-type').val('');
-    $('#admin-funding').val('');
-    $('#admin-featured').val('');
-    $('#admin-tag').val('');
-  }
-
-  $('#admin-search').on('input', function () {
-    state.search = $(this).val() || '';
-    state.page = 1;
-    render();
-  });
-
-  $('#admin-country').on('change', function () {
-    state.country = $(this).val() || '';
-    state.page = 1;
-    render();
-  });
-
-  $('#admin-type').on('change', function () {
-    state.type = $(this).val() || '';
-    state.page = 1;
-    render();
-  });
-
-  $('#admin-funding').on('change', function () {
-    state.funding = $(this).val() || '';
-    state.page = 1;
-    render();
-  });
-
-  $('#admin-featured').on('change', function () {
-    state.featured = $(this).val() || '';
-    state.page = 1;
-    render();
-  });
-
-  $('#admin-tag').on('input', function () {
-    state.tag = $(this).val() || '';
-    state.page = 1;
-    render();
-  });
-
-  $('#admin-reset').on('click', function () {
-    resetFilters();
-    render();
-  });
-
-  $('#admin-table thead th[data-sort]').on('click', function () {
-    const key = $(this).data('sort');
-    if (state.sortKey === key) {
-      state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
-    } else {
-      state.sortKey = key;
-      state.sortDir = 'asc';
+      return (
+        '<div class="admin-row" role="row" data-id="' + esc(o.id) + '">' +
+          '<div class="admin-cell-title" role="cell">' +
+            '<div class="admin-opp-title">' + esc(o.title) + '</div>' +
+            (o.organization ? '<div class="admin-opp-org">' + esc(o.organization) + '</div>' : '') +
+          '</div>' +
+          '<span class="admin-cell-country" role="cell">' + esc(W.countryLabel(o.country)) + '</span>' +
+          '<span role="cell">' + W.typeBadge(o) + '</span>' +
+          '<span class="admin-deadline' + deadlineClass + '" role="cell">' + esc(deadline ? deadline.text : '—') + '</span>' +
+          '<span role="cell">' +
+            '<button type="button" class="feat-toggle' + (isOn ? ' is-on' : '') + '" aria-pressed="' + (isOn ? 'true' : 'false') + '"' +
+              ' title="' + esc(t('admin.table.featured')) + '">' + esc(isOn ? t('admin.featuredOn') : t('admin.featuredOff')) + '</button>' +
+          '</span>' +
+          '<div class="admin-actions" role="cell">' +
+            '<a href="/admin/edit/' + esc(o.id) + '" class="btn btn--ghost btn--xs">' + esc(t('admin.edit')) + '</a>' +
+            '<form action="/admin/delete/' + esc(o.id) + '" method="post" class="js-delete">' +
+              '<button type="submit" class="btn btn--danger-text btn--xs">' + esc(t('admin.delete')) + '</button>' +
+            '</form>' +
+          '</div>' +
+        '</div>'
+      );
     }
-    $('#admin-table thead th[data-sort]').removeClass('sorted-asc sorted-desc');
-    $(this).addClass(state.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
-    render();
-  });
 
-  render();
+    function render() {
+      var rows = visibleItems();
+      $body.html(rows.map(rowHtml).join(''));
+      $count.text(W.tCount('admin.count', rows.length));
+    }
+
+    function setMessage(text, isError) {
+      $message.text(text).toggleClass('is-error', Boolean(isError));
+    }
+
+    // POST /admin/edit/:id rewrites the whole record from the body, so the full record is sent
+    // back with only `featured` changed (unknown fields such as `domain` are preserved server-side).
+    function editPayload(o, featured) {
+      var payload = {
+        title: o.title || '',
+        organization: o.organization || '',
+        country: o.country || '',
+        city: o.city || '',
+        type: o.type || '',
+        funding: o.funding || '',
+        domain: o.domain || '',
+        deadline: o.deadline || '',
+        duration: o.duration || '',
+        link: o.link || '',
+        description: o.description || '',
+        extra: o.extra || '',
+        tags: Array.isArray(o.tags) ? o.tags.join(', ') : o.tags || '',
+      };
+      if (featured) payload.featured = '1';
+      return payload;
+    }
+
+    function findItem(id) {
+      return items.filter(function (o) {
+        return o.id === id;
+      })[0];
+    }
+
+    $('#admin-search').on('input', function () {
+      query = $(this).val() || '';
+      render();
+    });
+
+    $body.on('click', '.feat-toggle', function () {
+      var $button = $(this);
+      var id = Number($button.closest('.admin-row').data('id'));
+      var record = findItem(id);
+      if (!record) return;
+
+      var next = !record.featured;
+      $button.prop('disabled', true);
+      setMessage('', false);
+
+      $.ajax({ url: '/admin/edit/' + id, method: 'POST', data: editPayload(record, next), timeout: REQUEST_TIMEOUT_MS })
+        .then(function () {
+          // The edit route redirects to /admin; re-read the record to verify the change was persisted.
+          return $.ajax({ url: '/api/opportunities/' + id, timeout: REQUEST_TIMEOUT_MS });
+        })
+        .then(function (fresh) {
+          if (!fresh || Boolean(fresh.featured) !== next) throw new Error('Featured flag was not persisted');
+          items = items.map(function (o) {
+            return o.id === id ? $.extend({}, o, { featured: next }) : o;
+          });
+          render();
+          setMessage(t('admin.saved'), false);
+        })
+        .catch(function () {
+          render();
+          setMessage(t('admin.saveError'), true);
+        });
+    });
+
+    $body.on('submit', 'form.js-delete', function (event) {
+      if (!window.confirm(t('admin.confirmDelete'))) event.preventDefault();
+    });
+
+    render();
+  }
+
+  // ---- form -------------------------------------------------------------------
+
+  function initForm() {
+    var $form = $('#admin-form');
+    if (!$form.length) return;
+
+    var $error = $('#form-error');
+    var REQUIRED_FIELDS = ['#title', '#country', '#type']; // mirrors the server-side rule
+
+    $form.on('submit', function (event) {
+      var missing = REQUIRED_FIELDS.filter(function (selector) {
+        return !String($form.find(selector).val() || '').trim();
+      });
+      if (!missing.length) {
+        $error.text('');
+        return;
+      }
+      event.preventDefault();
+      $error.text(t('admin.formError'));
+      $form.find(missing[0]).trigger('focus');
+    });
+  }
 });

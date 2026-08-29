@@ -1,0 +1,13 @@
+<div class="admin-header">
+  <div>
+    <p class="eyebrow"><%= t('admin.eyebrow') %></p>
+    <h1 class="admin-title"><%= t('admin.title') %></h1>
+    <p class="admin-intro"><%= t('admin.intro') %></p>
+  </div>
+  <div class="admin-header-actions">
+    <a href="/admin/new" class="btn btn--accent btn--sm"><%= t('admin.addNew') %></a>
+    <form action="/admin/logout" method="post">
+      <button type="submit" class="btn btn--ghost btn--sm"><%= t('admin.logout') %></button>
+    </form>
+  </div>
+</div>

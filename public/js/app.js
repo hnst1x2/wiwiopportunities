@@ -1,29 +1,41 @@
-// public/js/app.js
-$(document).ready(function () {
-  function t(key, vars) {
-    const parts = key.split('.');
-    let current = window.I18N && window.I18N.strings;
-    for (const part of parts) {
-      if (!current || typeof current !== 'object') return key;
-      current = current[part];
-    }
-    if (typeof current !== 'string') return key;
-    if (!vars) return current;
-    return current.replace(/\{(\w+)\}/g, function (_, k) {
-      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : `{${k}}`;
-    });
-  }
+// public/js/app.js — home & archive listing: fetch + filters + URL state + pagination + newsletter
+$(function () {
+  'use strict';
 
-  function tCount(baseKey, count) {
-    const key = count === 1 ? `${baseKey}.one` : `${baseKey}.other`;
-    return t(key, { count });
-  }
+  var W = window.Wiwi;
+  var t = W.t;
+  var esc = W.esc;
+
+  var API_URL = '/api/opportunities';
+  var PAGE_SIZE = 12;
+  var SKELETON_COUNT = 6;
+  var SEARCH_DEBOUNCE_MS = 300;
+  var FEATURED_MAX = 3;
+  var EMAIL_PATTERN = /.+@.+[.].+/;
+
+  var status = window.__OPPS_STATUS__ || '';
+  var isArchive = status === 'archived';
+
+  var filteredItems = [];
+  var currentPage = 1;
+  var lastQueryKey = '';
+  var pendingRequest = null;
+
+  var $list = $('#opportunities-list');
+  var $count = $('#results-count');
+  var $pagination = $('#pagination');
+  var $country = $('#filter-country');
+  var $clear = $('#btn-clear');
+
+  if (!$list.length) return;
+
+  // ---- helpers ------------------------------------------------------------
 
   function debounce(fn, delay) {
-    let timer = null;
+    var timer = null;
     return function () {
-      const context = this;
-      const args = arguments;
+      var context = this;
+      var args = arguments;
       clearTimeout(timer);
       timer = setTimeout(function () {
         fn.apply(context, args);
@@ -31,367 +43,425 @@ $(document).ready(function () {
     };
   }
 
-  const API_URL = '/api/opportunities';
-  let allOpportunities = [];
-  let filtered = [];
-  let currentPage = 1;
-  const pageSize = 9;
-  let lastQueryKey = '';
-
-  function syncSearchInputs(value) {
-    if ($('#search').length) {
-      $('#search').val(value);
-    }
-    if ($('#search-alt').length) {
-      $('#search-alt').val(value);
-    }
-  }
-
   function getSearchValue() {
     return ($('#search').val() || $('#search-alt').val() || '').trim();
   }
 
-  function getFiltersFromUI() {
+  function syncSearchInputs(value) {
+    $('#search, #search-alt').val(value);
+  }
+
+  function activeChip(group) {
+    var $chip = $('.chip.is-active[data-group="' + group + '"]').first();
+    return $chip.length ? String($chip.data('value')) : '';
+  }
+
+  function setChip(group, value) {
+    $('.chip[data-group="' + group + '"]').each(function () {
+      var isActive = Boolean(value) && String($(this).data('value')) === value;
+      $(this).toggleClass('is-active', isActive).attr('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  function hasCountryOption(value) {
+    return (
+      $country.find('option').filter(function () {
+        return this.value === value;
+      }).length > 0
+    );
+  }
+
+  function setCountry(value) {
+    if (!$country.length) return;
+    if (value && !hasCountryOption(value)) {
+      $country.append($('<option>').val(value).text(W.countryLabel(value)));
+    }
+    $country.val(value || '');
+  }
+
+  function getFilters() {
     return {
       search: getSearchValue(),
-      country: $('#filter-country').val() || '',
-      type: $('#filter-type').val() || '',
-      funding: $('#filter-funding').val() || '',
-      tag: $('#filter-tag').val() || '',
+      country: $country.val() || '',
+      type: activeChip('type'),
+      funding: activeChip('funding'),
+      domain: activeChip('domain'),
     };
   }
 
-  function applyFiltersToUI(filters) {
-    syncSearchInputs(filters.search || '');
-    if ($('#filter-country').length) $('#filter-country').val(filters.country || '');
-    if ($('#filter-type').length) $('#filter-type').val(filters.type || '');
-    if ($('#filter-funding').length) $('#filter-funding').val(filters.funding || '');
-    if ($('#filter-tag').length) $('#filter-tag').val(filters.tag || '');
+  function hasActiveFilters(filters) {
+    return Boolean(filters.search || filters.country || filters.type || filters.funding || filters.domain);
   }
 
-  function buildQueryKey(filters) {
-    return [filters.search, filters.country, filters.type, filters.funding, filters.tag].join('|');
+  function queryKey(filters) {
+    return [filters.search, filters.country, filters.type, filters.funding, filters.domain].join('|');
   }
+
+  function scrollToList() {
+    var target = document.getElementById('opps') || document.querySelector('.archive-toolbar') || $list[0];
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ---- URL state ------------------------------------------------------------
 
   function updateUrl(filters, page) {
-    const params = new URLSearchParams();
+    var params = new URLSearchParams();
     if (filters.search) params.set('q', filters.search);
     if (filters.country) params.set('country', filters.country);
     if (filters.type) params.set('type', filters.type);
     if (filters.funding) params.set('funding', filters.funding);
-    if (filters.tag) params.set('tag', filters.tag);
-    if (page && page > 1) params.set('page', String(page));
-    const query = params.toString();
-    const hash = window.location.hash || '';
-    const nextUrl = query ? `${window.location.pathname}?${query}${hash}` : `${window.location.pathname}${hash}`;
-    window.history.replaceState(null, '', nextUrl);
+    if (filters.domain) params.set('domain', filters.domain);
+    if (page > 1) params.set('page', String(page));
+    var query = params.toString();
+    var hash = window.location.hash || '';
+    window.history.replaceState(null, '', window.location.pathname + (query ? '?' + query : '') + hash);
   }
 
-  function readFiltersFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const page = parseInt(params.get('page'), 10);
+  function readUrlState() {
+    var params = new URLSearchParams(window.location.search);
+    var page = parseInt(params.get('page'), 10);
     return {
       filters: {
         search: params.get('q') || '',
         country: params.get('country') || '',
         type: params.get('type') || '',
         funding: params.get('funding') || '',
-        tag: params.get('tag') || '',
+        domain: params.get('domain') || '',
       },
       page: Number.isNaN(page) ? 1 : Math.max(page, 1),
     };
   }
 
-  function fetchOpportunities(options) {
-    const opts = options || {};
-    const status = window.__OPPS_STATUS__;
-    const filters = getFiltersFromUI();
-    const queryKey = buildQueryKey(filters);
-
-    if (!opts.preservePage && (opts.resetPage || queryKey !== lastQueryKey)) {
-      currentPage = 1;
-    }
-
-    lastQueryKey = queryKey;
-    updateUrl(filters, currentPage);
-
-    const params = {
-      search: filters.search,
-      country: filters.country,
-      type: filters.type,
-      funding: filters.funding,
-      tag: filters.tag,
-    };
-    if (status) params.status = status;
-
-    $.get(API_URL, params, function (data) {
-      allOpportunities = data || [];
-      filtered = allOpportunities;
-      renderOpportunities();
-      renderPagination();
-      renderActiveFilters(filters);
-      renderFeatured();
-    }).fail(function () {
-      $('#opportunities-list').html(`<p>${t('home.loadError')}</p>`);
-      $('#results-count').text(t('common.error'));
-    });
+  function applyFiltersToUI(filters) {
+    syncSearchInputs(filters.search || '');
+    setCountry(filters.country || '');
+    setChip('type', filters.type || '');
+    setChip('funding', filters.funding || '');
+    setChip('domain', filters.domain || '');
   }
 
-  function getPageItems() {
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    return filtered.slice(start, end);
+  // ---- rendering ------------------------------------------------------------
+
+  function skeletonCardHtml() {
+    return (
+      '<div class="card card--skeleton" aria-hidden="true">' +
+      '<span class="sk sk--badge"></span><span class="sk sk--title"></span>' +
+      '<span class="sk sk--line"></span><span class="sk sk--footer"></span>' +
+      '</div>'
+    );
   }
 
-  function renderActiveFilters(filters) {
-    const $container = $('#active-filters');
-    if (!$container.length) return;
+  function renderSkeleton() {
+    var html = '';
+    for (var i = 0; i < SKELETON_COUNT; i++) html += skeletonCardHtml();
+    $list.html(html);
+    $pagination.empty();
+    $count.text('…');
+    $clear.attr('hidden', true);
+  }
 
-    const chips = [];
-    if (filters.search) {
-      chips.push({ label: t('filters.searchLabel'), value: filters.search });
-    }
-    if (filters.country) {
-      chips.push({ label: t('filters.country'), value: $('#filter-country option:selected').text() });
-    }
-    if (filters.type) {
-      chips.push({ label: t('filters.type'), value: $('#filter-type option:selected').text() });
-    }
-    if (filters.funding) {
-      chips.push({ label: t('filters.funding'), value: $('#filter-funding option:selected').text() });
-    }
-    if (filters.tag) {
-      chips.push({ label: t('filters.domain'), value: $('#filter-tag option:selected').text() });
-    }
+  function cardHtml(o) {
+    var deadline = W.deadlineInfo(o);
+    var badges = isArchive
+      ? W.badgeHtml(t('archive.badge'), 'badge--expired') + W.typeBadge(o)
+      : W.typeBadge(o) + W.fundingBadge(o);
+    var deadlineHtml = deadline
+      ? '<span class="card-deadline' + (deadline.urgent ? ' is-urgent' : '') + '">' + esc(deadline.text) + '</span>'
+      : '';
 
-    $container.empty();
+    return (
+      '<a class="card' + (isArchive ? ' card--archived' : '') + '" href="/detail?id=' + encodeURIComponent(o.id) + '">' +
+      '<div class="card-badges">' + badges + '</div>' +
+      '<h3 class="card-title">' + esc(o.title) + '</h3>' +
+      (o.organization ? '<div class="card-org">' + esc(o.organization) + '</div>' : '') +
+      '<div class="card-footer">' +
+      '<span class="place-chip">' + esc(W.placeLabel(o)) + '</span>' +
+      deadlineHtml +
+      '</div>' +
+      '</a>'
+    );
+  }
 
-    if (!chips.length) {
+  function emptyStateHtml() {
+    return (
+      '<div class="empty-state">' +
+      '<div class="empty-icon" aria-hidden="true">✕</div>' +
+      '<div class="empty-title">' + esc(t('list.emptyTitle')) + '</div>' +
+      '<div class="empty-hint">' + esc(t('list.emptyHint')) + '</div>' +
+      '<button type="button" class="btn btn--accent btn--sm js-clear">' + esc(t('list.clear')) + '</button>' +
+      '</div>'
+    );
+  }
+
+  function pageItems() {
+    var start = (currentPage - 1) * PAGE_SIZE;
+    return filteredItems.slice(start, start + PAGE_SIZE);
+  }
+
+  function renderList() {
+    if (!filteredItems.length) {
+      $list.html(emptyStateHtml());
       return;
     }
-
-    chips.forEach(function (chip) {
-      const $chip = $('<span class="filter-chip"></span>');
-      $chip.text(`${chip.label}: ${chip.value}`);
-      $container.append($chip);
-    });
-
-    const $clear = $('<button type="button" class="filters-clear" id="btn-clear-inline"></button>');
-    $clear.text(t('filters.clear'));
-    $container.append($clear);
-  }
-
-  function renderOpportunities() {
-    const $list = $('#opportunities-list');
-    $list.empty();
-
-    $('#results-count').text(tCount('home.resultsCount', filtered.length));
-
-    if (!filtered.length) {
-      $list.html(
-        `<div class="empty-state">
-          <h3>${t('home.noResultsTitle')}</h3>
-          <p>${t('home.noResultsHint')}</p>
-          <button type="button" class="btn-secondary btn-sm" id="btn-empty-clear">${t('filters.clear')}</button>
-        </div>`
-      );
-      return;
-    }
-
-    const pageItems = getPageItems();
-
-    pageItems.forEach((o) => {
-      const detailUrl = `/detail?id=${o.id}`;
-
-      const tagsHtml = (o.tags || [])
-        .map((tag) => `<span class="tag">${tag}</span>`)
-        .join('');
-
-      const card = `
-        <article class="card">
-          <div class="card-top">
-            <div class="card-badges">
-              ${o.type ? `<span class="badge">${o.type}</span>` : ''}
-              ${o.funding ? `<span class="badge badge-funding">${o.funding}</span>` : ''}
-              ${o.deadline ? `<span class="badge badge-deadline">${t('home.deadlineLabel')}: ${o.deadline}</span>` : ''}
-            </div>
-          </div>
-          <div class="card-header">
-            <div class="card-title">
-              <a href="${detailUrl}" class="card-title-link">
-                ${o.title}
-              </a>
-            </div>
-            <div class="card-meta">
-              ${o.organization ? `${o.organization} &middot; ` : ''}${o.city || ''}${o.city ? ', ' : ''}${o.country || ''}
-            </div>
-          </div>
-          <div class="card-facts">
-            ${o.country ? `<span><i class="fa-solid fa-location-dot"></i>${o.country}</span>` : ''}
-            ${o.type ? `<span><i class="fa-solid fa-briefcase"></i>${o.type}</span>` : ''}
-            ${o.funding ? `<span><i class="fa-solid fa-circle-check"></i>${o.funding}</span>` : ''}
-            ${o.deadline ? `<span><i class="fa-solid fa-calendar"></i>${t('home.deadlineLabel')}: ${o.deadline}</span>` : ''}
-          </div>
-          <div class="card-description">
-            ${o.description || ''}
-          </div>
-          <div class="card-footer">
-            <div class="tags">
-              ${tagsHtml}
-            </div>
-            <div class="card-actions">
-              <a href="${detailUrl}" class="btn-secondary btn-sm">${t('common.details')}</a>
-              ${o.link ? `<a href="${o.link}" target="_blank" class="btn-apply">${t('common.apply')}</a>` : ''}
-            </div>
-          </div>
-        </article>
-      `;
-      $list.append(card);
-    });
+    $list.html(pageItems().map(cardHtml).join(''));
   }
 
   function renderPagination() {
-    const $p = $('#pagination');
-    $p.empty();
-
-    const totalPages = Math.ceil(filtered.length / pageSize) || 1;
-    if (totalPages <= 1) return;
-
-    for (let i = 1; i <= totalPages; i++) {
-      const btn = $(`<button>${i}</button>`);
-      if (i === currentPage) {
-        btn.addClass('active');
-      }
-      btn.on('click', function () {
-        currentPage = i;
-        renderOpportunities();
-        renderPagination();
-        updateUrl(getFiltersFromUI(), currentPage);
-      });
-      $p.append(btn);
+    var totalPages = Math.ceil(filteredItems.length / PAGE_SIZE) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (totalPages <= 1) {
+      $pagination.empty();
+      return;
     }
+    var html = '';
+    for (var i = 1; i <= totalPages; i++) {
+      var isActive = i === currentPage;
+      html +=
+        '<button type="button" class="page-btn' + (isActive ? ' is-active' : '') + '" data-page="' + i + '"' +
+        ' aria-label="' + esc(t('common.page', { page: i })) + '"' + (isActive ? ' aria-current="page"' : '') + '>' +
+        i + '</button>';
+    }
+    $pagination.html(html);
+  }
+
+  function renderResultsRow(filters) {
+    $count.text(W.tCount(isArchive ? 'archive.count' : 'list.count', filteredItems.length));
+    if (hasActiveFilters(filters)) $clear.removeAttr('hidden');
+    else $clear.attr('hidden', true);
+  }
+
+  function renderError() {
+    $list.html('<p class="load-error">' + esc(t('list.loadError')) + '</p>');
+    $pagination.empty();
+    $count.text(t('common.error'));
+  }
+
+  // ---- featured (home only, computed from the unfiltered active set) -------------
+
+  function featuredCardHtml(o, isDark) {
+    var deadline = W.deadlineInfo(o);
+    var badges = isDark
+      ? W.badgeHtml(W.typeLabel(o), 'badge--lg badge--glass') + W.badgeHtml(W.fundingLabel(o), 'badge--lg badge--glass')
+      : W.typeBadge(o, ' badge--lg') + W.fundingBadge(o, ' badge--lg');
+    var meta = [o.organization, W.placeLabel(o)].filter(Boolean).join(' · ');
+
+    return (
+      '<a class="featured-card' + (isDark ? ' featured-card--dark' : '') + '" href="/detail?id=' + encodeURIComponent(o.id) + '">' +
+      '<div class="featured-badges">' + badges + '</div>' +
+      '<h3 class="featured-title">' + esc(o.title) + '</h3>' +
+      (meta ? '<div class="featured-meta">' + esc(meta) + '</div>' : '') +
+      (o.description ? '<p class="featured-desc">' + esc(o.description) + '</p>' : '') +
+      '<div class="featured-footer">' +
+      '<span class="featured-deadline">' + (deadline ? esc(deadline.text) : '') + '</span>' +
+      '<span class="featured-cta">' + esc(t('featured.cta')) + ' →</span>' +
+      '</div>' +
+      '</a>'
+    );
+  }
+
+  function renderFeatured(items) {
+    var $section = $('#featured');
+    if (!$section.length) return;
+    var featured = items
+      .filter(function (o) {
+        return o.featured;
+      })
+      .slice(0, FEATURED_MAX);
+    if (!featured.length) {
+      $section.attr('hidden', true);
+      return;
+    }
+    $('#featured-list').html(
+      featured
+        .map(function (o, index) {
+          return featuredCardHtml(o, index === 0);
+        })
+        .join('')
+    );
+    $section.removeAttr('hidden');
+  }
+
+  function populateCountries(items) {
+    if (!$country.length) return;
+    var current = $country.val() || '';
+    var seen = {};
+    var options = [];
+    items.forEach(function (o) {
+      var name = (o.country || '').trim();
+      if (!name || seen[name]) return;
+      seen[name] = true;
+      options.push({ value: name, label: W.countryLabel(name) });
+    });
+    options.sort(function (a, b) {
+      return a.label.localeCompare(b.label, W.lang);
+    });
+    $country.find('option').not(':first').remove();
+    options.forEach(function (option) {
+      $country.append($('<option>').val(option.value).text(option.label));
+    });
+    setCountry(current);
+  }
+
+  // ---- data -------------------------------------------------------------------
+
+  function loadBase() {
+    var params = status ? { status: status } : {};
+    $.get(API_URL, params).done(function (data) {
+      var items = Array.isArray(data) ? data : [];
+      populateCountries(items);
+      renderFeatured(items);
+    });
+  }
+
+  function fetchOpportunities(options) {
+    var opts = options || {};
+    var filters = getFilters();
+    var key = queryKey(filters);
+    if (!opts.preservePage && (opts.resetPage || key !== lastQueryKey)) currentPage = 1;
+    lastQueryKey = key;
+    updateUrl(filters, currentPage);
+    renderSkeleton();
+
+    var params = { search: filters.search, country: filters.country, type: filters.type, funding: filters.funding };
+    if (status) params.status = status;
+
+    if (pendingRequest) pendingRequest.abort();
+    var request = $.get(API_URL, params);
+    pendingRequest = request;
+
+    request
+      .done(function (data) {
+        var items = Array.isArray(data) ? data : [];
+        // `domain` is not an API parameter: it is applied client-side to keep the API contract unchanged.
+        filteredItems = filters.domain
+          ? items.filter(function (o) {
+              return o.domain === filters.domain;
+            })
+          : items;
+        renderPagination();
+        // renderPagination may clamp currentPage (e.g. a shared ?page=5 with only 1 page of results),
+        // so re-sync the URL to the clamped value.
+        updateUrl(filters, currentPage);
+        renderList();
+        renderResultsRow(filters);
+      })
+      .fail(function (xhr, textStatus) {
+        if (textStatus === 'abort') return;
+        renderError();
+      })
+      .always(function () {
+        if (pendingRequest === request) pendingRequest = null;
+      });
   }
 
   function clearFilters() {
     syncSearchInputs('');
-    $('#filter-country').val('');
-    $('#filter-type').val('');
-    $('#filter-funding').val('');
-    $('#filter-tag').val('');
+    setCountry('');
+    setChip('type', '');
+    setChip('funding', '');
+    setChip('domain', '');
     fetchOpportunities({ resetPage: true });
   }
 
-  const debouncedFetch = debounce(function () {
+  // ---- events -----------------------------------------------------------------
+
+  var debouncedFetch = debounce(function () {
     fetchOpportunities({ resetPage: true });
-  }, 300);
+  }, SEARCH_DEBOUNCE_MS);
 
   $('#search, #search-alt').on('input', function () {
     syncSearchInputs($(this).val());
     debouncedFetch();
   });
 
-  $('#filter-country, #filter-type, #filter-funding, #filter-tag').on('change', function () {
-    fetchOpportunities({ resetPage: true });
-  });
-
-  $('#btn-reset').on('click', function () {
-    clearFilters();
-  });
-
-  $(document).on('click', '#btn-clear-inline, #btn-empty-clear', function () {
-    clearFilters();
-  });
-
-  $('#btn-hero-search').on('click', function () {
+  $('#hero-search-form').on('submit', function (event) {
+    event.preventDefault();
     syncSearchInputs($('#search').val() || '');
     fetchOpportunities({ resetPage: true });
+    scrollToList();
   });
 
-  $(document).on('click', '.chip', function () {
-    const country = $(this).data('country');
-    const type = $(this).data('type');
-    const tag = $(this).data('tag');
-
-    if (country) $('#filter-country').val(country);
-    if (type) $('#filter-type').val(type);
-    if (tag) $('#filter-tag').val(tag);
-
+  $country.on('change', function () {
     fetchOpportunities({ resetPage: true });
   });
 
-  $(document).on('click', '.filters-toggle', function () {
-    const $panel = $(this).closest('.filters-panel');
-    const isOpen = $panel.toggleClass('is-open').hasClass('is-open');
-    $(this).attr('aria-expanded', isOpen ? 'true' : 'false');
+  $(document).on('click', '.chip[data-group]', function () {
+    var $chip = $(this);
+    var value = String($chip.data('value'));
+    setChip($chip.data('group'), $chip.hasClass('is-active') ? '' : value);
+    fetchOpportunities({ resetPage: true });
   });
 
-  $('#newsletter-form').on('submit', function (e) {
-    e.preventDefault();
-    const email = $('#newsletter-email').val();
-    const $msg = $('#newsletter-message');
-
-    if (!email) return;
-
-    $.post('/newsletter', { email }, function (res) {
-      if (res && res.success) {
-        $msg.text(t('home.newsletterSuccess')).css('color', '#15803d');
-        $('#newsletter-email').val('');
-      } else {
-        $msg.text(t('home.newsletterError')).css('color', '#b91c1c');
-      }
-    }).fail(function () {
-      $msg.text(t('home.newsletterNetworkError')).css('color', '#b91c1c');
-    });
+  $(document).on('click', '.hero-chip', function () {
+    var $chip = $(this);
+    if ($chip.data('type')) setChip('type', String($chip.data('type')));
+    if ($chip.data('country')) setCountry(String($chip.data('country')));
+    fetchOpportunities({ resetPage: true });
+    scrollToList();
   });
 
-  function renderFeatured() {
-    const $featured = $('#featured-list');
-    if (!$featured.length) return;
+  $(document).on('click', '#btn-clear, .js-clear', clearFilters);
 
-    const featured = (allOpportunities || []).filter((o) => o.featured);
-    if (!featured.length) {
-      $('.featured-section').hide();
+  // Already on the home page: "/#opps" and "/#newsletter" links scroll instead of reloading (keeps filters + URL state).
+  $(document).on('click', 'a[href^="/#"]', function (event) {
+    if (window.location.pathname !== '/') return;
+    var target = document.getElementById(this.hash.slice(1));
+    if (!target) return;
+    event.preventDefault();
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.history.replaceState(null, '', window.location.pathname + window.location.search + this.hash);
+  });
+
+  $pagination.on('click', '.page-btn', function () {
+    currentPage = parseInt($(this).data('page'), 10) || 1;
+    renderPagination();
+    renderList();
+    updateUrl(getFilters(), currentPage);
+    scrollToList();
+  });
+
+  // ---- newsletter -------------------------------------------------------------
+
+  function setNewsletterStatus(message, isOk) {
+    $('#newsletter-message').text(message).toggleClass('is-ok', isOk).toggleClass('is-error', !isOk);
+  }
+
+  $('#newsletter-form').on('submit', function (event) {
+    event.preventDefault();
+    var $form = $(this);
+    var $email = $('#newsletter-email');
+    var email = ($email.val() || '').trim();
+
+    if (!EMAIL_PATTERN.test(email)) {
+      setNewsletterStatus(t('newsletter.invalid'), false);
+      $email.trigger('focus');
       return;
     }
 
-    $('.featured-section').show();
-    $featured.empty();
+    var $button = $form.find('button[type="submit"]').prop('disabled', true);
+    $.post('/newsletter', { email: email })
+      .done(function (res) {
+        if (res && res.success) {
+          setNewsletterStatus(t('newsletter.success'), true);
+          $email.val('');
+        } else {
+          setNewsletterStatus(t('newsletter.error'), false);
+        }
+      })
+      .fail(function () {
+        setNewsletterStatus(t('newsletter.networkError'), false);
+      })
+      .always(function () {
+        $button.prop('disabled', false);
+      });
+  });
 
-    const top = featured.slice(0, 3);
+  // ---- init -------------------------------------------------------------------
 
-    top.forEach((o) => {
-      const detailUrl = `/detail?id=${o.id}`;
-      const tagsHtml = (o.tags || [])
-        .map((tag) => `<span>${tag}</span>`)
-        .join('');
-
-      const card = `
-      <article class="featured-card">
-        <div class="featured-badge">${t('home.featuredBadge')}</div>
-        <h3><a href="${detailUrl}" class="card-title-link">${o.title}</a></h3>
-        <div class="featured-meta">
-          ${(o.organization || '')}${o.organization && (o.city || o.country) ? ' &middot; ' : ''}${o.city || ''}${o.city && o.country ? ', ' : ''}${o.country || ''}
-        </div>
-        <div class="featured-tags">
-          ${tagsHtml}
-        </div>
-        <div class="featured-actions">
-          <a href="${detailUrl}" class="btn-primary btn-sm">${t('home.featuredButton')}</a>
-          <div class="featured-deadline">
-            ${o.deadline ? t('home.featuredUntil', { date: o.deadline }) : ''}
-          </div>
-        </div>
-      </article>
-    `;
-      $featured.append(card);
-    });
-  }
-
-  const initial = readFiltersFromUrl();
+  var initial = readUrlState();
   applyFiltersToUI(initial.filters);
   currentPage = initial.page;
-  lastQueryKey = buildQueryKey(initial.filters);
-  renderActiveFilters(getFiltersFromUI());
-
+  lastQueryKey = queryKey(initial.filters);
+  loadBase();
   fetchOpportunities({ preservePage: true });
 });
