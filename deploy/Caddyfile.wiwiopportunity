@@ -1,0 +1,18 @@
+# WiwiOpportunity vhost — append this block to the host's /etc/caddy/Caddyfile
+# (root-owned; requires an operator with sudo — the `deploy` user cannot edit/reload Caddy).
+#
+# Mirrors the existing chat./admin.wiemibncheikh.com blocks: Caddy terminates TLS
+# (automatic Let's Encrypt) and reverse-proxies to the app's loopback port.
+#
+# After editing:
+#   sudo caddy validate --config /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+#
+# Change the hostname on the first line if you use a different domain (e.g. wiwiopportunity.com).
+
+opportunities.wiemibncheikh.com {
+    tls contact@wiemibncheikh.com
+    encode zstd gzip
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    reverse_proxy 127.0.0.1:8082
+}

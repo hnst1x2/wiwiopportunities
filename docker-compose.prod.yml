@@ -1,0 +1,37 @@
+# Production stack for the Hetzner host (the box that also runs ChatFlow).
+# Public HTTPS is terminated by the host-level Caddy, which reverse-proxies to the
+# loopback port published below. Nothing here is exposed on a public interface.
+#
+# Deploy / update from /opt/wiwiopportunity as the `deploy` user:
+#   git pull
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# The local `docker-compose.yml` stays the quick "dev" launcher (port 3000); this file
+# is the one used on the server.
+
+services:
+  app:
+    build: .
+    image: wiwiopportunity:latest
+    restart: always
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATA_DIR: /data
+    volumes:
+      - wiwi-data:/data
+    ports:
+      # Loopback only — Docker bypasses ufw, so never bind 0.0.0.0 here.
+      # Caddy on the host proxies the public hostname to this port.
+      - "127.0.0.1:8082:3000"
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  wiwi-data:

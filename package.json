@@ -4,8 +4,13 @@
   "description": "Plateforme d'opportunités à l'international (stages, études, volontariat, bourses...).",
   "main": "server/app.js",
   "scripts": {
-    "start": "node server/app.js",
-    "dev": "nodemon server/app.js"
+    "start": "node --experimental-sqlite server/app.js",
+    "dev": "nodemon --exec \"node --experimental-sqlite\" server/app.js",
+    "import": "node --experimental-sqlite scripts/import-json.js",
+    "backup": "node --experimental-sqlite scripts/backup.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
   },
   "dependencies": {
     "cors": "^2.8.5",

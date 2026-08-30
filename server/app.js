@@ -1,10 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 const session = require('express-session');
 const site = require('./config/site');
 const translations = require('./i18n/translations');
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -57,10 +57,7 @@ app.use((req, res, next) => {
 // --- Static ---
 app.use(express.static(path.join(__dirname, '../public')));
 
-// --- Helpers data ---
-const oppFilePath = path.join(__dirname, 'opportunities.json');
-const newsletterFilePath = path.join(__dirname, 'newsletter.json');
-
+// --- Helpers ---
 function getTodayString() {
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -75,32 +72,19 @@ function isActiveOpportunity(o) {
   return String(o.deadline) >= today;
 }
 
-function getOpportunities() {
-  if (!fs.existsSync(oppFilePath)) return [];
-  const raw = fs.readFileSync(oppFilePath, 'utf-8') || '[]';
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
+function parseTags(tags) {
+  if (Array.isArray(tags)) return tags.map((t) => String(t).trim()).filter(Boolean);
+  if (typeof tags === 'string') {
+    return tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
   }
+  return [];
 }
 
-function saveOpportunities(data) {
-  fs.writeFileSync(oppFilePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-function getNewsletterList() {
-  if (!fs.existsSync(newsletterFilePath)) return [];
-  const raw = fs.readFileSync(newsletterFilePath, 'utf-8') || '[]';
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
-function saveNewsletterList(list) {
-  fs.writeFileSync(newsletterFilePath, JSON.stringify(list, null, 2), 'utf-8');
+function isFeatured(value) {
+  return value === '1' || value === 'on' || value === 'true' || value === true;
 }
 
 // --- Middleware d'auth admin (simple) ---
@@ -163,11 +147,7 @@ app.post('/newsletter', (req, res) => {
   if (!email) {
     return res.status(400).json({ success: false, message: res.locals.t('errors.emailRequired') });
   }
-  const list = getNewsletterList();
-  if (!list.includes(email)) {
-    list.push(email);
-    saveNewsletterList(list);
-  }
+  db.addNewsletter(email);
   res.json({ success: true });
 });
 
@@ -214,12 +194,11 @@ app.post('/admin/logout', (req, res) => {
 // --- Pages admin (protégées) ---
 // Liste des opportunités
 app.get('/admin', requireAdmin, (req, res) => {
-  const data = getOpportunities();
   res.render('admin-list', {
     page: 'admin',
     title: res.locals.t('meta.adminListTitle'),
     baseUrl: process.env.PUBLIC_BASE_URL || '',
-    opportunities: data,
+    opportunities: db.listOpportunities(),
   });
 });
 
@@ -241,8 +220,7 @@ app.post('/admin/new', requireAdmin, (req, res) => {
     return res.status(400).send(res.locals.t('errors.requiredFields'));
   }
 
-  const data = getOpportunities();
-  const newOpp = {
+  db.insertOpportunity({
     id: Date.now(),
     title,
     organization,
@@ -256,17 +234,9 @@ app.post('/admin/new', requireAdmin, (req, res) => {
     link,
     description,
     extra,
-    tags: tags
-      ? tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [],
-    featured: featured === '1' || featured === 'on' || featured === 'true',
-  };
-
-  data.push(newOpp);
-  saveOpportunities(data);
+    tags: parseTags(tags),
+    featured: isFeatured(featured),
+  });
 
   res.redirect('/admin');
 });
@@ -274,8 +244,7 @@ app.post('/admin/new', requireAdmin, (req, res) => {
 // Formulaire édition
 app.get('/admin/edit/:id', requireAdmin, (req, res) => {
   const id = Number(req.params.id);
-  const data = getOpportunities();
-  const opp = data.find((o) => o.id === id);
+  const opp = db.getOpportunity(id);
   if (!opp) {
     return res.status(404).send(res.locals.t('errors.notFound'));
   }
@@ -290,17 +259,14 @@ app.get('/admin/edit/:id', requireAdmin, (req, res) => {
 // POST édition
 app.post('/admin/edit/:id', requireAdmin, (req, res) => {
   const id = Number(req.params.id);
-  const data = getOpportunities();
-  const index = data.findIndex((o) => o.id === id);
-  if (index === -1) {
+  if (!db.getOpportunity(id)) {
     return res.status(404).send(res.locals.t('errors.notFound'));
   }
 
   const { title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured } =
     req.body;
 
-  data[index] = {
-    ...data[index],
+  db.updateOpportunity(id, {
     title,
     organization,
     country,
@@ -313,25 +279,17 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
     link,
     description,
     extra,
-    tags: tags
-      ? tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [],
-    featured: featured === '1' || featured === 'on' || featured === 'true',
-  };
+    tags: parseTags(tags),
+    featured: isFeatured(featured),
+  });
 
-  saveOpportunities(data);
   res.redirect('/admin');
 });
 
 // Suppression
 app.post('/admin/delete/:id', requireAdmin, (req, res) => {
   const id = Number(req.params.id);
-  let data = getOpportunities();
-  data = data.filter((o) => o.id !== id);
-  saveOpportunities(data);
+  db.deleteOpportunity(id);
   res.redirect('/admin');
 });
 
@@ -339,7 +297,7 @@ app.post('/admin/delete/:id', requireAdmin, (req, res) => {
 // GET /api/opportunities avec filtres + tags
 app.get('/api/opportunities', (req, res) => {
   const { country, type, funding, search, tag, status } = req.query;
-  let data = getOpportunities();
+  let data = db.listOpportunities();
 
   if (status === 'archived') {
     data = data.filter((o) => !isActiveOpportunity(o));
@@ -381,8 +339,7 @@ app.get('/api/opportunities', (req, res) => {
 // GET /api/opportunities/:id
 app.get('/api/opportunities/:id', (req, res) => {
   const id = Number(req.params.id);
-  const data = getOpportunities();
-  const opp = data.find((o) => o.id === id);
+  const opp = db.getOpportunity(id);
 
   if (!opp) return res.status(404).json({ error: res.locals.t('errors.notFound') });
   res.json(opp);
@@ -390,21 +347,29 @@ app.get('/api/opportunities/:id', (req, res) => {
 
 // POST /api/opportunities (API publique d'ajout - à sécuriser si nécessaire)
 app.post('/api/opportunities', (req, res) => {
-  const newOpp = req.body;
-  if (!newOpp.title || !newOpp.country || !newOpp.type) {
+  const body = req.body || {};
+  if (!body.title || !body.country || !body.type) {
     return res.status(400).json({ error: res.locals.t('errors.apiRequired') });
   }
-  const data = getOpportunities();
-  newOpp.id = Date.now();
-  if (newOpp.tags && typeof newOpp.tags === 'string') {
-    newOpp.tags = newOpp.tags
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-  }
-  data.push(newOpp);
-  saveOpportunities(data);
-  res.status(201).json(newOpp);
+  const id = Date.now();
+  db.insertOpportunity({
+    id,
+    title: body.title,
+    organization: body.organization,
+    country: body.country,
+    city: body.city,
+    type: body.type,
+    funding: body.funding,
+    domain: body.domain,
+    deadline: body.deadline,
+    duration: body.duration,
+    link: body.link,
+    description: body.description,
+    extra: body.extra,
+    tags: parseTags(body.tags),
+    featured: isFeatured(body.featured),
+  });
+  res.status(201).json(db.getOpportunity(id));
 });
 
 app.listen(PORT, () => {

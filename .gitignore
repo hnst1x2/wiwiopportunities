@@ -1,1 +1,7 @@
 /docker-compose.yml
+
+# Local env + SQLite store (never commit runtime data)
+.env
+*.db
+*.db-shm
+*.db-wal

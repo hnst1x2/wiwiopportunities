@@ -1,0 +1,18 @@
+# Keep the build context (and image) small and free of local/dev/secret material.
+node_modules
+npm-debug.log*
+.git
+.gitignore
+.env
+.env.*
+docker-compose*.yml
+Dockerfile
+.dockerignore
+data
+*.db
+*.db-shm
+*.db-wal
+design_handoff_wiwi_rebrand
+docs
+deploy
+*.md
