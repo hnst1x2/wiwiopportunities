@@ -384,6 +384,6 @@ app.post('/api/opportunities', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`WiwiOpportunity app running on http://localhost:${PORT}`);
+  console.log(`Opportunities by Wiem app running on http://localhost:${PORT}`);
   mailer.verify();
 });

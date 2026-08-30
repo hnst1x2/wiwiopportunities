@@ -74,7 +74,7 @@ $(function () {
       '</article>'
     );
 
-    if (o.title) document.title = o.title + ' – WiwiOpportunity';
+    if (o.title) document.title = o.title + ' – Opportunities by Wiem';
   }
 
   if (!id) {

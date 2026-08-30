@@ -10,7 +10,7 @@ const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
 const SMTP_SECURE = String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true';
 const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASSWORD = process.env.SMTP_PASSWORD || '';
-const MAIL_FROM = process.env.MAIL_FROM || 'WiwiOpportunity <contact@wiemibncheikh.com>';
+const MAIL_FROM = process.env.MAIL_FROM || 'Opportunities by Wiem <contact@wiemibncheikh.com>';
 const SITE_URL = process.env.PUBLIC_BASE_URL || 'https://opportunities.wiemibncheikh.com';
 
 let transporter = null;
@@ -54,24 +54,24 @@ async function verify() {
 
 const WELCOME = {
   fr: {
-    subject: 'Bienvenue sur WiwiOpportunity ✨',
+    subject: 'Bienvenue sur Opportunities by Wiem ✨',
     heading: 'Bienvenue !',
-    lead: 'Merci de ton inscription à la newsletter WiwiOpportunity.',
+    lead: 'Merci de ton inscription à la newsletter Opportunities by Wiem.',
     body:
       "Tu recevras une sélection d'opportunités internationales — stages, bourses, études et volontariats — vérifiées à la main pour les jeunes de la région MENA.",
     cta: 'Voir les opportunités',
-    signoff: "À très vite,\nL'équipe WiwiOpportunity",
-    footer: 'Tu reçois cet email car tu t\'es inscrit·e sur WiwiOpportunity.',
+    signoff: "À très vite,\nL'équipe Opportunities by Wiem",
+    footer: 'Tu reçois cet email car tu t\'es inscrit·e sur Opportunities by Wiem.',
   },
   en: {
-    subject: 'Welcome to WiwiOpportunity ✨',
+    subject: 'Welcome to Opportunities by Wiem ✨',
     heading: 'Welcome!',
-    lead: 'Thanks for subscribing to the WiwiOpportunity newsletter.',
+    lead: 'Thanks for subscribing to the Opportunities by Wiem newsletter.',
     body:
       'You\'ll receive a hand-picked selection of international opportunities — internships, scholarships, studies and volunteering — for young people across the MENA region.',
     cta: 'Browse opportunities',
-    signoff: 'See you soon,\nThe WiwiOpportunity team',
-    footer: 'You are receiving this email because you subscribed on WiwiOpportunity.',
+    signoff: 'See you soon,\nThe Opportunities by Wiem team',
+    footer: 'You are receiving this email because you subscribed on Opportunities by Wiem.',
   },
 };
 
@@ -91,7 +91,7 @@ function buildWelcomeMessage({ email, lang }) {
   const html = `<!doctype html><html><body style="margin:0;background:#f7f7fa;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#2e1451">
   <div style="max-width:520px;margin:0 auto;padding:24px">
     <div style="background:linear-gradient(135deg,#7a80f7,#2e1451);border-radius:20px;padding:28px;color:#fff;text-align:center">
-      <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">Wiwi<span style="color:#d1baf6">Opportunity</span></div>
+      <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">Opportunities <span style="color:#d1baf6">by Wiem</span></div>
       <h1 style="margin:16px 0 6px;font-size:24px;font-weight:800">${esc(t.heading)}</h1>
       <p style="margin:0;color:rgba(255,255,255,0.85);font-size:15px;line-height:1.6">${esc(t.lead)}</p>
     </div>

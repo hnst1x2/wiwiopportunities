@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="wGrad" gradientUnits="userSpaceOnUse" x1="250" y1="668" x2="845" y2="278">
+      <stop offset="0" stop-color="#9196fa"/>
+      <stop offset="1" stop-color="#d1baf6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.30" cy="0.22" r="0.75">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="512" cy="512" r="512" fill="#2e1451"/>
+    <circle cx="512" cy="512" r="512" fill="url(#glow)"/>
+    <circle cx="512" cy="512" r="474" fill="none" stroke="#FFFFFF" stroke-opacity="0.30" stroke-width="5"/>
+    <g transform="translate(-20 16)">
+    <path d="M 250 415 L 378 668 L 500 478 L 622 668 L 731.6 460.3" fill="none" stroke="url(#wGrad)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 795 340 L 802.3 497.6 L 660.8 423.0 Z" fill="url(#wGrad)" stroke="url(#wGrad)" stroke-width="30" stroke-linejoin="round"/>
+    <path d="M 845 234 Q 845 278 889 278 Q 845 278 845 322 Q 845 278 801 278 Q 845 278 845 234 Z" fill="#FFFFFF"/>
+    <path d="M 906 337 Q 906 352 921 352 Q 906 352 906 367 Q 906 352 891 352 Q 906 352 906 337 Z" fill="#FFFFFF"/>
+  </g>
+</svg>

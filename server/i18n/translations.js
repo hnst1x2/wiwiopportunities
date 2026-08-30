@@ -44,20 +44,20 @@ const COUNTRY_EN = {
 const translations = {
   fr: {
     meta: {
-      defaultTitle: 'WiwiOpportunity – Opportunités internationales',
+      defaultTitle: 'Opportunities by Wiem – Opportunités internationales',
       defaultDescription:
-        "WiwiOpportunity recense des opportunités de stages, études, bourses et volontariats à l'international pour les étudiant·es et jeunes de la région MENA.",
+        "Opportunities by Wiem recense des opportunités de stages, études, bourses et volontariats à l'international pour les étudiant·es et jeunes de la région MENA.",
       ogDescription: "Trouve des stages, bourses, études et volontariats à l'étranger adaptés à ton profil.",
       keywords: "stage, bourse, volontariat, études à l'étranger, opportunités, jeunes, MENA",
-      homeTitle: "WiwiOpportunity – Opportunités à l'international",
-      detailTitle: "Détail de l'opportunité – WiwiOpportunity",
-      aboutTitle: 'À propos – WiwiOpportunity',
-      contactTitle: 'Contact – WiwiOpportunity',
-      archiveTitle: 'Archives – WiwiOpportunity',
-      adminLoginTitle: 'Connexion admin – WiwiOpportunity',
-      adminListTitle: 'Administration – WiwiOpportunity',
-      adminNewTitle: 'Ajouter une opportunité – WiwiOpportunity',
-      adminEditTitle: "Modifier l'opportunité – WiwiOpportunity",
+      homeTitle: "Opportunities by Wiem – Opportunités à l'international",
+      detailTitle: "Détail de l'opportunité – Opportunities by Wiem",
+      aboutTitle: 'À propos – Opportunities by Wiem',
+      contactTitle: 'Contact – Opportunities by Wiem',
+      archiveTitle: 'Archives – Opportunities by Wiem',
+      adminLoginTitle: 'Connexion admin – Opportunities by Wiem',
+      adminListTitle: 'Administration – Opportunities by Wiem',
+      adminNewTitle: 'Ajouter une opportunité – Opportunities by Wiem',
+      adminEditTitle: "Modifier l'opportunité – Opportunities by Wiem",
     },
     nav: {
       home: 'Accueil',
@@ -71,7 +71,7 @@ const translations = {
       mainLabel: 'Navigation principale',
       footerLabel: 'Liens du pied de page',
       langLabel: 'Langue',
-      brandLabel: "WiwiOpportunity – retour à l'accueil",
+      brandLabel: "Opportunities by Wiem – retour à l'accueil",
     },
     common: {
       search: 'Rechercher',
@@ -93,7 +93,7 @@ const translations = {
       placeholder: 'Ex : stage marketing Berlin, bourse France…',
       button: 'Rechercher',
       suggestions: 'Suggestions :',
-      social: 'Suis WiwiOpportunity :',
+      social: 'Suis Opportunities by Wiem :',
       chips: {
         stage: 'Stages',
         scholarship: 'Bourses',
@@ -174,9 +174,9 @@ const translations = {
     },
     about: {
       eyebrow: 'À propos',
-      title: 'À propos de WiwiOpportunity',
+      title: 'À propos de Opportunities by Wiem',
       p1:
-        "WiwiOpportunity est un projet indépendant créé pour aider les étudiants et jeunes de la région MENA à accéder à des opportunités à l'international : stages, bourses, études, volontariats, jobs saisonniers, programmes d'échange, etc.",
+        "Opportunities by Wiem est un projet indépendant créé pour aider les étudiants et jeunes de la région MENA à accéder à des opportunités à l'international : stages, bourses, études, volontariats, jobs saisonniers, programmes d'échange, etc.",
       p2:
         "Notre objectif est de centraliser des opportunités fiables, de les présenter de manière claire et d'offrir une expérience de recherche simple et agréable.",
       p3:
@@ -225,8 +225,8 @@ const translations = {
       title: 'Administration',
       intro: 'Gère les opportunités publiées : ajout, édition, mise en avant.',
       loginTitle: 'Connexion admin',
-      loginIntro: 'Accès réservé pour gérer les opportunités publiées sur WiwiOpportunity.',
-      loginHelper: "Accès réservé à l'équipe WiwiOpportunity.",
+      loginIntro: 'Accès réservé pour gérer les opportunités publiées sur Opportunities by Wiem.',
+      loginHelper: "Accès réservé à l'équipe Opportunities by Wiem.",
       username: "Nom d'utilisateur",
       password: 'Mot de passe',
       loginButton: 'Se connecter',
@@ -301,26 +301,26 @@ const translations = {
     },
     footer: {
       tag: "Opportunités à l'international pour les jeunes de la région MENA. Sélection indépendante, vérifiée à la main.",
-      rights: '© {year} WiwiOpportunity · Projet indépendant',
+      rights: '© {year} Opportunities by Wiem · Projet indépendant',
       made: 'Fait avec soin, pour toi.',
     },
   },
   en: {
     meta: {
-      defaultTitle: 'WiwiOpportunity – International opportunities',
+      defaultTitle: 'Opportunities by Wiem – International opportunities',
       defaultDescription:
-        'WiwiOpportunity curates international internships, studies, scholarships and volunteering opportunities for students and young people across the MENA region.',
+        'Opportunities by Wiem curates international internships, studies, scholarships and volunteering opportunities for students and young people across the MENA region.',
       ogDescription: 'Find internships, scholarships, study abroad and volunteering opportunities tailored to your profile.',
       keywords: 'internship, scholarship, volunteering, study abroad, opportunities, youth, MENA',
-      homeTitle: 'WiwiOpportunity – International opportunities',
-      detailTitle: 'Opportunity details – WiwiOpportunity',
-      aboutTitle: 'About – WiwiOpportunity',
-      contactTitle: 'Contact – WiwiOpportunity',
-      archiveTitle: 'Archive – WiwiOpportunity',
-      adminLoginTitle: 'Admin login – WiwiOpportunity',
-      adminListTitle: 'Administration – WiwiOpportunity',
-      adminNewTitle: 'Add an opportunity – WiwiOpportunity',
-      adminEditTitle: 'Edit the opportunity – WiwiOpportunity',
+      homeTitle: 'Opportunities by Wiem – International opportunities',
+      detailTitle: 'Opportunity details – Opportunities by Wiem',
+      aboutTitle: 'About – Opportunities by Wiem',
+      contactTitle: 'Contact – Opportunities by Wiem',
+      archiveTitle: 'Archive – Opportunities by Wiem',
+      adminLoginTitle: 'Admin login – Opportunities by Wiem',
+      adminListTitle: 'Administration – Opportunities by Wiem',
+      adminNewTitle: 'Add an opportunity – Opportunities by Wiem',
+      adminEditTitle: 'Edit the opportunity – Opportunities by Wiem',
     },
     nav: {
       home: 'Home',
@@ -334,7 +334,7 @@ const translations = {
       mainLabel: 'Main navigation',
       footerLabel: 'Footer links',
       langLabel: 'Language',
-      brandLabel: 'WiwiOpportunity – back to home',
+      brandLabel: 'Opportunities by Wiem – back to home',
     },
     common: {
       search: 'Search',
@@ -356,7 +356,7 @@ const translations = {
       placeholder: 'E.g. marketing internship Berlin, scholarship France…',
       button: 'Search',
       suggestions: 'Suggestions:',
-      social: 'Follow WiwiOpportunity:',
+      social: 'Follow Opportunities by Wiem:',
       chips: {
         stage: 'Internships',
         scholarship: 'Scholarships',
@@ -437,9 +437,9 @@ const translations = {
     },
     about: {
       eyebrow: 'About',
-      title: 'About WiwiOpportunity',
+      title: 'About Opportunities by Wiem',
       p1:
-        'WiwiOpportunity is an independent project created to help students and young people across the MENA region access international opportunities: internships, scholarships, studies, volunteering, seasonal jobs, exchange programs, and more.',
+        'Opportunities by Wiem is an independent project created to help students and young people across the MENA region access international opportunities: internships, scholarships, studies, volunteering, seasonal jobs, exchange programs, and more.',
       p2:
         'Our goal is to centralize trustworthy opportunities, present them clearly, and provide a simple, enjoyable search experience.',
       p3:
@@ -487,8 +487,8 @@ const translations = {
       title: 'Administration',
       intro: 'Manage published opportunities: add, edit, feature.',
       loginTitle: 'Admin login',
-      loginIntro: 'Restricted access to manage opportunities published on WiwiOpportunity.',
-      loginHelper: 'Restricted to the WiwiOpportunity team.',
+      loginIntro: 'Restricted access to manage opportunities published on Opportunities by Wiem.',
+      loginHelper: 'Restricted to the Opportunities by Wiem team.',
       username: 'Username',
       password: 'Password',
       loginButton: 'Log in',
@@ -563,7 +563,7 @@ const translations = {
     },
     footer: {
       tag: 'International opportunities for MENA youth. Independent, hand-checked selection.',
-      rights: '© {year} WiwiOpportunity · Independent project',
+      rights: '© {year} Opportunities by Wiem · Independent project',
       made: 'Made with care, for you.',
     },
   },

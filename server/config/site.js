@@ -1,5 +1,5 @@
 const site = {
-  name: 'WiwiOpportunity',
+  name: 'Opportunities by Wiem',
   baseUrl: process.env.PUBLIC_BASE_URL || '',
   social: {
     instagram: 'https://www.instagram.com/wiem.benchikh',
