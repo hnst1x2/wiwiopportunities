@@ -11,6 +11,7 @@ RUN npm ci --omit=dev
 COPY server ./server
 COPY public ./public
 COPY views ./views
+COPY scripts ./scripts
 
 # In production, DATA_DIR should point at a mounted volume (see docker-compose.prod.yml).
 # The SQLite store lives at $DATA_DIR/wiwiopportunity.db.
