@@ -5,6 +5,7 @@ const session = require('express-session');
 const site = require('./config/site');
 const translations = require('./i18n/translations');
 const db = require('./db');
+const mailer = require('./mailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -141,13 +142,23 @@ app.get('/archive', (req, res) => {
   });
 });
 
-// Newsletter (POST)
-app.post('/newsletter', (req, res) => {
+// Newsletter (POST) — store the email first, then send a Brevo confirmation to new subscribers.
+app.post('/newsletter', async (req, res) => {
   const email = (req.body.email || '').trim().toLowerCase();
-  if (!email) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ success: false, message: res.locals.t('errors.emailRequired') });
   }
-  db.addNewsletter(email);
+  // Persist first so a subscription is never lost even if the email send fails.
+  const isNew = db.addNewsletter(email);
+  if (isNew) {
+    const lang = getCookieLang(req) || DEFAULT_LANG;
+    try {
+      await mailer.sendWelcomeEmail({ email, lang });
+    } catch (err) {
+      // Email captured in the DB; log the delivery failure for follow-up rather than failing the request.
+      console.error(`[newsletter] confirmation email failed for ${email}: ${err.message}`);
+    }
+  }
   res.json({ success: true });
 });
 
@@ -374,4 +385,5 @@ app.post('/api/opportunities', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`WiwiOpportunity app running on http://localhost:${PORT}`);
+  mailer.verify();
 });

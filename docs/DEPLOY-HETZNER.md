@@ -55,6 +55,9 @@ Fichiers ajoutés/modifiés dans le repo pour rendre l'app déployable :
   Formes de données identiques (tags tableau, featured booléen) → **vues / JS / API inchangés**.
 - `server/app.js` — utilise `server/db.js` au lieu des fichiers JSON (défaut `DATA_DIR` = à côté du
   code → **comportement local inchangé**).
+- `server/mailer.js` — email de confirmation à l'inscription newsletter via **Brevo SMTP** (nodemailer,
+  même mécanique que ChatFlow). L'email est capturé en base même si l'envoi échoue ; si `SMTP_HOST`
+  est vide, l'envoi est simplement ignoré (pas de crash).
 - `scripts/import-json.js` — import (upsert) de données JSON existantes vers la base — pour récupérer
   les données live de Render (voir §8). `scripts/backup.js` — snapshot SQLite cohérent (voir §7).
 - `package.json` — scripts lancés avec `--experimental-sqlite` (requis sur Node 22) ; `engines >=22.5`.
@@ -65,7 +68,7 @@ Committer et pousser (le déploiement serveur fait un `git pull`) :
 
 ```bash
 git add Dockerfile .dockerignore .gitignore docker-compose.prod.yml .env.production.example \
-        deploy/ docs/ scripts/ server/app.js server/db.js package.json package-lock.json
+        deploy/ docs/ scripts/ server/app.js server/db.js server/mailer.js package.json package-lock.json
 git commit -m "feat: SQLite storage + Hetzner deploy artifacts"
 git push origin main
 ```
@@ -99,7 +102,17 @@ ADMIN_USER=…
 ADMIN_PASSWORD=…            # PAS "changeme"
 SESSION_SECRET=…            # openssl rand -hex 32
 PUBLIC_BASE_URL=https://opportunities.wiemibncheikh.com
+# Email Brevo (réutiliser le compte/creds de ChatFlow — domaine wiemibncheikh.com déjà SPF/DKIM) :
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=…                 # login SMTP Brevo de ChatFlow
+SMTP_PASSWORD=…             # clé SMTP Brevo de ChatFlow
+MAIL_FROM=WiwiOpportunity <contact@wiemibncheikh.com>
 ```
+
+> Astuce : sur le serveur, plutôt que de retaper les creds, recopie les 5 lignes `SMTP_*` /
+> `MAIL_FROM` depuis `/opt/chatflow/.env` (mêmes valeurs, sauf `MAIL_FROM` propre à Wiwi).
 
 ## Étape 3 — Lancer le conteneur *(user `deploy`)*
 
