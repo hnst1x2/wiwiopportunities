@@ -7,6 +7,11 @@
     <div class="admin-toolbar">
       <label for="admin-search" class="sr-only"><%= t('admin.search') %></label>
       <input id="admin-search" type="search" class="field field--pill admin-search" placeholder="<%= t('admin.searchPlaceholder') %>" autocomplete="off" />
+      <div class="admin-status-filter" role="group" aria-label="<%= t('admin.statusLabel') %>">
+        <% ['active', 'expired', 'all'].forEach((s) => { %>
+        <button type="button" class="seg" data-status="<%= s %>" aria-pressed="false"><%= t('admin.status.' + s) %> <span class="seg-count" data-status-count="<%= s %>">0</span></button>
+        <% }) %>
+      </div>
       <span id="admin-results-count" class="admin-count" role="status" aria-live="polite"></span>
       <span id="admin-message" class="admin-message" role="status" aria-live="polite"></span>
     </div>
@@ -17,11 +22,11 @@
     <div class="admin-table-wrap">
       <div class="admin-table" role="table" aria-label="<%= t('admin.tableLabel') %>">
         <div class="admin-row admin-row--head" role="row">
-          <span role="columnheader"><%= t('admin.table.title') %></span>
-          <span role="columnheader"><%= t('admin.table.country') %></span>
-          <span role="columnheader"><%= t('admin.table.type') %></span>
-          <span role="columnheader"><%= t('admin.table.deadline') %></span>
-          <span role="columnheader"><%= t('admin.table.featured') %></span>
+          <% ['title', 'country', 'type', 'deadline', 'featured'].forEach((col) => { %>
+          <span class="admin-th-cell" role="columnheader" aria-sort="none" data-col="<%= col %>">
+            <button type="button" class="admin-th" data-sort="<%= col %>"><%= t('admin.table.' + col) %><span class="sort-ind" aria-hidden="true"></span></button>
+          </span>
+          <% }) %>
           <span role="columnheader"><%= t('admin.table.actions') %></span>
         </div>
         <div id="admin-table-body" role="rowgroup"></div>

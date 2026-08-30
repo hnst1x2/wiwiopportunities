@@ -235,6 +235,12 @@ const translations = {
       logout: 'Se déconnecter',
       search: 'Rechercher une opportunité',
       searchPlaceholder: 'Titre, orga, pays…',
+      statusLabel: 'Statut',
+      status: {
+        active: 'Actives',
+        expired: 'Expirées',
+        all: 'Toutes',
+      },
       count: {
         one: '{count} opportunité',
         other: '{count} opportunités',
@@ -491,6 +497,12 @@ const translations = {
       logout: 'Log out',
       search: 'Search opportunities',
       searchPlaceholder: 'Title, org, country…',
+      statusLabel: 'Status',
+      status: {
+        active: 'Active',
+        expired: 'Expired',
+        all: 'All',
+      },
       count: {
         one: '{count} opportunity',
         other: '{count} opportunities',

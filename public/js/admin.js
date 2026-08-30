@@ -18,28 +18,62 @@ $(function () {
     if (!$body.length) return;
 
     var items = Array.isArray(window.__ADMIN_OPPORTUNITIES__) ? window.__ADMIN_OPPORTUNITIES__ : [];
-    var query = '';
     var $count = $('#admin-results-count');
     var $message = $('#admin-message');
 
-    function visibleItems() {
-      var needle = W.norm(query);
-      if (!needle) return items;
-      return items.filter(function (o) {
-        var haystack = [o.title, o.organization, o.country, W.countryLabel(o.country), o.city, (o.tags || []).join(' ')].join(' ');
-        return W.norm(haystack).indexOf(needle) !== -1;
+    // A record with no deadline is treated as active (mirrors the server's isActiveOpportunity).
+    function isActive(o) {
+      var d = W.deadlineInfo(o);
+      return !d || !d.expired;
+    }
+
+    var hasActive = items.some(isActive);
+    var state = {
+      query: '',
+      status: hasActive ? 'active' : 'all', // default to the live set; fall back to all when nothing is active
+      sortKey: 'deadline',
+      sortDir: 'asc',
+    };
+
+    function matchesSearch(o) {
+      var needle = W.norm(state.query);
+      if (!needle) return true;
+      var haystack = [o.title, o.organization, o.country, W.countryLabel(o.country), o.city, (o.tags || []).join(' ')].join(' ');
+      return W.norm(haystack).indexOf(needle) !== -1;
+    }
+
+    // Comparable key per sortable column. Missing deadlines sort last (ascending); featured is 1/0.
+    function sortValue(o, key) {
+      if (key === 'title') return W.norm(o.title);
+      if (key === 'country') return W.norm(W.countryLabel(o.country));
+      if (key === 'type') return W.norm(W.typeLabel(o));
+      if (key === 'deadline') return o.deadline || '9999-12-31';
+      if (key === 'featured') return o.featured ? 1 : 0;
+      return '';
+    }
+
+    function sortRows(rows) {
+      var dir = state.sortDir === 'desc' ? -1 : 1;
+      return rows.slice().sort(function (a, b) {
+        var va = sortValue(a, state.sortKey);
+        var vb = sortValue(b, state.sortKey);
+        if (va < vb) return -dir;
+        if (va > vb) return dir;
+        // Stable tie-break by title so equal keys keep a predictable order.
+        var ta = W.norm(a.title);
+        var tb = W.norm(b.title);
+        return ta < tb ? -1 : ta > tb ? 1 : 0;
       });
     }
 
     function rowHtml(o) {
       var deadline = W.deadlineInfo(o);
-      var deadlineClass = '';
-      if (deadline && deadline.expired) deadlineClass = ' is-expired';
-      else if (deadline && deadline.urgent) deadlineClass = ' is-urgent';
+      var expired = deadline && deadline.expired;
+      var deadlineClass = expired ? ' is-expired' : deadline && deadline.urgent ? ' is-urgent' : '';
       var isOn = Boolean(o.featured);
 
       return (
-        '<div class="admin-row" role="row" data-id="' + esc(o.id) + '">' +
+        '<div class="admin-row' + (expired ? ' admin-row--expired' : '') + '" role="row" data-id="' + esc(o.id) + '">' +
           '<div class="admin-cell-title" role="cell">' +
             '<div class="admin-opp-title">' + esc(o.title) + '</div>' +
             (o.organization ? '<div class="admin-opp-org">' + esc(o.organization) + '</div>' : '') +
@@ -61,10 +95,68 @@ $(function () {
       );
     }
 
+    function groupHeadHtml(statusKey, count) {
+      return (
+        '<div class="admin-group-head" role="row">' +
+          esc(t('admin.status.' + statusKey)) + ' <span class="admin-group-count">' + count + '</span>' +
+        '</div>'
+      );
+    }
+
+    function rowsHtml(rows) {
+      return rows.map(rowHtml).join('');
+    }
+
+    function setSegCount(statusKey, count) {
+      $('[data-status-count="' + statusKey + '"]').text(count);
+    }
+
+    function syncControls(shownCount) {
+      $('.seg[data-status]').each(function () {
+        var on = $(this).data('status') === state.status;
+        $(this).toggleClass('is-active', on).attr('aria-pressed', on ? 'true' : 'false');
+      });
+      $('.admin-th-cell').each(function () {
+        var $cell = $(this);
+        var isSorted = $cell.data('col') === state.sortKey;
+        $cell.attr('aria-sort', isSorted ? (state.sortDir === 'asc' ? 'ascending' : 'descending') : 'none');
+        $cell.find('.admin-th').removeClass('is-asc is-desc').addClass(isSorted ? 'is-' + state.sortDir : '');
+      });
+      $count.text(W.tCount('admin.count', shownCount));
+    }
+
     function render() {
-      var rows = visibleItems();
-      $body.html(rows.map(rowHtml).join(''));
-      $count.text(W.tCount('admin.count', rows.length));
+      var searched = items.filter(matchesSearch);
+      var active = searched.filter(isActive);
+      var expired = searched.filter(function (o) {
+        return !isActive(o);
+      });
+
+      setSegCount('active', active.length);
+      setSegCount('expired', expired.length);
+      setSegCount('all', searched.length);
+
+      var html;
+      var shownCount;
+      if (state.status === 'active') {
+        html = rowsHtml(sortRows(active));
+        shownCount = active.length;
+      } else if (state.status === 'expired') {
+        html = rowsHtml(sortRows(expired));
+        shownCount = expired.length;
+      } else {
+        // "Toutes": keep the two groups visually separated, each independently sorted.
+        var sortedActive = sortRows(active);
+        var sortedExpired = sortRows(expired);
+        html =
+          (sortedActive.length ? groupHeadHtml('active', sortedActive.length) + rowsHtml(sortedActive) : '') +
+          (sortedExpired.length ? groupHeadHtml('expired', sortedExpired.length) + rowsHtml(sortedExpired) : '');
+        shownCount = searched.length;
+      }
+
+      if (!shownCount) html = '<div class="admin-empty-row">' + esc(t('admin.none')) + '</div>';
+      $body.html(html);
+      syncControls(shownCount);
     }
 
     function setMessage(text, isError) {
@@ -100,7 +192,25 @@ $(function () {
     }
 
     $('#admin-search').on('input', function () {
-      query = $(this).val() || '';
+      state.query = $(this).val() || '';
+      render();
+    });
+
+    // Segmented status control: separate active from expired opportunities.
+    $('.admin-status-filter').on('click', '.seg[data-status]', function () {
+      state.status = String($(this).data('status'));
+      render();
+    });
+
+    // Sortable column headers: click to sort, click again to flip direction.
+    $('.admin-row--head').on('click', '.admin-th[data-sort]', function () {
+      var key = String($(this).data('sort'));
+      if (state.sortKey === key) {
+        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortKey = key;
+        state.sortDir = key === 'featured' ? 'desc' : 'asc'; // featured: show "On" first
+      }
       render();
     });
 

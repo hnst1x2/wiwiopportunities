@@ -125,6 +125,54 @@ main.admin-login-page {
   font-size: 14px;
 }
 
+/* Status segmented control (Actives / Expirées / Toutes) */
+
+.admin-status-filter {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--bg-chip);
+}
+
+.seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.seg:hover {
+  color: var(--ink);
+}
+
+.seg.is-active {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+
+.seg-count {
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: rgba(46, 20, 81, 0.08);
+  color: var(--ink-3);
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.seg.is-active .seg-count {
+  background: rgba(145, 150, 250, 0.22);
+  color: #4348c8;
+}
+
 .admin-count {
   font-size: 13.5px;
   font-weight: 800;
@@ -184,6 +232,98 @@ main.admin-login-page {
 
 .admin-row--head:hover {
   background: transparent;
+}
+
+/* Sortable column headers */
+
+.admin-th-cell {
+  min-width: 0;
+}
+
+.admin-th {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.admin-th:hover {
+  color: var(--ink);
+}
+
+.admin-th.is-asc,
+.admin-th.is-desc {
+  color: var(--ink);
+}
+
+.sort-ind {
+  flex: none;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.sort-ind::after {
+  content: '↕';
+  opacity: 0.4;
+}
+
+.admin-th.is-asc .sort-ind::after {
+  content: '▲';
+  opacity: 1;
+}
+
+.admin-th.is-desc .sort-ind::after {
+  content: '▼';
+  opacity: 1;
+}
+
+/* Active / expired group headers (shown in the "Toutes" view) */
+
+.admin-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.admin-group-head + .admin-row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.admin-group-count {
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(46, 20, 81, 0.08);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: normal;
+}
+
+.admin-empty-row {
+  padding: 28px 18px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+/* Expired rows read as de-emphasized so they separate from the active set */
+
+.admin-row--expired .admin-opp-title {
+  color: var(--ink-2);
 }
 
 .admin-cell-title {
