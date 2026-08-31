@@ -16,3 +16,14 @@ opportunities.wiemibncheikh.com {
     header Strict-Transport-Security "max-age=31536000; includeSubDomains"
     reverse_proxy 127.0.0.1:8082
 }
+
+# Dedicated admin entry point — the bare domain lands on the admin login.
+# Prereq: add a DNS A record `admin-op.wiemibncheikh.com` -> 37.27.187.110 before reloading Caddy.
+# Same app/container (127.0.0.1:8082); only the root path is redirected to the login.
+admin-op.wiemibncheikh.com {
+    tls contact@wiemibncheikh.com
+    encode zstd gzip
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    redir / /admin/login 302
+    reverse_proxy 127.0.0.1:8082
+}
