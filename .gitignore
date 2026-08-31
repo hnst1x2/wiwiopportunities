@@ -5,3 +5,5 @@
 *.db
 *.db-shm
 *.db-wal
+server/uploads/
+node_modules/

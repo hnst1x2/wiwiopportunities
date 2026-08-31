@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+const multer = require('multer');
 const session = require('express-session');
 const site = require('./config/site');
 const translations = require('./i18n/translations');
@@ -12,15 +15,25 @@ const PORT = process.env.PORT || 3000;
 const DEFAULT_LANG = 'fr';
 
 // --- Middlewares globaux ---
+// Behind the host-level Caddy reverse proxy in production: trust X-Forwarded-* so
+// req.secure reflects the real client protocol (needed for the secure session cookie).
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
 // --- Session (pour admin login) ---
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'wiwiopportunity-secret',
     resave: false,
     saveUninitialized: false,
+    // sameSite=lax blocks cross-site POSTs (CSRF) on the admin routes;
+    // secure:'auto' marks the cookie Secure whenever the request came over HTTPS.
+    cookie: { sameSite: 'lax', secure: 'auto', httpOnly: true },
   })
 );
 
@@ -58,6 +71,12 @@ app.use((req, res, next) => {
 // --- Static ---
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Uploaded images live next to the SQLite file (DATA_DIR = mounted volume in production),
+// so they survive image rebuilds just like the database.
+const UPLOADS_DIR = path.join(process.env.DATA_DIR || __dirname, 'uploads');
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '7d', immutable: true }));
+
 // --- Helpers ---
 function getTodayString() {
   const now = new Date();
@@ -87,6 +106,101 @@ function parseTags(tags) {
 function isFeatured(value) {
   return value === '1' || value === 'on' || value === 'true' || value === true;
 }
+
+const MAX_IMAGES = 10;
+const MAX_IMAGE_URL_LENGTH = 600;
+
+// Accepts an array (API JSON), a JSON-array string (admin form hidden field) or a
+// newline-separated list. Only absolute http(s) URLs and local /uploads/ paths survive.
+function parseImages(value) {
+  let list = [];
+  if (Array.isArray(value)) {
+    list = value;
+  } else if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      list = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      list = value.split(/\r?\n/);
+    }
+  }
+  return list
+    .map((entry) => String(entry).trim())
+    .filter(
+      (url) =>
+        url.length > 0 &&
+        url.length <= MAX_IMAGE_URL_LENGTH &&
+        (/^https?:\/\//i.test(url) || /^\/uploads\/[\w.-]+$/.test(url))
+    )
+    .slice(0, MAX_IMAGES);
+}
+
+// --- Upload d'images (admin) ---
+const IMAGE_MIME_EXTENSIONS = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+  'image/avif': '.avif',
+};
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
+// The multipart Content-Type is client-controlled: after saving, verify the file
+// actually starts with the magic bytes of the claimed image format.
+const IMAGE_SIGNATURES = {
+  '.jpg': (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+  '.png': (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
+  '.gif': (b) => b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38,
+  '.webp': (b) => b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50,
+  '.avif': (b) => b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70, // ISO BMFF "ftyp" box
+};
+
+function hasValidImageSignature(filePath) {
+  const matches = IMAGE_SIGNATURES[path.extname(filePath).toLowerCase()];
+  if (!matches) return false;
+  let fd;
+  try {
+    fd = fs.openSync(filePath, 'r');
+    const header = Buffer.alloc(12);
+    const bytesRead = fs.readSync(fd, header, 0, 12, 0);
+    return bytesRead === 12 && matches(header);
+  } catch {
+    return false;
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd);
+  }
+}
+
+// Delete uploaded files that no opportunity references any more (called after edit/delete
+// with the record's previous image list) so the volume doesn't fill with orphans.
+function removeUnreferencedUploads(candidateUrls) {
+  const candidates = (candidateUrls || []).filter((url) => /^\/uploads\/[\w.-]+$/.test(url));
+  if (!candidates.length) return;
+  const referenced = new Set();
+  for (const opp of db.listOpportunities()) {
+    for (const url of opp.images || []) referenced.add(url);
+  }
+  for (const url of candidates) {
+    if (referenced.has(url)) continue;
+    fs.unlink(path.join(UPLOADS_DIR, path.basename(url)), (err) => {
+      if (err && err.code !== 'ENOENT') console.error(`[uploads] failed to remove orphan ${url}: ${err.message}`);
+    });
+  }
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+    // Never trust the client filename: random name + extension derived from the mimetype.
+    filename: (req, file, cb) =>
+      cb(null, `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${IMAGE_MIME_EXTENSIONS[file.mimetype]}`),
+  }),
+  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
+  fileFilter: (req, file, cb) => {
+    if (IMAGE_MIME_EXTENSIONS[file.mimetype]) return cb(null, true);
+    cb(new Error('UNSUPPORTED_TYPE'));
+  },
+});
 
 // --- Middleware d'auth admin (simple) ---
 function requireAdmin(req, res, next) {
@@ -224,7 +338,7 @@ app.get('/admin/new', requireAdmin, (req, res) => {
 
 // POST création
 app.post('/admin/new', requireAdmin, (req, res) => {
-  const { title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured } =
+  const { title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured, images } =
     req.body;
 
   if (!title || !country || !type) {
@@ -247,6 +361,7 @@ app.post('/admin/new', requireAdmin, (req, res) => {
     extra,
     tags: parseTags(tags),
     featured: isFeatured(featured),
+    images: parseImages(images),
   });
 
   res.redirect('/admin');
@@ -270,11 +385,12 @@ app.get('/admin/edit/:id', requireAdmin, (req, res) => {
 // POST édition
 app.post('/admin/edit/:id', requireAdmin, (req, res) => {
   const id = Number(req.params.id);
-  if (!db.getOpportunity(id)) {
+  const previous = db.getOpportunity(id);
+  if (!previous) {
     return res.status(404).send(res.locals.t('errors.notFound'));
   }
 
-  const { title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured } =
+  const { title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured, images } =
     req.body;
 
   db.updateOpportunity(id, {
@@ -292,15 +408,42 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
     extra,
     tags: parseTags(tags),
     featured: isFeatured(featured),
+    images: parseImages(images),
   });
 
+  removeUnreferencedUploads(previous.images);
   res.redirect('/admin');
+});
+
+// Upload d'une image (utilisé par le gestionnaire d'images du formulaire admin)
+app.post('/admin/upload', requireAdmin, (req, res) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      const message =
+        err.message === 'UNSUPPORTED_TYPE'
+          ? res.locals.t('admin.images.unsupportedType')
+          : err.code === 'LIMIT_FILE_SIZE'
+            ? res.locals.t('admin.images.tooLarge')
+            : res.locals.t('admin.images.uploadError');
+      return res.status(400).json({ success: false, error: message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: res.locals.t('admin.images.uploadError') });
+    }
+    if (!hasValidImageSignature(req.file.path)) {
+      fs.unlink(req.file.path, () => {});
+      return res.status(400).json({ success: false, error: res.locals.t('admin.images.unsupportedType') });
+    }
+    res.json({ success: true, url: `/uploads/${req.file.filename}` });
+  });
 });
 
 // Suppression
 app.post('/admin/delete/:id', requireAdmin, (req, res) => {
   const id = Number(req.params.id);
+  const previous = db.getOpportunity(id);
   db.deleteOpportunity(id);
+  if (previous) removeUnreferencedUploads(previous.images);
   res.redirect('/admin');
 });
 
@@ -379,6 +522,7 @@ app.post('/api/opportunities', (req, res) => {
     extra: body.extra,
     tags: parseTags(body.tags),
     featured: isFeatured(body.featured),
+    images: parseImages(body.images),
   });
   res.status(201).json(db.getOpportunity(id));
 });

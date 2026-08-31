@@ -169,8 +169,16 @@ $(function () {
       ? '<span class="card-deadline' + (deadline.urgent ? ' is-urgent' : '') + '">' + esc(deadline.text) + '</span>'
       : '';
 
+    var images = W.safeImages(o);
+    var mediaHtml = images.length
+      ? '<div class="card-media"><img src="' + esc(images[0]) + '" alt="" loading="lazy" />' +
+        (images.length > 1 ? '<span class="card-media-count">+' + (images.length - 1) + '</span>' : '') +
+        '</div>'
+      : '';
+
     return (
-      '<a class="card' + (isArchive ? ' card--archived' : '') + '" href="/detail?id=' + encodeURIComponent(o.id) + '">' +
+      '<a class="card' + (isArchive ? ' card--archived' : '') + (images.length ? ' card--with-media' : '') + '" href="/detail?id=' + encodeURIComponent(o.id) + '">' +
+      mediaHtml +
       '<div class="card-badges">' + badges + '</div>' +
       '<h3 class="card-title">' + esc(o.title) + '</h3>' +
       (o.organization ? '<div class="card-org">' + esc(o.organization) + '</div>' : '') +

@@ -10,6 +10,7 @@ $(function () {
 
   initList();
   initForm();
+  initImages();
 
   // ---- list -------------------------------------------------------------------
 
@@ -180,6 +181,7 @@ $(function () {
         description: o.description || '',
         extra: o.extra || '',
         tags: Array.isArray(o.tags) ? o.tags.join(', ') : o.tags || '',
+        images: JSON.stringify(Array.isArray(o.images) ? o.images : []),
       };
       if (featured) payload.featured = '1';
       return payload;
@@ -271,5 +273,138 @@ $(function () {
       $error.text(t('admin.formError'));
       $form.find(missing[0]).trigger('focus');
     });
+  }
+
+  // ---- images (create/edit form) ------------------------------------------------
+
+  function initImages() {
+    var $manager = $('#images-manager');
+    if (!$manager.length) return;
+
+    var MAX_IMAGES = 10;
+    var $hidden = $('#images');
+    var $list = $('#image-list');
+    var $urlInput = $('#image-url-input');
+    var $fileInput = $('#image-upload-input');
+    var $error = $('#image-error');
+
+    var images = [];
+    try {
+      var parsed = JSON.parse($hidden.val() || '[]');
+      if (Array.isArray(parsed)) images = parsed.map(W.safeImageUrl).filter(Boolean);
+    } catch (e) {
+      images = [];
+    }
+
+    function setError(message) {
+      $error.text(message || '');
+    }
+
+    function render() {
+      $hidden.val(JSON.stringify(images));
+      $list.html(
+        images
+          .map(function (url, index) {
+            return (
+              '<div class="image-item" data-index="' + index + '">' +
+                '<img class="image-thumb" src="' + esc(url) + '" alt="" loading="lazy" />' +
+                (index === 0 ? '<span class="image-cover-badge">' + esc(t('admin.images.cover')) + '</span>' : '') +
+                '<div class="image-item-actions">' +
+                  '<button type="button" class="image-btn js-img-left" title="' + esc(t('admin.images.moveLeft')) + '"' +
+                    (index === 0 ? ' disabled' : '') + '>←</button>' +
+                  '<button type="button" class="image-btn js-img-right" title="' + esc(t('admin.images.moveRight')) + '"' +
+                    (index === images.length - 1 ? ' disabled' : '') + '>→</button>' +
+                  '<button type="button" class="image-btn image-btn--danger js-img-remove" title="' + esc(t('admin.images.remove')) + '">✕</button>' +
+                '</div>' +
+              '</div>'
+            );
+          })
+          .join('')
+      );
+    }
+
+    function addImage(url) {
+      var safe = W.safeImageUrl(url);
+      if (!safe) {
+        setError(t('admin.images.invalidUrl'));
+        return false;
+      }
+      if (images.length >= MAX_IMAGES) {
+        setError(t('admin.images.limit', { max: MAX_IMAGES }));
+        return false;
+      }
+      if (images.indexOf(safe) !== -1) return true; // already present: not an error, just no duplicate
+      images = images.concat([safe]);
+      setError('');
+      render();
+      return true;
+    }
+
+    $('#image-add-url').on('click', function () {
+      if (addImage($urlInput.val())) $urlInput.val('');
+    });
+
+    // Enter in the URL field adds the image instead of submitting the whole form.
+    $urlInput.on('keydown', function (event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      if (addImage($urlInput.val())) $urlInput.val('');
+    });
+
+    $fileInput.on('change', function () {
+      var file = this.files && this.files[0];
+      $fileInput.val('');
+      if (!file) return;
+      if (images.length >= MAX_IMAGES) {
+        setError(t('admin.images.limit', { max: MAX_IMAGES }));
+        return;
+      }
+
+      var formData = new FormData();
+      formData.append('image', file);
+      setError(t('admin.images.uploading'));
+
+      $.ajax({ url: '/admin/upload', method: 'POST', data: formData, processData: false, contentType: false })
+        .done(function (res) {
+          if (res && res.success && res.url) {
+            addImage(res.url);
+          } else {
+            setError((res && res.error) || t('admin.images.uploadError'));
+          }
+        })
+        .fail(function (xhr) {
+          var res = xhr.responseJSON;
+          setError((res && res.error) || t('admin.images.uploadError'));
+        });
+    });
+
+    $list.on('click', '.js-img-remove', function () {
+      var index = Number($(this).closest('.image-item').data('index'));
+      images = images.filter(function (_, i) {
+        return i !== index;
+      });
+      setError('');
+      render();
+    });
+
+    function move(index, delta) {
+      var target = index + delta;
+      if (target < 0 || target >= images.length) return;
+      var next = images.slice();
+      next[index] = images[target];
+      next[target] = images[index];
+      images = next;
+      render();
+    }
+
+    $list.on('click', '.js-img-left', function () {
+      move(Number($(this).closest('.image-item').data('index')), -1);
+    });
+
+    $list.on('click', '.js-img-right', function () {
+      move(Number($(this).closest('.image-item').data('index')), 1);
+    });
+
+    render();
   }
 });

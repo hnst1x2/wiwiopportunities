@@ -139,6 +139,17 @@
     return /^https?:\/\//i.test(value) ? value : '';
   }
 
+  // Image sources may also be local uploads served from /uploads/.
+  function safeImageUrl(url) {
+    var value = String(url || '').trim();
+    if (/^\/uploads\/[\w.-]+$/.test(value)) return value;
+    return safeUrl(value);
+  }
+
+  function safeImages(o) {
+    return (Array.isArray(o && o.images) ? o.images : []).map(safeImageUrl).filter(Boolean);
+  }
+
   function badgeHtml(label, className) {
     if (!label) return '';
     return '<span class="badge ' + className + '">' + esc(label) + '</span>';
@@ -169,6 +180,8 @@
     formatDate: formatDate,
     deadlineInfo: deadlineInfo,
     safeUrl: safeUrl,
+    safeImageUrl: safeImageUrl,
+    safeImages: safeImages,
     badgeHtml: badgeHtml,
     typeBadge: typeBadge,
     fundingBadge: fundingBadge,

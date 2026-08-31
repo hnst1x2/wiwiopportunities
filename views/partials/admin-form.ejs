@@ -110,6 +110,22 @@
     <input class="field" type="text" name="tags" id="tags" value="<%= tagsValue %>" placeholder="<%= t('admin.placeholders.tags') %>" />
   </label>
 
+  <div class="form-field" id="images-manager">
+    <span class="field-label"><%= t('admin.fields.images') %></span>
+    <input type="hidden" name="images" id="images" value="<%= JSON.stringify(Array.isArray(record.images) ? record.images : []) %>" />
+    <div class="image-list" id="image-list" aria-live="polite"></div>
+    <div class="image-add-row">
+      <input class="field" type="url" id="image-url-input" placeholder="<%= t('admin.images.urlPlaceholder') %>" />
+      <button type="button" class="btn btn--ghost btn--sm" id="image-add-url"><%= t('admin.images.addUrl') %></button>
+      <label class="btn btn--ghost btn--sm image-upload-label">
+        <input type="file" id="image-upload-input" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden />
+        <%= t('admin.images.upload') %>
+      </label>
+    </div>
+    <p class="image-hint"><%= t('admin.images.hint') %></p>
+    <p class="form-error" id="image-error" role="alert" aria-live="polite"></p>
+  </div>
+
   <label class="form-check">
     <input type="checkbox" name="featured" value="1" <%= record.featured ? 'checked' : '' %> />
     <%= t('admin.featuredLabel') %>

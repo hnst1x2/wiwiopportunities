@@ -37,7 +37,8 @@ db.exec(`
     description  TEXT NOT NULL DEFAULT '',
     extra        TEXT NOT NULL DEFAULT '',
     tags         TEXT NOT NULL DEFAULT '[]',
-    featured     INTEGER NOT NULL DEFAULT 0
+    featured     INTEGER NOT NULL DEFAULT 0,
+    images       TEXT NOT NULL DEFAULT '[]'
   );
   CREATE TABLE IF NOT EXISTS newsletter (
     email      TEXT PRIMARY KEY,
@@ -45,16 +46,25 @@ db.exec(`
   );
 `);
 
+// Existing databases created before the images feature lack the column: add it in place.
+const hasImagesColumn = db
+  .prepare('PRAGMA table_info(opportunities)')
+  .all()
+  .some((col) => col.name === 'images');
+if (!hasImagesColumn) {
+  db.exec("ALTER TABLE opportunities ADD COLUMN images TEXT NOT NULL DEFAULT '[]'");
+}
+
 // --- statements ---------------------------------------------------------------
 
 const stmtInsert = db.prepare(
   `INSERT INTO opportunities
-     (id, title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured)
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     (id, title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured, images)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 );
 const stmtUpdate = db.prepare(
   `UPDATE opportunities SET
-     title=?, organization=?, country=?, city=?, type=?, funding=?, domain=?, deadline=?, duration=?, link=?, description=?, extra=?, tags=?, featured=?
+     title=?, organization=?, country=?, city=?, type=?, funding=?, domain=?, deadline=?, duration=?, link=?, description=?, extra=?, tags=?, featured=?, images=?
    WHERE id=?`
 );
 const stmtGet = db.prepare('SELECT * FROM opportunities WHERE id = ?');
@@ -68,7 +78,7 @@ const stmtListNewsletter = db.prepare('SELECT email FROM newsletter ORDER BY cre
 
 const str = (v) => (v == null ? '' : String(v));
 
-function parseTags(raw) {
+function parseJsonArray(raw) {
   if (Array.isArray(raw)) return raw.map((t) => String(t).trim()).filter(Boolean);
   try {
     const parsed = JSON.parse(raw || '[]');
@@ -94,8 +104,9 @@ function rowToObj(row) {
     link: row.link,
     description: row.description,
     extra: row.extra,
-    tags: parseTags(row.tags),
+    tags: parseJsonArray(row.tags),
     featured: !!row.featured,
+    images: parseJsonArray(row.images),
   };
 }
 
@@ -116,6 +127,7 @@ function insertValues(o) {
     str(o.extra),
     JSON.stringify(Array.isArray(o.tags) ? o.tags : []),
     o.featured ? 1 : 0,
+    JSON.stringify(Array.isArray(o.images) ? o.images : []),
   ];
 }
 
@@ -185,6 +197,7 @@ module.exports = {
       str(obj.extra),
       JSON.stringify(Array.isArray(obj.tags) ? obj.tags : []),
       obj.featured ? 1 : 0,
+      JSON.stringify(Array.isArray(obj.images) ? obj.images : []),
       Number(id)
     );
     return info.changes > 0;
