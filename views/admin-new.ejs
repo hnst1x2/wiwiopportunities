@@ -2,6 +2,19 @@
 
 <main id="main" class="container admin-page">
   <%- include('partials/admin-header') %>
+
+  <% if (importEnabled) { %>
+  <section class="import-card" id="import-card" aria-labelledby="import-title">
+    <h2 class="import-title" id="import-title"><%= t('admin.importer.title') %></h2>
+    <p class="import-hint"><%= t('admin.importer.hint') %></p>
+    <div class="import-row">
+      <input class="field" type="url" id="import-url" placeholder="<%= t('admin.importer.urlPlaceholder') %>" />
+      <button type="button" class="btn btn--accent" id="import-run"><%= t('admin.importer.button') %></button>
+    </div>
+    <p class="import-status" id="import-status" role="status" aria-live="polite"></p>
+  </section>
+  <% } %>
+
   <%- include('partials/admin-form', { action: '/admin/new', formTitle: t('admin.newTitle') }) %>
 </main>
 

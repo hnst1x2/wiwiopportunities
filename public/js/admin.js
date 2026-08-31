@@ -11,6 +11,7 @@ $(function () {
   initList();
   initForm();
   initImages();
+  initImport();
 
   // ---- list -------------------------------------------------------------------
 
@@ -294,6 +295,100 @@ $(function () {
       event.preventDefault();
       $error.text(t('admin.formError'));
       $form.find(missing[0]).trigger('focus');
+    });
+  }
+
+  // ---- AI import (create form) --------------------------------------------------
+
+  function initImport() {
+    var $card = $('#import-card');
+    if (!$card.length) return;
+
+    var IMPORT_TIMEOUT_MS = 90000; // page fetch + Gemini extraction can be slow
+    var $url = $('#import-url');
+    var $button = $('#import-run');
+    var $status = $('#import-status');
+
+    function setStatus(text, kind) {
+      $status.text(text || '').removeClass('is-error is-success is-busy');
+      if (kind) $status.addClass('is-' + kind);
+    }
+
+    // Pre-select a value in a select-with-custom pair; unknown values go through
+    // the existing "Other…" option (same mechanism as the edit form).
+    function setChoice(selectId, value) {
+      var $select = $('#' + selectId);
+      var $custom = $('#' + $select.data('custom-target'));
+      if (!value) return;
+      var known = $select.find('option').filter(function () {
+        return $(this).val() === value;
+      }).length > 0;
+      $select.val(known ? value : '__custom__').trigger('change');
+      if (!known) $custom.val(value);
+    }
+
+    function fillForm(data) {
+      var textFields = {
+        title: data.title,
+        organization: data.organization,
+        country: data.country,
+        city: data.city,
+        deadline: data.deadline,
+        duration: data.duration,
+        link: data.link,
+        description: data.description,
+        extra: data.extra,
+        tags: (data.tags || []).join(', '),
+      };
+      Object.keys(textFields).forEach(function (id) {
+        if (textFields[id]) $('#' + id).val(textFields[id]);
+      });
+      setChoice('type', data.type);
+      setChoice('funding', data.funding);
+      setChoice('domain', data.domain);
+    }
+
+    function runImport() {
+      var url = String($url.val() || '').trim();
+      if (!/^https?:\/\//i.test(url)) {
+        setStatus(t('admin.importer.invalidUrl'), 'error');
+        $url.trigger('focus');
+        return;
+      }
+
+      $button.prop('disabled', true);
+      setStatus(t('admin.importer.loading'), 'busy');
+
+      $.ajax({
+        url: '/admin/import',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ url: url }),
+        timeout: IMPORT_TIMEOUT_MS,
+      })
+        .done(function (res) {
+          if (res && res.success && res.data) {
+            fillForm(res.data);
+            setStatus(t('admin.importer.success'), 'success');
+            $('#title').trigger('focus');
+          } else {
+            setStatus((res && res.error) || t('admin.importer.error'), 'error');
+          }
+        })
+        .fail(function (xhr) {
+          var res = xhr.responseJSON;
+          setStatus((res && res.error) || t('admin.importer.error'), 'error');
+        })
+        .always(function () {
+          $button.prop('disabled', false);
+        });
+    }
+
+    $button.on('click', runImport);
+    $url.on('keydown', function (event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      runImport();
     });
   }
 

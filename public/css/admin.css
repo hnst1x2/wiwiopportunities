@@ -467,6 +467,58 @@ main.admin-login-page {
   color: var(--ink-4);
 }
 
+/* AI import (create form) ---------------------------------------------------- */
+
+.import-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 860px;
+  padding: clamp(16px, 2.5vw, 24px);
+  border: 1px dashed rgba(46, 20, 81, 0.25);
+  border-radius: 20px;
+  background: rgba(46, 20, 81, 0.03);
+}
+
+.import-title {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.import-hint {
+  font-size: 13.5px;
+  color: var(--ink-4);
+}
+
+.import-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.import-row .field {
+  flex: 1;
+  min-width: min(100%, 260px);
+}
+
+.import-status {
+  min-height: 1em;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.import-status.is-busy {
+  color: var(--ink-4);
+}
+
+.import-status.is-success {
+  color: #1d7a4f;
+}
+
+.import-status.is-error {
+  color: #c0392b;
+}
+
 /* Images manager (create/edit form) ----------------------------------------- */
 
 .image-list {

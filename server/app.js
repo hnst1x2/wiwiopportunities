@@ -9,6 +9,7 @@ const site = require('./config/site');
 const translations = require('./i18n/translations');
 const db = require('./db');
 const mailer = require('./mailer');
+const importer = require('./importer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -344,7 +345,30 @@ app.get('/admin/new', requireAdmin, (req, res) => {
     page: 'admin',
     baseUrl: process.env.PUBLIC_BASE_URL || '',
     title: res.locals.t('meta.adminNewTitle'),
+    importEnabled: importer.isConfigured(),
   });
+});
+
+// Import IA : extrait les champs d'une page web (Gemini) pour pré-remplir le formulaire.
+// Le résultat est TOUJOURS revu par l'admin avant enregistrement — rien n'est publié ici.
+app.post('/admin/import', requireAdmin, async (req, res) => {
+  const t = res.locals.t;
+  const errorMessages = {
+    NOT_CONFIGURED: t('admin.importer.notConfigured'),
+    INVALID_URL: t('admin.importer.invalidUrl'),
+    FETCH_FAILED: t('admin.importer.fetchFailed'),
+    EXTRACT_FAILED: t('admin.importer.extractFailed'),
+  };
+  try {
+    const data = await importer.importFromUrl((req.body && req.body.url) || '');
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error(`[import] ${err.message}`);
+    res.status(err.code === 'NOT_CONFIGURED' ? 503 : 400).json({
+      success: false,
+      error: errorMessages[err.code] || t('admin.importer.extractFailed'),
+    });
+  }
 });
 
 // POST création
