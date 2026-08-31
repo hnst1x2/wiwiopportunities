@@ -259,12 +259,34 @@ $(function () {
     if (!$form.length) return;
 
     var $error = $('#form-error');
-    var REQUIRED_FIELDS = ['#title', '#country', '#type']; // mirrors the server-side rule
+    var CUSTOM_CHOICE = '__custom__';
+
+    // "Other…" in a select reveals its free-text companion input.
+    $form.on('change', '.js-choice-select', function () {
+      var $select = $(this);
+      var $custom = $('#' + $select.data('custom-target'));
+      var isCustom = $select.val() === CUSTOM_CHOICE;
+      $custom.prop('hidden', !isCustom);
+      if (isCustom) $custom.trigger('focus');
+      else $custom.val('');
+    });
+
+    // The effective value of a select-with-custom pair (mirrors the server's resolveChoice).
+    function resolvedValue(selector) {
+      var $field = $form.find(selector);
+      var value = String($field.val() || '').trim();
+      if (value !== CUSTOM_CHOICE) return value;
+      return String($('#' + $field.data('custom-target')).val() || '').trim();
+    }
 
     $form.on('submit', function (event) {
-      var missing = REQUIRED_FIELDS.filter(function (selector) {
-        return !String($form.find(selector).val() || '').trim();
+      var missing = [];
+      ['#title', '#country'].forEach(function (selector) {
+        if (!String($form.find(selector).val() || '').trim()) missing.push(selector);
       });
+      if (!resolvedValue('#type')) {
+        missing.push($form.find('#type').val() === CUSTOM_CHOICE ? '#type-custom' : '#type');
+      }
       if (!missing.length) {
         $error.text('');
         return;

@@ -289,6 +289,54 @@ $(function () {
     $section.removeAttr('hidden');
   }
 
+  // ---- custom filter chips ------------------------------------------------------
+  // Types / fundings / domains are free text for the admin: values outside the
+  // built-in chips get their own chip, appended after the static ones.
+
+  function chipCanonical(group, value) {
+    if (group === 'type') return W.typeKey(value) || W.norm(value);
+    if (group === 'funding') return W.fundingKey(value) || W.norm(value);
+    return W.norm(value);
+  }
+
+  function chipLabel(group, value) {
+    if (group === 'type') return W.typeLabel({ type: value });
+    if (group === 'funding') return W.fundingLabel({ funding: value });
+    return value;
+  }
+
+  function appendCustomChips(items) {
+    ['type', 'funding', 'domain'].forEach(function (group) {
+      var $existing = $('.chip[data-group="' + group + '"]');
+      if (!$existing.length) return; // this page has no filter for that group (e.g. archive)
+
+      var known = {};
+      $existing.each(function () {
+        known[chipCanonical(group, String($(this).data('value')))] = true;
+      });
+
+      var $last = $existing.last();
+      items.forEach(function (o) {
+        var value = String(o[group] || '').trim();
+        if (!value) return;
+        var canonical = chipCanonical(group, value);
+        if (known[canonical]) return;
+        known[canonical] = true;
+        var $chip = $('<button>', { type: 'button', class: 'chip', 'aria-pressed': 'false', text: chipLabel(group, value) })
+          .attr('data-group', group)
+          .attr('data-value', value);
+        $last.after($chip);
+        $last = $chip;
+      });
+    });
+
+    // A shared URL may point at a custom value whose chip didn't exist at init: re-apply it.
+    var urlFilters = readUrlState().filters;
+    if (urlFilters.type) setChip('type', urlFilters.type);
+    if (urlFilters.funding) setChip('funding', urlFilters.funding);
+    if (urlFilters.domain) setChip('domain', urlFilters.domain);
+  }
+
   function populateCountries(items) {
     if (!$country.length) return;
     var current = $country.val() || '';
@@ -317,6 +365,7 @@ $(function () {
     $.get(API_URL, params).done(function (data) {
       var items = Array.isArray(data) ? data : [];
       populateCountries(items);
+      appendCustomChips(items);
       renderFeatured(items);
     });
   }
@@ -343,7 +392,7 @@ $(function () {
         // `domain` is not an API parameter: it is applied client-side to keep the API contract unchanged.
         filteredItems = filters.domain
           ? items.filter(function (o) {
-              return o.domain === filters.domain;
+              return W.norm(o.domain) === W.norm(filters.domain);
             })
           : items;
         renderPagination();

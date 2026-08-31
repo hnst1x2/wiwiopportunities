@@ -107,6 +107,17 @@ function isFeatured(value) {
   return value === '1' || value === 'on' || value === 'true' || value === true;
 }
 
+// Admin form selects post '__custom__' when the admin typed a free-text value
+// in the companion input (type_custom / funding_custom / domain_custom).
+const CUSTOM_CHOICE = '__custom__';
+const MAX_CHOICE_LENGTH = 60;
+
+function resolveChoice(value, customValue) {
+  const selected = String(value || '').trim();
+  const resolved = selected === CUSTOM_CHOICE ? String(customValue || '').trim() : selected;
+  return resolved.slice(0, MAX_CHOICE_LENGTH);
+}
+
 const MAX_IMAGES = 10;
 const MAX_IMAGE_URL_LENGTH = 600;
 
@@ -338,8 +349,10 @@ app.get('/admin/new', requireAdmin, (req, res) => {
 
 // POST création
 app.post('/admin/new', requireAdmin, (req, res) => {
-  const { title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured, images } =
-    req.body;
+  const { title, organization, country, city, deadline, duration, link, description, extra, tags, featured, images } = req.body;
+  const type = resolveChoice(req.body.type, req.body.type_custom);
+  const funding = resolveChoice(req.body.funding, req.body.funding_custom);
+  const domain = resolveChoice(req.body.domain, req.body.domain_custom);
 
   if (!title || !country || !type) {
     return res.status(400).send(res.locals.t('errors.requiredFields'));
@@ -390,8 +403,14 @@ app.post('/admin/edit/:id', requireAdmin, (req, res) => {
     return res.status(404).send(res.locals.t('errors.notFound'));
   }
 
-  const { title, organization, country, city, type, funding, domain, deadline, duration, link, description, extra, tags, featured, images } =
-    req.body;
+  const { title, organization, country, city, deadline, duration, link, description, extra, tags, featured, images } = req.body;
+  const type = resolveChoice(req.body.type, req.body.type_custom);
+  const funding = resolveChoice(req.body.funding, req.body.funding_custom);
+  const domain = resolveChoice(req.body.domain, req.body.domain_custom);
+
+  if (!title || !country || !type) {
+    return res.status(400).send(res.locals.t('errors.requiredFields'));
+  }
 
   db.updateOpportunity(id, {
     title,

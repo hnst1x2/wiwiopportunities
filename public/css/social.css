@@ -63,3 +63,8 @@
 .social-icon--linkedin {
   background: #0a66c2;
 }
+
+/* The black TikTok chip needs a hairline to read on the dark footer */
+.footer-social .social-icon--tiktok {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}

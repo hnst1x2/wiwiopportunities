@@ -270,6 +270,7 @@ const translations = {
       save: 'Enregistrer',
       cancel: 'Annuler',
       featuredLabel: "Mettre en avant sur la page d'accueil",
+      customOption: 'Autre (saisir)…',
       fields: {
         title: 'Titre',
         organization: 'Organisation',
@@ -291,6 +292,7 @@ const translations = {
         duration: '3 mois, 1 an…',
         link: 'https://…',
         tags: 'ex : IT, Marketing, France…',
+        custom: 'Saisis la valeur…',
         description: "Décris l'opportunité…",
         extra: 'Profil recherché, conditions, avantages…',
       },
@@ -552,6 +554,7 @@ const translations = {
       save: 'Save',
       cancel: 'Cancel',
       featuredLabel: 'Feature this opportunity on the home page',
+      customOption: 'Other (type in)…',
       fields: {
         title: 'Title',
         organization: 'Organization',
@@ -573,6 +576,7 @@ const translations = {
         duration: '3 months, 1 year…',
         link: 'https://…',
         tags: 'e.g. IT, Marketing, France…',
+        custom: 'Type the value…',
         description: 'Describe the opportunity…',
         extra: 'Desired profile, conditions, benefits…',
       },

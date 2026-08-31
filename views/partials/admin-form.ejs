@@ -24,6 +24,10 @@
   const currentFunding = LEGACY_FUNDING[String(record.funding || '').toLowerCase()] || '';
   const currentDomain = String(record.domain || '');
   const tagsValue = Array.isArray(record.tags) ? record.tags.join(', ') : record.tags || '';
+  // A stored value outside the fixed lists is a custom one: preselect "Other" and prefill the text input.
+  const isCustomType = Boolean(currentType) && !TYPE_OPTIONS.some(([value]) => value === currentType);
+  const isCustomFunding = Boolean(record.funding) && !currentFunding;
+  const isCustomDomain = Boolean(currentDomain) && !DOMAIN_OPTIONS.includes(currentDomain);
 %>
 <form action="<%= action %>" method="post" class="admin-form-card" id="admin-form" novalidate>
   <h2 class="admin-form-title"><%= formTitle %></h2>
@@ -66,32 +70,38 @@
 
     <label class="form-field">
       <span class="field-label"><%= t('admin.fields.type') %> <span class="required">*</span></span>
-      <select class="field" name="type" id="type" required>
+      <select class="field js-choice-select" name="type" id="type" required data-custom-target="type-custom">
         <option value=""><%= t('common.select') %></option>
         <% TYPE_OPTIONS.forEach(([value, key]) => { %>
         <option value="<%= value %>" <%= currentType === value ? 'selected' : '' %>><%= t('options.types.' + key) %></option>
         <% }) %>
+        <option value="__custom__" <%= isCustomType ? 'selected' : '' %>><%= t('admin.customOption') %></option>
       </select>
+      <input class="field js-choice-custom" type="text" name="type_custom" id="type-custom" value="<%= isCustomType ? currentType : '' %>" placeholder="<%= t('admin.placeholders.custom') %>" <%= isCustomType ? '' : 'hidden' %> />
     </label>
 
     <label class="form-field">
       <span class="field-label"><%= t('admin.fields.funding') %></span>
-      <select class="field" name="funding" id="funding">
-        <option value="" <%= !currentFunding ? 'selected' : '' %>><%= t('options.funding.unspecified') %></option>
+      <select class="field js-choice-select" name="funding" id="funding" data-custom-target="funding-custom">
+        <option value="" <%= !currentFunding && !isCustomFunding ? 'selected' : '' %>><%= t('options.funding.unspecified') %></option>
         <% FUNDING_OPTIONS.forEach((key) => { %>
         <option value="<%= key %>" <%= currentFunding === key ? 'selected' : '' %>><%= t('options.funding.' + key) %></option>
         <% }) %>
+        <option value="__custom__" <%= isCustomFunding ? 'selected' : '' %>><%= t('admin.customOption') %></option>
       </select>
+      <input class="field js-choice-custom" type="text" name="funding_custom" id="funding-custom" value="<%= isCustomFunding ? record.funding : '' %>" placeholder="<%= t('admin.placeholders.custom') %>" <%= isCustomFunding ? '' : 'hidden' %> />
     </label>
 
     <label class="form-field">
       <span class="field-label"><%= t('admin.fields.domain') %></span>
-      <select class="field" name="domain" id="domain">
+      <select class="field js-choice-select" name="domain" id="domain" data-custom-target="domain-custom">
         <option value="" <%= !currentDomain ? 'selected' : '' %>><%= t('options.domains.unspecified') %></option>
         <% DOMAIN_OPTIONS.forEach((key) => { %>
         <option value="<%= key %>" <%= currentDomain === key ? 'selected' : '' %>><%= t('options.domains.' + key) %></option>
         <% }) %>
+        <option value="__custom__" <%= isCustomDomain ? 'selected' : '' %>><%= t('admin.customOption') %></option>
       </select>
+      <input class="field js-choice-custom" type="text" name="domain_custom" id="domain-custom" value="<%= isCustomDomain ? currentDomain : '' %>" placeholder="<%= t('admin.placeholders.custom') %>" <%= isCustomDomain ? '' : 'hidden' %> />
     </label>
   </div>
 
