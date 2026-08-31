@@ -15,3 +15,51 @@
   margin: 0 4px;
   opacity: 0.7;
 }
+
+/* Brand social icons (contact page) — inline SVG glyphs on brand-colored chips */
+
+.social-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: #fff;
+  text-decoration: none;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), filter var(--t-fast) var(--ease);
+}
+
+.social-icon svg {
+  display: block;
+}
+
+.social-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(46, 20, 81, 0.18);
+  filter: brightness(1.06);
+  text-decoration: none;
+}
+
+.social-icon:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.social-icon--instagram {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+}
+
+.social-icon--tiktok {
+  background: #010101;
+}
+
+.social-icon--linkedin {
+  background: #0a66c2;
+}
