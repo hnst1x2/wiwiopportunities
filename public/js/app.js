@@ -161,33 +161,7 @@ $(function () {
   }
 
   function cardHtml(o) {
-    var deadline = W.deadlineInfo(o);
-    var badges = isArchive
-      ? W.badgeHtml(t('archive.badge'), 'badge--expired') + W.typeBadge(o)
-      : W.typeBadge(o) + W.fundingBadge(o);
-    var deadlineHtml = deadline
-      ? '<span class="card-deadline' + (deadline.urgent ? ' is-urgent' : '') + '">' + esc(deadline.text) + '</span>'
-      : '';
-
-    var images = W.safeImages(o);
-    var mediaHtml = images.length
-      ? '<div class="card-media"><img src="' + esc(images[0]) + '" alt="" loading="lazy" />' +
-        (images.length > 1 ? '<span class="card-media-count">+' + (images.length - 1) + '</span>' : '') +
-        '</div>'
-      : '';
-
-    return (
-      '<a class="card' + (isArchive ? ' card--archived' : '') + (images.length ? ' card--with-media' : '') + '" href="/detail?id=' + encodeURIComponent(o.id) + '">' +
-      mediaHtml +
-      '<div class="card-badges">' + badges + '</div>' +
-      '<h3 class="card-title">' + esc(o.title) + '</h3>' +
-      (o.organization ? '<div class="card-org">' + esc(o.organization) + '</div>' : '') +
-      '<div class="card-footer">' +
-      '<span class="place-chip">' + esc(W.placeLabel(o)) + '</span>' +
-      deadlineHtml +
-      '</div>' +
-      '</a>'
-    );
+    return W.cardHtml(o, { archived: isArchive });
   }
 
   function emptyStateHtml() {
@@ -358,15 +332,71 @@ $(function () {
     setCountry(current);
   }
 
+  // ---- "Pour toi" (home only, logged-in members with preferences) ----------------
+  // Score = how many preference groups the opportunity matches; best matches first.
+
+  var baseItems = null; // unfiltered active set, shared with renderForYou
+
+  function prefMatch(list, value, canon) {
+    for (var i = 0; i < list.length; i++) {
+      if (canon(list[i]) && canon(list[i]) === canon(value)) return true;
+    }
+    return false;
+  }
+
+  function forYouScore(o, prefs) {
+    var score = 0;
+    if (prefMatch(prefs.prefTypes, o.type, function (v) { return W.typeKey(v) || W.norm(v); })) score += 1;
+    if (prefMatch(prefs.prefDomains, o.domain, W.norm)) score += 1;
+    if (prefMatch(prefs.prefCountries, o.country, W.norm)) score += 1;
+    return score;
+  }
+
+  function renderForYou() {
+    var $section = $('#foryou');
+    if (!$section.length || !baseItems) return;
+    var me = W.getMe();
+    if (!me.loaded || !me.user) return;
+
+    var prefs = me.user;
+    var hasPrefs = prefs.prefTypes.length || prefs.prefDomains.length || prefs.prefCountries.length;
+    if (!hasPrefs) return;
+
+    var matches = baseItems
+      .map(function (o) {
+        return { o: o, score: forYouScore(o, prefs) };
+      })
+      .filter(function (entry) {
+        return entry.score > 0;
+      })
+      .sort(function (a, b) {
+        if (b.score !== a.score) return b.score - a.score;
+        return String(a.o.deadline || '9999') < String(b.o.deadline || '9999') ? -1 : 1;
+      })
+      .slice(0, FEATURED_MAX * 2);
+
+    if (!matches.length) return;
+    $('#foryou-list').html(
+      matches
+        .map(function (entry) {
+          return cardHtml(entry.o);
+        })
+        .join('')
+    );
+    $section.removeAttr('hidden');
+  }
+
   // ---- data -------------------------------------------------------------------
 
   function loadBase() {
     var params = status ? { status: status } : {};
     $.get(API_URL, params).done(function (data) {
       var items = Array.isArray(data) ? data : [];
+      baseItems = items;
       populateCountries(items);
       appendCustomChips(items);
       renderFeatured(items);
+      renderForYou();
     });
   }
 
@@ -519,6 +549,7 @@ $(function () {
   applyFiltersToUI(initial.filters);
   currentPage = initial.page;
   lastQueryKey = queryKey(initial.filters);
+  W.loadMe(renderForYou); // hearts + "Pour toi" once the member state is known
   loadBase();
   fetchOpportunities({ preservePage: true });
 });

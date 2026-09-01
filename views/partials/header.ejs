@@ -25,8 +25,11 @@
   <link rel="stylesheet" href="/css/brand-tokens.css" />
   <link rel="stylesheet" href="/css/base.css" />
   <link rel="stylesheet" href="/css/social.css" />
-  <% if (page === 'home' || page === 'archive') { %>
+  <% if (page === 'home' || page === 'archive' || page === 'favorites') { %>
   <link rel="stylesheet" href="/css/home.css" />
+  <% } %>
+  <% if (page === 'account' || page === 'favorites') { %>
+  <link rel="stylesheet" href="/css/account.css" />
   <% } %>
   <% if (page === 'detail') { %>
   <link rel="stylesheet" href="/css/detail.css" />
@@ -68,6 +71,12 @@
           <button type="button" class="lang-btn<%= lang === 'fr' ? ' is-active' : '' %>" data-lang="fr" aria-pressed="<%= lang === 'fr' %>" lang="fr">FR</button>
           <button type="button" class="lang-btn<%= lang === 'en' ? ' is-active' : '' %>" data-lang="en" aria-pressed="<%= lang === 'en' %>" lang="en">EN</button>
         </div>
+        <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/favorites" class="nav-user-link" title="<%= t('account.navFavorites') %>">♥<span class="sr-only"> <%= t('account.navFavorites') %></span></a>
+        <a href="/account" class="nav-user-link nav-user-link--account"><%= t('account.navAccount') %></a>
+        <% } else { %>
+        <a href="/login" class="nav-user-link nav-user-link--account"><%= t('account.navLogin') %></a>
+        <% } %>
         <a href="/#newsletter" class="btn btn--accent btn--sm nav-cta"><%= t('nav.newsletter') %></a>
       </div>
     </div>

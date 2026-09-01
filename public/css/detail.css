@@ -123,6 +123,11 @@ main.detail-page {
   overflow-wrap: anywhere;
 }
 
+.detail-fav.is-on {
+  border-color: rgba(224, 72, 90, 0.5);
+  color: #e0485a;
+}
+
 .detail-apply {
   padding: 14px 20px;
   font-size: 15px;

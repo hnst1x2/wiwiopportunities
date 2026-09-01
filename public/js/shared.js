@@ -155,6 +155,122 @@
     return '<span class="badge ' + className + '">' + esc(label) + '</span>';
   }
 
+  // ---- member state (login, preferences, favorites) -----------------------------
+  // Loaded once per page via /api/me; hearts everywhere read from this cache.
+
+  var me = { loaded: false, user: null, favorites: {} };
+
+  function loadMe(callback) {
+    window.jQuery
+      .get('/api/me')
+      .done(function (data) {
+        me.user = data && data.user ? data.user : null;
+        me.favorites = {};
+        ((data && data.favorites) || []).forEach(function (id) {
+          me.favorites[id] = true;
+        });
+      })
+      .always(function () {
+        me.loaded = true;
+        syncFavButtons();
+        if (callback) callback(me);
+      });
+  }
+
+  function getMe() {
+    return me;
+  }
+
+  function isFavorite(id) {
+    return Boolean(me.favorites[id]);
+  }
+
+  function loginRedirect() {
+    window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname + window.location.search);
+  }
+
+  function toggleFavorite(id, callback) {
+    if (!me.user) {
+      loginRedirect();
+      return;
+    }
+    window.jQuery
+      .post('/api/favorites/' + encodeURIComponent(id))
+      .done(function (res) {
+        if (!res || !res.success) return;
+        if (res.favorited) me.favorites[id] = true;
+        else delete me.favorites[id];
+        syncFavButtons();
+        window.jQuery(document).trigger('wiwi:favchange', [Number(id), res.favorited]);
+        if (callback) callback(res.favorited);
+      })
+      .fail(function (xhr) {
+        if (xhr && xhr.status === 401) loginRedirect();
+      });
+  }
+
+  function favButtonHtml(id) {
+    var on = isFavorite(id);
+    return (
+      '<button type="button" class="card-fav' + (on ? ' is-on' : '') + '" data-fav-id="' + esc(id) + '"' +
+      ' aria-pressed="' + (on ? 'true' : 'false') + '" aria-label="' + esc(t(on ? 'account.favRemove' : 'account.favAdd')) + '">♥</button>'
+    );
+  }
+
+  function syncFavButtons() {
+    window.jQuery('.card-fav').each(function () {
+      var $button = window.jQuery(this);
+      var on = isFavorite($button.data('fav-id'));
+      $button
+        .toggleClass('is-on', on)
+        .attr('aria-pressed', on ? 'true' : 'false')
+        .attr('aria-label', t(on ? 'account.favRemove' : 'account.favAdd'));
+    });
+  }
+
+  // One delegated handler for every listing heart (cards are <a> elements:
+  // the click must not follow the link).
+  window.jQuery(document).on('click', '.card-fav', function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleFavorite(window.jQuery(this).data('fav-id'));
+  });
+
+  // ---- shared opportunity card (home, archive, favorites) ----------------------
+
+  function cardHtml(o, opts) {
+    var options = opts || {};
+    var deadline = deadlineInfo(o);
+    var archived = options.archived === true || (options.archived === 'auto' && deadline && deadline.expired);
+    var badges = archived
+      ? badgeHtml(t('archive.badge'), 'badge--expired') + typeBadge(o)
+      : typeBadge(o) + fundingBadge(o);
+    var deadlineHtml = deadline
+      ? '<span class="card-deadline' + (deadline.urgent ? ' is-urgent' : '') + '">' + esc(deadline.text) + '</span>'
+      : '';
+
+    var images = safeImages(o);
+    var mediaHtml = images.length
+      ? '<div class="card-media"><img src="' + esc(images[0]) + '" alt="" loading="lazy" />' +
+        (images.length > 1 ? '<span class="card-media-count">+' + (images.length - 1) + '</span>' : '') +
+        '</div>'
+      : '';
+
+    return (
+      '<a class="card' + (archived ? ' card--archived' : '') + (images.length ? ' card--with-media' : '') + '" href="/detail?id=' + encodeURIComponent(o.id) + '">' +
+      mediaHtml +
+      favButtonHtml(o.id) +
+      '<div class="card-badges">' + badges + '</div>' +
+      '<h3 class="card-title">' + esc(o.title) + '</h3>' +
+      (o.organization ? '<div class="card-org">' + esc(o.organization) + '</div>' : '') +
+      '<div class="card-footer">' +
+      '<span class="place-chip">' + esc(placeLabel(o)) + '</span>' +
+      deadlineHtml +
+      '</div>' +
+      '</a>'
+    );
+  }
+
   function typeBadge(o, extraClass) {
     var key = typeKey(o.type);
     return badgeHtml(typeLabel(o), (key ? 'badge--type-' + key : 'badge--neutral') + (extraClass || ''));
@@ -185,5 +301,11 @@
     badgeHtml: badgeHtml,
     typeBadge: typeBadge,
     fundingBadge: fundingBadge,
+    loadMe: loadMe,
+    getMe: getMe,
+    isFavorite: isFavorite,
+    toggleFavorite: toggleFavorite,
+    syncFavButtons: syncFavButtons,
+    cardHtml: cardHtml,
   };
 })(window);

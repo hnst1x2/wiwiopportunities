@@ -11,6 +11,9 @@ const db = require('./db');
 const mailer = require('./mailer');
 const importer = require('./importer');
 const imageSuggestions = require('./imageSuggestions');
+const usersDb = require('./usersDb');
+const userRoutes = require('./userRoutes');
+const SQLiteSessionStore = require('./sessionStore');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,17 +30,30 @@ app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   next();
 });
-// --- Session (pour admin login) ---
+// --- Session (admin + comptes membres) ---
+// Persisted in SQLite so logins survive restarts/redeploys (no MemoryStore).
 app.use(
   session({
+    store: new SQLiteSessionStore(),
     secret: process.env.SESSION_SECRET || 'wiwiopportunity-secret',
     resave: false,
     saveUninitialized: false,
-    // sameSite=lax blocks cross-site POSTs (CSRF) on the admin routes;
+    // sameSite=lax blocks cross-site POSTs (CSRF) on the session-protected routes;
     // secure:'auto' marks the cookie Secure whenever the request came over HTTPS.
-    cookie: { sameSite: 'lax', secure: 'auto', httpOnly: true },
+    cookie: { sameSite: 'lax', secure: 'auto', httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 },
   })
 );
+
+// Logged-in member (or null) for every view; a stale session pointing at a
+// deleted account is cleaned up on the way.
+app.use((req, res, next) => {
+  res.locals.user = null;
+  if (req.session && req.session.userId) {
+    res.locals.user = usersDb.getUserById(req.session.userId);
+    if (!res.locals.user) delete req.session.userId;
+  }
+  next();
+});
 
 // --- Vues EJS ---
 app.set('view engine', 'ejs');
@@ -222,6 +238,9 @@ function requireAdmin(req, res, next) {
   }
   return res.redirect('/admin/login');
 }
+
+// --- Espace membre (inscription, connexion, compte, favoris) ---
+app.use(userRoutes);
 
 // --- Pages publiques ---
 // Home

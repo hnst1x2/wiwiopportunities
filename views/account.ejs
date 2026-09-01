@@ -1,0 +1,109 @@
+<%- include('partials/header', { title: t('meta.accountTitle'), page: 'account', baseUrl }) %>
+
+<main id="main" class="container account-page">
+  <div class="account-header">
+    <div>
+      <p class="eyebrow"><%= t('account.eyebrow') %></p>
+      <h1 class="account-title"><%= account.name ? t('account.hello', { name: account.name }) : t('account.title') %></h1>
+      <p class="account-intro"><%= account.email %></p>
+    </div>
+    <div class="account-header-actions">
+      <a href="/favorites" class="btn btn--accent btn--sm">♥ <%= t('account.navFavorites') %></a>
+      <form action="/logout" method="post">
+        <button type="submit" class="btn btn--ghost btn--sm"><%= t('account.logout') %></button>
+      </form>
+    </div>
+  </div>
+
+  <form action="/account" method="post" class="account-card">
+    <h2 class="account-card-title"><%= t('account.prefsTitle') %></h2>
+    <p class="account-card-intro"><%= t('account.prefsIntro') %></p>
+
+    <div class="form-field">
+      <label class="field-label" for="name"><%= t('account.fields.name') %></label>
+      <input class="field" id="name" name="name" value="<%= account.name || '' %>" autocomplete="name" maxlength="80" />
+    </div>
+
+    <div class="form-field">
+      <span class="field-label"><%= t('account.prefsTypes') %></span>
+      <div class="pref-checks">
+        <% prefTypes.forEach((value) => { %>
+        <label class="pref-check">
+          <input type="checkbox" name="prefTypes" value="<%= value %>" <%= account.prefTypes.includes(value) ? 'checked' : '' %> />
+          <span><%= t('options.types.' + ({ 'Stage': 'stage', 'Bourse': 'scholarship', 'Volontariat': 'volunteering', 'Job': 'job', 'Études': 'studies' })[value]) %></span>
+        </label>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <span class="field-label"><%= t('account.prefsDomains') %></span>
+      <div class="pref-checks">
+        <% prefDomains.forEach((value) => { %>
+        <label class="pref-check">
+          <input type="checkbox" name="prefDomains" value="<%= value %>" <%= account.prefDomains.includes(value) ? 'checked' : '' %> />
+          <span><%= t('options.domains.' + value) %></span>
+        </label>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="field-label" for="prefCountries"><%= t('account.prefsCountries') %></label>
+      <input class="field" id="prefCountries" name="prefCountries" value="<%= account.prefCountries.join(', ') %>" placeholder="<%= t('account.prefsCountriesPlaceholder') %>" />
+      <p class="field-hint"><%= t('account.prefsCountriesHint') %></p>
+    </div>
+
+    <% if (saved) { %>
+    <p class="form-success" role="status"><%= t('account.saved') %></p>
+    <% } %>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary"><%= t('account.save') %></button>
+    </div>
+  </form>
+
+  <form action="/account/password" method="post" class="account-card">
+    <h2 class="account-card-title"><%= t('account.passwordTitle') %></h2>
+    <div class="account-grid">
+      <div class="form-field">
+        <label class="field-label" for="currentPassword"><%= t('account.fields.currentPassword') %></label>
+        <input class="field" id="currentPassword" type="password" name="currentPassword" autocomplete="current-password" required />
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="newPassword"><%= t('account.fields.newPassword') %></label>
+        <input class="field" id="newPassword" type="password" name="newPassword" autocomplete="new-password" minlength="8" required />
+      </div>
+    </div>
+
+    <% if (passwordError) { %>
+    <p class="form-error" role="alert"><%= passwordError %></p>
+    <% } %>
+    <% if (passwordChanged) { %>
+    <p class="form-success" role="status"><%= t('account.passwordChanged') %></p>
+    <% } %>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--ghost"><%= t('account.passwordButton') %></button>
+    </div>
+  </form>
+
+  <form action="/account/delete" method="post" class="account-card account-card--danger" id="delete-account-form">
+    <h2 class="account-card-title"><%= t('account.deleteTitle') %></h2>
+    <p class="account-card-intro"><%= t('account.deleteWarning') %></p>
+    <div class="form-field">
+      <label class="field-label" for="deletePassword"><%= t('account.fields.password') %></label>
+      <input class="field" id="deletePassword" type="password" name="password" autocomplete="current-password" required />
+    </div>
+
+    <% if (deleteError) { %>
+    <p class="form-error" role="alert"><%= deleteError %></p>
+    <% } %>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--danger"><%= t('account.deleteButton') %></button>
+    </div>
+  </form>
+</main>
+
+<%- include('partials/footer', { page: 'account' }) %>

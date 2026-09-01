@@ -329,6 +329,26 @@ button {
   box-shadow: 0 2px 6px rgba(46, 20, 81, 0.14);
 }
 
+/* Member links in the top bar (login / account / favorites heart) */
+
+.nav-user-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-3);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.nav-user-link:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.nav-user-link:not(.nav-user-link--account) {
+  font-size: 16px;
+  color: #e0485a;
+}
+
 /* Buttons ----------------------------------------------------------------- */
 
 .btn {

@@ -1,0 +1,31 @@
+<%- include('partials/header', { title: t('meta.loginTitle'), page: 'account', baseUrl }) %>
+
+<main id="main" class="container auth-page">
+  <div class="auth-card">
+    <img src="/img/opportunities-by-wiem-avatar.svg" alt="" width="44" height="44" class="auth-mark" />
+    <h1 class="auth-title"><%= t('account.loginTitle') %></h1>
+    <p class="auth-intro"><%= t('account.loginIntro') %></p>
+
+    <form action="/login" method="post" class="auth-form">
+      <input type="hidden" name="next" value="<%= next %>" />
+      <div class="form-field">
+        <label class="field-label" for="email"><%= t('account.fields.email') %></label>
+        <input class="field" id="email" type="email" name="email" value="<%= values.email || '' %>" autocomplete="email" required />
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="password"><%= t('account.fields.password') %></label>
+        <input class="field" id="password" type="password" name="password" autocomplete="current-password" required />
+      </div>
+
+      <% if (error) { %>
+      <p class="form-error" role="alert"><%= error %></p>
+      <% } %>
+
+      <button type="submit" class="btn btn--primary btn--block"><%= t('account.loginButton') %></button>
+    </form>
+
+    <p class="auth-switch"><%= t('account.noAccount') %> <a href="/register<%= next ? '?next=' + encodeURIComponent(next) : '' %>"><%= t('account.registerLink') %></a></p>
+  </div>
+</main>
+
+<%- include('partials/footer', { page: 'account' }) %>

@@ -1,0 +1,36 @@
+<%- include('partials/header', { title: t('meta.registerTitle'), page: 'account', baseUrl }) %>
+
+<main id="main" class="container auth-page">
+  <div class="auth-card">
+    <img src="/img/opportunities-by-wiem-avatar.svg" alt="" width="44" height="44" class="auth-mark" />
+    <h1 class="auth-title"><%= t('account.registerTitle') %></h1>
+    <p class="auth-intro"><%= t('account.registerIntro') %></p>
+
+    <form action="/register" method="post" class="auth-form">
+      <input type="hidden" name="next" value="<%= next %>" />
+      <div class="form-field">
+        <label class="field-label" for="name"><%= t('account.fields.name') %></label>
+        <input class="field" id="name" name="name" value="<%= values.name || '' %>" autocomplete="name" maxlength="80" />
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="email"><%= t('account.fields.email') %> <span class="required">*</span></label>
+        <input class="field" id="email" type="email" name="email" value="<%= values.email || '' %>" autocomplete="email" required />
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="password"><%= t('account.fields.password') %> <span class="required">*</span></label>
+        <input class="field" id="password" type="password" name="password" autocomplete="new-password" minlength="8" required />
+        <p class="field-hint"><%= t('account.passwordHint') %></p>
+      </div>
+
+      <% if (error) { %>
+      <p class="form-error" role="alert"><%= error %></p>
+      <% } %>
+
+      <button type="submit" class="btn btn--primary btn--block"><%= t('account.registerButton') %></button>
+    </form>
+
+    <p class="auth-switch"><%= t('account.haveAccount') %> <a href="/login<%= next ? '?next=' + encodeURIComponent(next) : '' %>"><%= t('account.loginLink') %></a></p>
+  </div>
+</main>
+
+<%- include('partials/footer', { page: 'account' }) %>

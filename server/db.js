@@ -171,6 +171,9 @@ process.on('exit', () => {
 
 module.exports = {
   dbPath: DB_PATH,
+  // Raw connection, shared with the other data layers (usersDb, sessionStore)
+  // so the whole app lives in one SQLite file.
+  handle: db,
   listOpportunities() {
     return stmtList.all().map(rowToObj);
   },

@@ -1,0 +1,15 @@
+<%- include('partials/header', { title: t('meta.favoritesTitle'), page: 'favorites', baseUrl }) %>
+
+<main id="main" class="container section favorites-page">
+  <p class="eyebrow"><%= t('account.eyebrow') %></p>
+  <h1 class="h2-section"><%= t('account.favoritesTitle') %></h1>
+  <p class="section-sub"><%= t('account.favoritesIntro') %></p>
+
+  <div class="results-row">
+    <span id="results-count" class="results-count" role="status" aria-live="polite">…</span>
+  </div>
+
+  <div id="favorites-list" class="cards-grid"></div>
+</main>
+
+<%- include('partials/footer', { page: 'favorites' }) %>

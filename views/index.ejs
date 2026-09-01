@@ -39,6 +39,14 @@
     <div id="featured-list" class="featured-grid"></div>
   </section>
 
+  <%# Shown by app.js only for logged-in members whose preferences match active opportunities %>
+  <section id="foryou" class="container section foryou-section" aria-labelledby="foryou-heading" hidden>
+    <p class="eyebrow"><%= t('account.foryou.eyebrow') %></p>
+    <h2 id="foryou-heading" class="h2-section"><%= t('account.foryou.title') %></h2>
+    <p class="section-sub"><%= t('account.foryou.sub') %> <a href="/account"><%= t('account.foryou.edit') %></a></p>
+    <div id="foryou-list" class="cards-grid"></div>
+  </section>
+
   <section id="opps" class="container section opps-section" aria-labelledby="opps-heading">
     <p class="eyebrow"><%= t('list.eyebrow') %></p>
     <h2 id="opps-heading" class="h2-section"><%= t('list.title') %></h2>

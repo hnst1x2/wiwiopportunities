@@ -1,0 +1,184 @@
+/* Member area: auth pages (login/register), account page, favorites page */
+
+/* Auth pages ------------------------------------------------------------------ */
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  padding-top: clamp(32px, 6vw, 72px);
+  padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(100%, 420px);
+  padding: clamp(24px, 4vw, 36px);
+  border: 1px solid rgba(46, 20, 81, 0.1);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: var(--shadow-xs);
+}
+
+.auth-mark {
+  align-self: flex-start;
+}
+
+.auth-title {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.auth-intro {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.auth-switch {
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+
+.auth-switch a {
+  font-weight: 700;
+}
+
+.field-hint {
+  font-size: 12.5px;
+  color: var(--ink-4);
+}
+
+/* Account page ------------------------------------------------------------------ */
+
+.account-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-top: clamp(24px, 4vw, 48px);
+  padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+.account-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.account-title {
+  font-size: clamp(24px, 3.5vw, 32px);
+  font-weight: 800;
+}
+
+.account-intro {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.account-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid rgba(46, 20, 81, 0.1);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.account-card--danger {
+  border-color: rgba(192, 57, 43, 0.35);
+}
+
+.account-card-title {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.account-card-intro {
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 14px;
+}
+
+/* Preference checkboxes rendered as selectable chips */
+
+.pref-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pref-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid rgba(46, 20, 81, 0.15);
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.16s var(--ease), background 0.16s var(--ease);
+}
+
+.pref-check:hover {
+  border-color: var(--lilas);
+}
+
+.pref-check:has(input:checked) {
+  border-color: var(--lilas);
+  background: rgba(145, 150, 250, 0.12);
+}
+
+.pref-check input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--lilas);
+  cursor: pointer;
+}
+
+.form-success {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1d7a4f;
+}
+
+.btn--danger {
+  border: 1px solid rgba(192, 57, 43, 0.5);
+  background: #fff;
+  color: #c0392b;
+}
+
+.btn--danger:hover {
+  background: #c0392b;
+  border-color: #c0392b;
+  color: #fff;
+}
+
+/* Favorites page ------------------------------------------------------------------ */
+
+.favorites-page {
+  padding-bottom: clamp(48px, 8vw, 96px);
+}

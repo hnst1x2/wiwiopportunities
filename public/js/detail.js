@@ -147,15 +147,40 @@ $(function () {
               ? '<a class="btn btn--gradient btn--block detail-apply" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' +
                 esc(t('detail.apply')) + ' ↗</a>'
               : '') +
+            '<button type="button" class="btn btn--ghost btn--block detail-fav" data-fav-id="' + esc(o.id) + '"></button>' +
           '</aside>' +
         '</div>' +
       '</article>'
     );
 
     initCarousel();
+    syncFavButton(o.id);
 
     if (o.title) document.title = o.title + ' – Opportunities by Wiem';
   }
+
+  // ---- favorite button (aside) ---------------------------------------------------
+
+  function syncFavButton(oppId) {
+    var on = W.isFavorite(oppId);
+    $root
+      .find('.detail-fav')
+      .toggleClass('is-on', on)
+      .attr('aria-pressed', on ? 'true' : 'false')
+      .text((on ? '♥ ' : '♡ ') + t(on ? 'account.favRemove' : 'account.favAdd'));
+  }
+
+  $root.on('click', '.detail-fav', function () {
+    var oppId = $(this).data('fav-id');
+    W.toggleFavorite(oppId, function () {
+      syncFavButton(oppId);
+    });
+  });
+
+  W.loadMe(function () {
+    var $fav = $root.find('.detail-fav');
+    if ($fav.length) syncFavButton($fav.data('fav-id'));
+  });
 
   if (!id) {
     $root.html(missingHtml(t('detail.missingId')));
