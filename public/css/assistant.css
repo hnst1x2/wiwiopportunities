@@ -3,8 +3,9 @@
 .assistant-root {
   position: fixed;
   right: clamp(14px, 3vw, 28px);
-  bottom: clamp(14px, 3vw, 28px);
-  z-index: 90;
+  bottom: calc(clamp(14px, 3vw, 28px) + env(safe-area-inset-bottom, 0px));
+  /* Au-dessus de la topbar sticky (z-index 100) pour la feuille plein écran mobile. */
+  z-index: 250;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -15,17 +16,22 @@
 /* --- launcher ------------------------------------------------------------ */
 
 .assistant-fab {
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
+  padding: 0;
   border: 0;
   border-radius: var(--r-pill);
-  background: var(--grad-cta);
-  color: var(--ink-on-dark);
-  font-size: 24px;
-  line-height: 1;
+  background: none;
   cursor: pointer;
   box-shadow: var(--shadow-lg);
   transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.assistant-fab-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--r-pill);
 }
 
 .assistant-fab:hover {
@@ -37,9 +43,8 @@
   box-shadow: var(--focus-ring), var(--shadow-lg);
 }
 
-.assistant-fab.is-open .assistant-fab-icon {
-  display: inline-block;
-  transform: rotate(-8deg);
+.assistant-fab.is-open {
+  transform: scale(0.94);
 }
 
 /* --- panel ---------------------------------------------------------------- */
@@ -71,8 +76,18 @@
 }
 
 .assistant-head-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 800;
   font-size: 15px;
+}
+
+.assistant-head-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
 }
 
 .assistant-head-actions {
@@ -116,19 +131,37 @@
 
 .assistant-msg {
   display: flex;
-  flex-direction: column;
   gap: 8px;
-  max-width: 88%;
+  max-width: 90%;
 }
 
 .assistant-msg--user {
   align-self: flex-end;
-  align-items: flex-end;
+  justify-content: flex-end;
 }
 
 .assistant-msg--bot {
   align-self: flex-start;
-  align-items: flex-start;
+}
+
+.assistant-avatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: var(--r-pill);
+  margin-top: 2px;
+  box-shadow: var(--shadow-xs);
+}
+
+.assistant-msg-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.assistant-msg--user .assistant-msg-content {
+  align-items: flex-end;
 }
 
 .assistant-bubble {
@@ -360,10 +393,48 @@
 }
 
 /* --- mobile ------------------------------------------------------------------- */
+/* Sous 640px le panneau devient une feuille plein écran : plus fiable qu'un
+   popover flottant avec le clavier virtuel (dvh suit le viewport visible). */
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .assistant-panel {
-    width: calc(100vw - 20px);
-    height: min(70vh, 560px);
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    border: 0;
+  }
+
+  /* Le FAB disparaît pendant que la feuille est ouverte (fermeture via ✕). */
+  .assistant-fab.is-open {
+    display: none;
+  }
+
+  /* Fige la page derrière la feuille plein écran. */
+  body.assistant-open {
+    overflow: hidden;
+  }
+
+  .assistant-head {
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  }
+
+  .assistant-messages {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .assistant-msg {
+    max-width: 94%;
+  }
+
+  /* 16px minimum : en dessous, iOS zoome automatiquement sur le champ au focus. */
+  .assistant-form input {
+    font-size: 16px;
+  }
+
+  .assistant-insta {
+    padding-bottom: calc(9px + env(safe-area-inset-bottom, 0px));
   }
 }

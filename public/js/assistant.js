@@ -9,6 +9,7 @@
   var t = Wiwi.t;
   var esc = Wiwi.esc;
   var STORAGE_KEY = 'wiwi_assistant_chat';
+  var AVATAR_SRC = '/img/opportunities-by-wiem-assistant.svg';
   var MAX_MESSAGE_LENGTH = 600;
   var HISTORY_SENT = 8;
 
@@ -30,10 +31,13 @@
   function loginPromptHtml() {
     return (
       '<div class="assistant-msg assistant-msg--bot">' +
+      '<img class="assistant-avatar" src="' + AVATAR_SRC + '" alt="" width="28" height="28" />' +
+      '<div class="assistant-msg-content">' +
       '<div class="assistant-bubble">' + esc(t('assistant.loginPrompt')) + '</div>' +
       '<div class="assistant-auth">' +
       '<a class="assistant-auth-btn assistant-auth-btn--primary" href="' + esc(loginUrl('/login')) + '">' + esc(t('assistant.loginBtn')) + '</a>' +
       '<a class="assistant-auth-btn" href="' + esc(loginUrl('/register')) + '">' + esc(t('assistant.registerBtn')) + '</a>' +
+      '</div>' +
       '</div>' +
       '</div>'
     );
@@ -84,12 +88,16 @@
   }
 
   function messageHtml(entry) {
+    var isUser = entry.role === 'user';
     var text = esc(entry.text).replace(/\n/g, '<br>');
     var cards = (entry.opps || []).map(miniCardHtml).join('');
     return (
-      '<div class="assistant-msg assistant-msg--' + (entry.role === 'user' ? 'user' : 'bot') + '">' +
+      '<div class="assistant-msg assistant-msg--' + (isUser ? 'user' : 'bot') + '">' +
+      (isUser ? '' : '<img class="assistant-avatar" src="' + AVATAR_SRC + '" alt="" width="28" height="28" />') +
+      '<div class="assistant-msg-content">' +
       '<div class="assistant-bubble">' + text + '</div>' +
       (cards ? '<div class="assistant-cards">' + cards + '</div>' : '') +
+      '</div>' +
       '</div>'
     );
   }
@@ -109,7 +117,11 @@
         '</div>';
     }
     if (pending) {
-      html += '<div class="assistant-msg assistant-msg--bot"><div class="assistant-bubble assistant-bubble--typing">' + esc(t('assistant.typing')) + '</div></div>';
+      html +=
+        '<div class="assistant-msg assistant-msg--bot">' +
+        '<img class="assistant-avatar" src="' + AVATAR_SRC + '" alt="" width="28" height="28" />' +
+        '<div class="assistant-msg-content"><div class="assistant-bubble assistant-bubble--typing">' + esc(t('assistant.typing')) + '</div></div>' +
+        '</div>';
     }
     $body.html(html);
     $body.scrollTop($body[0].scrollHeight);
@@ -180,7 +192,10 @@
       '<div class="assistant-root">' +
       '<div class="assistant-panel" id="assistant-panel" role="dialog" aria-label="' + esc(t('assistant.title')) + '" hidden>' +
       '<div class="assistant-head">' +
-      '<span class="assistant-head-title">💬 ' + esc(t('assistant.title')) + '</span>' +
+      '<span class="assistant-head-title">' +
+      '<img class="assistant-head-avatar" src="' + AVATAR_SRC + '" alt="" width="34" height="34" />' +
+      esc(t('assistant.title')) +
+      '</span>' +
       '<span class="assistant-head-actions">' +
       '<button type="button" class="assistant-icon-btn" id="assistant-clear" title="' + esc(t('assistant.clear')) + '" aria-label="' + esc(t('assistant.clear')) + '">↺</button>' +
       '<button type="button" class="assistant-icon-btn" id="assistant-close" aria-label="' + esc(t('assistant.close')) + '">✕</button>' +
@@ -196,7 +211,7 @@
       '</a>' +
       '</div>' +
       '<button type="button" class="assistant-fab" id="assistant-fab" aria-expanded="false" aria-label="' + esc(t('assistant.open')) + '">' +
-      '<span class="assistant-fab-icon">💬</span>' +
+      '<img class="assistant-fab-icon" src="' + AVATAR_SRC + '" alt="" width="56" height="56" />' +
       '</button>' +
       '</div>'
     );
@@ -206,6 +221,7 @@
     var $panel = $('#assistant-panel');
     var show = typeof open === 'boolean' ? open : $panel.prop('hidden');
     $panel.prop('hidden', !show);
+    $('body').toggleClass('assistant-open', show);
     $('#assistant-fab')
       .attr('aria-expanded', show ? 'true' : 'false')
       .attr('aria-label', t(show ? 'assistant.close' : 'assistant.open'))
