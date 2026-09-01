@@ -501,6 +501,37 @@ main.admin-login-page {
   min-width: min(100%, 260px);
 }
 
+.import-file-label {
+  cursor: pointer;
+}
+
+.import-file-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 6px 10px;
+  border: 1px solid rgba(46, 20, 81, 0.15);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #fff;
+}
+
+.import-file-clear {
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--ink-4);
+  cursor: pointer;
+}
+
+.import-file-clear:hover {
+  color: #c0392b;
+}
+
 .import-status {
   min-height: 1em;
   font-size: 13.5px;

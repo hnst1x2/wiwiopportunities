@@ -9,8 +9,16 @@
     <p class="import-hint"><%= t('admin.importer.hint') %></p>
     <div class="import-row">
       <input class="field" type="url" id="import-url" placeholder="<%= t('admin.importer.urlPlaceholder') %>" />
+      <label class="btn btn--ghost import-file-label">
+        <input type="file" id="import-image-input" accept="image/jpeg,image/png,image/webp" hidden />
+        <%= t('admin.importer.imageButton') %>
+      </label>
       <button type="button" class="btn btn--accent" id="import-run"><%= t('admin.importer.button') %></button>
     </div>
+    <p class="import-file-name" id="import-file-name" hidden>
+      <span id="import-file-text"></span>
+      <button type="button" class="import-file-clear" id="import-file-clear" aria-label="<%= t('admin.importer.clearImage') %>">✕</button>
+    </p>
     <p class="import-status" id="import-status" role="status" aria-live="polite"></p>
   </section>
   <% } %>

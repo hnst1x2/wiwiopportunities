@@ -83,8 +83,8 @@ async function fetchPageText(url) {
   return text;
 }
 
-function buildPrompt(pageText, sourceUrl, today) {
-  return `Tu extrais UNE opportunité (stage, bourse, études, volontariat, job, camp, fellowship, événement jeunesse) depuis le texte d'une page web, pour le catalogue "Opportunities by Wiem" (public : jeunes de la région MENA, catalogue en français).
+function buildRules(today, sourceLabel) {
+  return `Tu extrais UNE opportunité (stage, bourse, études, volontariat, job, camp, fellowship, événement jeunesse) depuis ${sourceLabel}, pour le catalogue "Opportunities by Wiem" (public : jeunes de la région MENA, catalogue en français).
 
 Règles STRICTES :
 - Écris "description", "extra" et "tags" en FRANÇAIS. Garde les noms propres (événement, organisation) tels quels.
@@ -92,18 +92,32 @@ Règles STRICTES :
 - "type" : EXACTEMENT une valeur parmi : Stage (stage), Bourse (bourse/subvention), Volontariat (bénévolat), Job (emploi), Études (programme d'études, formation, camp, sommet, conférence, fellowship, échange).
 - "funding" : "fully" (tout est pris en charge, ou s'il existe une option fully funded), "partial" (prise en charge partielle), "none" (autofinancé / participant paie). Si inconnu : "none".
 - "domain" : "it" (tech/logiciel), "marketing" (marketing/communication/médias), "business" (management/entrepreneuriat), "studies" (académique/recherche), "humanitarian" (leadership, jeunesse, social, ONG).
-- "deadline" : la date limite de CANDIDATURE ("apply by") au format YYYY-MM-DD — PAS les dates de l'événement. Si elle n'est pas indiquée sur la page, mets null. Aujourd'hui : ${today}.
+- "deadline" : la date limite de CANDIDATURE ("apply by") au format YYYY-MM-DD — PAS les dates de l'événement. Si elle n'est pas indiquée dans la source, mets null.
 - "duration" : ex "3 jours", "2 semaines", "6 mois". Sinon null.
 - "description" : 1 à 2 phrases claires en français résumant l'opportunité.
 - "extra" : éligibilité / profil recherché / conditions (âge, pays éligibles, exigences) en français. Plusieurs lignes possibles.
 - "tags" : 2 à ${MAX_TAGS} mots-clés courts en français.
-- N'INVENTE RIEN. Si une information n'est pas sur la page, mets null. Ne devine jamais une deadline ni un niveau de financement.
-- Si le titre, le pays ou le type ne peuvent pas être déterminés depuis la page, mets null pour ce champ.
+- "country" est le pays de DESTINATION (où se déroule l'opportunité), pas celui de l'organisme qui relaie l'annonce.
+- N'INVENTE RIEN. Si une information n'est pas dans la source, mets null. Ne devine jamais une deadline ni un niveau de financement.
+- Si le titre, le pays ou le type ne peuvent pas être déterminés, mets null pour ce champ.
+- Aujourd'hui : ${today}.`;
+}
+
+function buildPagePrompt(pageText, sourceUrl, today) {
+  return `${buildRules(today, "le texte d'une page web")}
+- "link" : mets null (le lien source est déjà connu).
 
 URL source : ${sourceUrl}
 
 TEXTE DE LA PAGE :
 ${pageText}`;
+}
+
+function buildImagePrompt(today) {
+  return `${buildRules(today, "une IMAGE (affiche, capture d'écran, courrier scanné)")}
+- "link" : le lien de candidature visible dans l'image (URL complète). Si seule une adresse email de candidature est indiquée, mets "mailto:adresse@exemple.com". Sinon null.
+
+Lis attentivement tout le texte de l'image (français, anglais ou arabe) et extrais l'opportunité.`;
 }
 
 const RESPONSE_SCHEMA = {
@@ -118,6 +132,7 @@ const RESPONSE_SCHEMA = {
     domain: { type: 'STRING', enum: DOMAIN_VALUES, nullable: true },
     deadline: { type: 'STRING', nullable: true },
     duration: { type: 'STRING', nullable: true },
+    link: { type: 'STRING', nullable: true },
     description: { type: 'STRING', nullable: true },
     extra: { type: 'STRING', nullable: true },
     tags: { type: 'ARRAY', items: { type: 'STRING' } },
@@ -125,7 +140,7 @@ const RESPONSE_SCHEMA = {
   required: ['title', 'country', 'type'],
 };
 
-async function callGemini(prompt) {
+async function callGemini(parts) {
   const response = await fetch(GEMINI_ENDPOINT, {
     method: 'POST',
     signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
@@ -134,7 +149,7 @@ async function callGemini(prompt) {
       'x-goog-api-key': process.env.GEMINI_API_KEY,
     },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: [{ parts }],
       generationConfig: {
         responseMimeType: 'application/json',
         responseSchema: RESPONSE_SCHEMA,
@@ -165,9 +180,17 @@ function cleanString(value, maxLength) {
   return value.trim().slice(0, maxLength);
 }
 
+// Only http(s) URLs or plain mailto: addresses may become the apply link.
+function safeApplyLink(value) {
+  const link = cleanString(value, 600);
+  if (/^https?:\/\/\S+$/i.test(link)) return link;
+  if (/^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(link)) return link;
+  return '';
+}
+
 // Model output is external data: re-validate every field against the platform
 // vocabularies before it reaches the admin form.
-function normalizeExtraction(raw, sourceUrl) {
+function normalizeExtraction(raw, applyLink) {
   const type = cleanString(raw.type, 60);
   const funding = cleanString(raw.funding, 20).toLowerCase();
   const domain = cleanString(raw.domain, 20).toLowerCase();
@@ -182,7 +205,7 @@ function normalizeExtraction(raw, sourceUrl) {
     domain: DOMAIN_VALUES.includes(domain) ? domain : '',
     deadline: /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : '',
     duration: cleanString(raw.duration, 100),
-    link: sourceUrl,
+    link: applyLink,
     description: cleanString(raw.description, 1000),
     extra: cleanString(raw.extra, 2000),
     tags: (Array.isArray(raw.tags) ? raw.tags : [])
@@ -212,11 +235,29 @@ async function importFromUrl(rawUrl) {
 
   try {
     const today = new Date().toISOString().slice(0, 10);
-    const raw = await callGemini(buildPrompt(pageText, url, today));
-    return normalizeExtraction(raw || {}, url);
+    const raw = await callGemini([{ text: buildPagePrompt(pageText, url, today) }]);
+    return normalizeExtraction(raw || {}, url); // the source URL is always the apply link
   } catch (err) {
     throw Object.assign(new Error(`extraction failed: ${err.message}`), { code: 'EXTRACT_FAILED' });
   }
 }
 
-module.exports = { importFromUrl, isConfigured };
+// Same pipeline from an uploaded image (poster, screenshot, scanned letter):
+// Gemini reads the image directly; the apply link comes from the image when visible.
+async function importFromImage(buffer, mimeType) {
+  if (!isConfigured()) {
+    throw Object.assign(new Error('GEMINI_API_KEY is not configured'), { code: 'NOT_CONFIGURED' });
+  }
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const raw = await callGemini([
+      { text: buildImagePrompt(today) },
+      { inline_data: { mime_type: mimeType, data: buffer.toString('base64') } },
+    ]);
+    return normalizeExtraction(raw || {}, safeApplyLink(raw && raw.link));
+  } catch (err) {
+    throw Object.assign(new Error(`image extraction failed: ${err.message}`), { code: 'EXTRACT_FAILED' });
+  }
+}
+
+module.exports = { importFromUrl, importFromImage, isConfigured };

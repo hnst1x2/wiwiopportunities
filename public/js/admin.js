@@ -10,8 +10,8 @@ $(function () {
 
   initList();
   initForm();
-  initImages();
-  initImport();
+  var imagesApi = initImages();
+  initImport(imagesApi);
 
   // ---- list -------------------------------------------------------------------
 
@@ -300,7 +300,7 @@ $(function () {
 
   // ---- AI import (create form) --------------------------------------------------
 
-  function initImport() {
+  function initImport(imagesApi) {
     var $card = $('#import-card');
     if (!$card.length) return;
 
@@ -308,6 +308,26 @@ $(function () {
     var $url = $('#import-url');
     var $button = $('#import-run');
     var $status = $('#import-status');
+    var $fileInput = $('#import-image-input');
+    var $fileName = $('#import-file-name');
+    var $fileText = $('#import-file-text');
+    var selectedFile = null;
+
+    function setSelectedFile(file) {
+      selectedFile = file || null;
+      $fileText.text(selectedFile ? selectedFile.name : '');
+      $fileName.prop('hidden', !selectedFile);
+    }
+
+    $fileInput.on('change', function () {
+      setSelectedFile(this.files && this.files[0]);
+      $fileInput.val(''); // allow re-picking the same file
+      if (selectedFile) setStatus('', null);
+    });
+
+    $('#import-file-clear').on('click', function () {
+      setSelectedFile(null);
+    });
 
     function setStatus(text, kind) {
       $status.text(text || '').removeClass('is-error is-success is-busy');
@@ -350,8 +370,17 @@ $(function () {
 
     function runImport() {
       var url = String($url.val() || '').trim();
-      if (!/^https?:\/\//i.test(url)) {
-        setStatus(t('admin.importer.invalidUrl'), 'error');
+      var request;
+
+      // An image, when selected, wins over the URL field.
+      if (selectedFile) {
+        var formData = new FormData();
+        formData.append('image', selectedFile);
+        request = { data: formData, processData: false, contentType: false };
+      } else if (/^https?:\/\//i.test(url)) {
+        request = { data: JSON.stringify({ url: url }), contentType: 'application/json' };
+      } else {
+        setStatus(t('admin.importer.nothingToImport'), 'error');
         $url.trigger('focus');
         return;
       }
@@ -359,17 +388,13 @@ $(function () {
       $button.prop('disabled', true);
       setStatus(t('admin.importer.loading'), 'busy');
 
-      $.ajax({
-        url: '/admin/import',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ url: url }),
-        timeout: IMPORT_TIMEOUT_MS,
-      })
+      $.ajax($.extend({ url: '/admin/import', method: 'POST', timeout: IMPORT_TIMEOUT_MS }, request))
         .done(function (res) {
           if (res && res.success && res.data) {
             fillForm(res.data);
             setStatus(t('admin.importer.success'), 'success');
+            if (selectedFile) attachPosterImage(selectedFile);
+            setSelectedFile(null);
             $('#title').trigger('focus');
           } else {
             setStatus((res && res.error) || t('admin.importer.error'), 'error');
@@ -381,6 +406,19 @@ $(function () {
         })
         .always(function () {
           $button.prop('disabled', false);
+        });
+    }
+
+    // The analyzed poster usually IS the opportunity visual: upload it and add it
+    // to the images list as a convenience. Failures are silent — the admin can
+    // still add it manually via the images manager.
+    function attachPosterImage(file) {
+      if (!imagesApi) return;
+      var formData = new FormData();
+      formData.append('image', file);
+      $.ajax({ url: '/admin/upload', method: 'POST', data: formData, processData: false, contentType: false })
+        .done(function (res) {
+          if (res && res.success && res.url) imagesApi.addImage(res.url);
         });
     }
 
@@ -396,7 +434,7 @@ $(function () {
 
   function initImages() {
     var $manager = $('#images-manager');
-    if (!$manager.length) return;
+    if (!$manager.length) return null;
 
     var MAX_IMAGES = 10;
     var $hidden = $('#images');
@@ -523,5 +561,8 @@ $(function () {
     });
 
     render();
+
+    // Small API for the AI import: lets it append the analyzed poster to the list.
+    return { addImage: addImage };
   }
 });

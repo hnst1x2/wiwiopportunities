@@ -349,9 +349,20 @@ app.get('/admin/new', requireAdmin, (req, res) => {
   });
 });
 
-// Import IA : extrait les champs d'une page web (Gemini) pour pré-remplir le formulaire.
-// Le résultat est TOUJOURS revu par l'admin avant enregistrement — rien n'est publié ici.
-app.post('/admin/import', requireAdmin, async (req, res) => {
+// Import IA : extrait les champs d'une page web (lien) ou d'une image (affiche, scan)
+// via Gemini pour pré-remplir le formulaire. Le résultat est TOUJOURS revu par l'admin
+// avant enregistrement — rien n'est publié ici. L'image reste en mémoire (jamais sur disque).
+const IMPORT_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
+const importUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
+  fileFilter: (req, file, cb) => {
+    if (IMPORT_IMAGE_MIMES.includes(file.mimetype)) return cb(null, true);
+    cb(new Error('UNSUPPORTED_TYPE'));
+  },
+});
+
+app.post('/admin/import', requireAdmin, (req, res) => {
   const t = res.locals.t;
   const errorMessages = {
     NOT_CONFIGURED: t('admin.importer.notConfigured'),
@@ -359,16 +370,31 @@ app.post('/admin/import', requireAdmin, async (req, res) => {
     FETCH_FAILED: t('admin.importer.fetchFailed'),
     EXTRACT_FAILED: t('admin.importer.extractFailed'),
   };
-  try {
-    const data = await importer.importFromUrl((req.body && req.body.url) || '');
-    res.json({ success: true, data });
-  } catch (err) {
-    console.error(`[import] ${err.message}`);
-    res.status(err.code === 'NOT_CONFIGURED' ? 503 : 400).json({
-      success: false,
-      error: errorMessages[err.code] || t('admin.importer.extractFailed'),
-    });
-  }
+
+  // Multer only parses multipart bodies; JSON {url} requests pass through untouched.
+  importUpload.single('image')(req, res, async (uploadErr) => {
+    if (uploadErr) {
+      const message =
+        uploadErr.message === 'UNSUPPORTED_TYPE'
+          ? t('admin.importer.unsupportedImage')
+          : uploadErr.code === 'LIMIT_FILE_SIZE'
+            ? t('admin.images.tooLarge')
+            : t('admin.importer.extractFailed');
+      return res.status(400).json({ success: false, error: message });
+    }
+    try {
+      const data = req.file
+        ? await importer.importFromImage(req.file.buffer, req.file.mimetype)
+        : await importer.importFromUrl((req.body && req.body.url) || '');
+      res.json({ success: true, data });
+    } catch (err) {
+      console.error(`[import] ${err.message}`);
+      res.status(err.code === 'NOT_CONFIGURED' ? 503 : 400).json({
+        success: false,
+        error: errorMessages[err.code] || t('admin.importer.extractFailed'),
+      });
+    }
+  });
 });
 
 // POST création
