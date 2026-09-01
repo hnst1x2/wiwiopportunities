@@ -89,5 +89,8 @@
   <% if (page === 'admin') { %>
   <script src="/js/admin.js"></script>
   <% } %>
+  <% if (page !== 'admin' && page !== 'admin-login') { %>
+  <script src="/js/assistant.js"></script>
+  <% } %>
 </body>
 </html>

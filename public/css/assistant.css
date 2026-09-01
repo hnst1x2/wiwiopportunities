@@ -1,0 +1,302 @@
+/* Assistant Wiwi — floating chat widget (uses brand-tokens.css variables) */
+
+.assistant-root {
+  position: fixed;
+  right: clamp(14px, 3vw, 28px);
+  bottom: clamp(14px, 3vw, 28px);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  font-family: var(--font-sans);
+}
+
+/* --- launcher ------------------------------------------------------------ */
+
+.assistant-fab {
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--grad-cta);
+  color: var(--ink-on-dark);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.assistant-fab:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.assistant-fab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--shadow-lg);
+}
+
+.assistant-fab.is-open .assistant-fab-icon {
+  display: inline-block;
+  transform: rotate(-8deg);
+}
+
+/* --- panel ---------------------------------------------------------------- */
+
+.assistant-panel {
+  width: min(380px, calc(100vw - 28px));
+  height: min(560px, calc(100vh - 120px));
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-panel);
+  box-shadow: var(--shadow-hero);
+  overflow: hidden;
+}
+
+.assistant-panel[hidden] {
+  display: none;
+}
+
+.assistant-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--grad-card-dark);
+  color: var(--ink-on-dark);
+}
+
+.assistant-head-title {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.assistant-head-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.assistant-icon-btn {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--ink-on-dark);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+
+.assistant-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.assistant-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* --- messages -------------------------------------------------------------- */
+
+.assistant-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-page);
+}
+
+.assistant-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 88%;
+}
+
+.assistant-msg--user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.assistant-msg--bot {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.assistant-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.assistant-msg--user .assistant-bubble {
+  background: var(--violet-nuit);
+  color: var(--ink-on-dark);
+  border-bottom-right-radius: 6px;
+}
+
+.assistant-msg--bot .assistant-bubble {
+  background: var(--bg-card);
+  color: var(--ink);
+  border: 1px solid var(--border-subtle);
+  border-bottom-left-radius: 6px;
+  box-shadow: var(--shadow-xs);
+}
+
+.assistant-bubble--typing {
+  color: var(--ink-3);
+  font-style: italic;
+  animation: assistant-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes assistant-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant-bubble--typing { animation: none; }
+  .assistant-fab:hover { transform: none; }
+}
+
+/* --- opportunity mini-cards -------------------------------------------------- */
+
+.assistant-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.assistant-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-card);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.assistant-card:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.assistant-card-badges .badge {
+  font-size: 11px;
+}
+
+.assistant-card-title {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.assistant-card-meta {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* --- suggestion chips --------------------------------------------------------- */
+
+.assistant-suggestions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.assistant-chip {
+  border: 1px solid var(--border-default);
+  background: var(--bg-card);
+  color: var(--ink-2);
+  border-radius: var(--r-pill);
+  padding: 8px 14px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+
+.assistant-chip:hover {
+  border-color: var(--lilas);
+  color: var(--ink);
+  background: rgba(145, 150, 250, 0.1);
+}
+
+/* --- input row ------------------------------------------------------------------ */
+
+.assistant-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.assistant-form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-pill);
+  padding: 10px 16px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--bg-page);
+}
+
+.assistant-form input:focus-visible {
+  outline: none;
+  border-color: var(--lilas);
+  box-shadow: var(--focus-ring);
+}
+
+.assistant-send {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--violet-nuit);
+  color: var(--ink-on-dark);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+
+.assistant-send:hover {
+  background: var(--violet-nuit-hover);
+}
+
+.assistant-send:disabled,
+.assistant-form input:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* --- mobile ------------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .assistant-panel {
+    width: calc(100vw - 20px);
+    height: min(70vh, 560px);
+  }
+}

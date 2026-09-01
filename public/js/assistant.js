@@ -1,0 +1,199 @@
+// public/js/assistant.js — floating "Wiwi" chat widget (all public pages).
+// Talks to POST /api/assistant; the conversation survives page navigation via
+// sessionStorage so a visitor can browse cards without losing the thread.
+(function ($, Wiwi) {
+  'use strict';
+
+  if (!$ || !Wiwi) return;
+
+  var t = Wiwi.t;
+  var esc = Wiwi.esc;
+  var STORAGE_KEY = 'wiwi_assistant_chat';
+  var MAX_MESSAGE_LENGTH = 600;
+  var HISTORY_SENT = 8;
+
+  var messages = loadMessages();
+  var pending = false;
+
+  function loadMessages() {
+    try {
+      var raw = sessionStorage.getItem(STORAGE_KEY);
+      var parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveMessages() {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch (e) {}
+  }
+
+  function suggestions() {
+    var list = window.I18N && window.I18N.strings && window.I18N.strings.assistant && window.I18N.strings.assistant.suggestions;
+    return Array.isArray(list) ? list : [];
+  }
+
+  // ---- rendering ---------------------------------------------------------------
+
+  function miniCardHtml(o) {
+    var deadline = Wiwi.deadlineInfo(o);
+    return (
+      '<a class="assistant-card" href="/detail?id=' + encodeURIComponent(o.id) + '">' +
+      '<span class="assistant-card-badges">' + Wiwi.typeBadge(o) + '</span>' +
+      '<span class="assistant-card-title">' + esc(o.title) + '</span>' +
+      '<span class="assistant-card-meta">' +
+      esc(Wiwi.placeLabel(o)) +
+      (deadline ? ' · ' + esc(deadline.text) : '') +
+      '</span>' +
+      '</a>'
+    );
+  }
+
+  function messageHtml(entry) {
+    var text = esc(entry.text).replace(/\n/g, '<br>');
+    var cards = (entry.opps || []).map(miniCardHtml).join('');
+    return (
+      '<div class="assistant-msg assistant-msg--' + (entry.role === 'user' ? 'user' : 'bot') + '">' +
+      '<div class="assistant-bubble">' + text + '</div>' +
+      (cards ? '<div class="assistant-cards">' + cards + '</div>' : '') +
+      '</div>'
+    );
+  }
+
+  function renderMessages() {
+    var $body = $('#assistant-messages');
+    var html = messageHtml({ role: 'bot', text: t('assistant.greeting') });
+    html += messages.map(messageHtml).join('');
+    if (!messages.length) {
+      html +=
+        '<div class="assistant-suggestions">' +
+        suggestions()
+          .map(function (text) {
+            return '<button type="button" class="assistant-chip" data-suggestion="' + esc(text) + '">' + esc(text) + '</button>';
+          })
+          .join('') +
+        '</div>';
+    }
+    if (pending) {
+      html += '<div class="assistant-msg assistant-msg--bot"><div class="assistant-bubble assistant-bubble--typing">' + esc(t('assistant.typing')) + '</div></div>';
+    }
+    $body.html(html);
+    $body.scrollTop($body[0].scrollHeight);
+  }
+
+  // ---- API ----------------------------------------------------------------------
+
+  function send(text) {
+    var message = String(text || '').trim().slice(0, MAX_MESSAGE_LENGTH);
+    if (!message || pending) return;
+
+    messages.push({ role: 'user', text: message });
+    saveMessages();
+    pending = true;
+    renderMessages();
+    $('#assistant-input').val('');
+    setBusy(true);
+
+    var history = messages.slice(-HISTORY_SENT - 1, -1).map(function (entry) {
+      return { role: entry.role === 'user' ? 'user' : 'assistant', text: entry.text };
+    });
+
+    $.ajax({
+      url: '/api/assistant',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ message: message, history: history }),
+    })
+      .done(function (res) {
+        if (res && res.success && res.reply) {
+          messages.push({ role: 'bot', text: res.reply, opps: res.opportunities || [] });
+        } else {
+          messages.push({ role: 'bot', text: t('assistant.error') });
+        }
+      })
+      .fail(function (xhr) {
+        var serverError = xhr && xhr.responseJSON && xhr.responseJSON.error;
+        messages.push({ role: 'bot', text: serverError || t('assistant.error') });
+      })
+      .always(function () {
+        pending = false;
+        saveMessages();
+        setBusy(false);
+        renderMessages();
+        $('#assistant-input').trigger('focus');
+      });
+  }
+
+  function setBusy(busy) {
+    $('#assistant-input, #assistant-send').prop('disabled', busy);
+  }
+
+  // ---- widget shell ---------------------------------------------------------------
+
+  function widgetHtml() {
+    return (
+      '<div class="assistant-root">' +
+      '<div class="assistant-panel" id="assistant-panel" role="dialog" aria-label="' + esc(t('assistant.title')) + '" hidden>' +
+      '<div class="assistant-head">' +
+      '<span class="assistant-head-title">💬 ' + esc(t('assistant.title')) + '</span>' +
+      '<span class="assistant-head-actions">' +
+      '<button type="button" class="assistant-icon-btn" id="assistant-clear" title="' + esc(t('assistant.clear')) + '" aria-label="' + esc(t('assistant.clear')) + '">↺</button>' +
+      '<button type="button" class="assistant-icon-btn" id="assistant-close" aria-label="' + esc(t('assistant.close')) + '">✕</button>' +
+      '</span>' +
+      '</div>' +
+      '<div class="assistant-messages" id="assistant-messages" aria-live="polite"></div>' +
+      '<form class="assistant-form" id="assistant-form">' +
+      '<input type="text" id="assistant-input" maxlength="' + MAX_MESSAGE_LENGTH + '" placeholder="' + esc(t('assistant.placeholder')) + '" autocomplete="off" />' +
+      '<button type="submit" class="assistant-send" id="assistant-send" aria-label="' + esc(t('assistant.send')) + '">➤</button>' +
+      '</form>' +
+      '</div>' +
+      '<button type="button" class="assistant-fab" id="assistant-fab" aria-expanded="false" aria-label="' + esc(t('assistant.open')) + '">' +
+      '<span class="assistant-fab-icon">💬</span>' +
+      '</button>' +
+      '</div>'
+    );
+  }
+
+  function togglePanel(open) {
+    var $panel = $('#assistant-panel');
+    var show = typeof open === 'boolean' ? open : $panel.prop('hidden');
+    $panel.prop('hidden', !show);
+    $('#assistant-fab')
+      .attr('aria-expanded', show ? 'true' : 'false')
+      .attr('aria-label', t(show ? 'assistant.close' : 'assistant.open'))
+      .toggleClass('is-open', show);
+    if (show) {
+      renderMessages();
+      $('#assistant-input').trigger('focus');
+    }
+  }
+
+  $(function () {
+    $('body').append(widgetHtml());
+
+    $('#assistant-fab').on('click', function () {
+      togglePanel();
+    });
+    $('#assistant-close').on('click', function () {
+      togglePanel(false);
+    });
+    $('#assistant-clear').on('click', function () {
+      messages = [];
+      saveMessages();
+      renderMessages();
+    });
+    $('#assistant-form').on('submit', function (event) {
+      event.preventDefault();
+      send($('#assistant-input').val());
+    });
+    $(document).on('click', '.assistant-chip', function () {
+      send($(this).data('suggestion'));
+    });
+    $(document).on('keydown', function (event) {
+      if (event.key === 'Escape' && !$('#assistant-panel').prop('hidden')) togglePanel(false);
+    });
+  });
+})(window.jQuery, window.Wiwi);

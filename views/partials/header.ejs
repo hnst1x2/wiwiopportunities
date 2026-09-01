@@ -40,6 +40,9 @@
   <% if (page === 'admin') { %>
   <link rel="stylesheet" href="/css/admin.css" />
   <% } %>
+  <% if (page !== 'admin' && page !== 'admin-login') { %>
+  <link rel="stylesheet" href="/css/assistant.css" />
+  <% } %>
 </head>
 <body>
   <a class="skip-link" href="#main"><%= t('nav.skip') %></a>

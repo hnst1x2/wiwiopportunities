@@ -11,6 +11,7 @@ const db = require('./db');
 const mailer = require('./mailer');
 const importer = require('./importer');
 const imageSuggestions = require('./imageSuggestions');
+const assistant = require('./assistant');
 const usersDb = require('./usersDb');
 const userRoutes = require('./userRoutes');
 const SQLiteSessionStore = require('./sessionStore');
@@ -602,6 +603,71 @@ app.get('/api/opportunities', (req, res) => {
   }
 
   res.json(data);
+});
+
+// --- Assistant virtuel (widget de chat public) ---
+// Protégé par un double plafond : par IP (anti-abus) et global par jour, car le
+// quota gratuit Gemini Flash Lite est de 500 requêtes/jour pour tout le site.
+const ASSISTANT_IP_LIMIT = 10;
+const ASSISTANT_IP_WINDOW_MS = 5 * 60 * 1000;
+const ASSISTANT_DAILY_LIMIT = Number(process.env.ASSISTANT_DAILY_LIMIT) || 300;
+const assistantIpBuckets = new Map();
+let assistantDaily = { day: '', count: 0 };
+
+function assistantRateLimit(req, res, next) {
+  const now = Date.now();
+  const today = getTodayString();
+  if (assistantDaily.day !== today) assistantDaily = { day: today, count: 0 };
+  if (assistantDaily.count >= ASSISTANT_DAILY_LIMIT) {
+    return res.status(429).json({ success: false, error: res.locals.t('assistant.tooMany') });
+  }
+  const bucket = assistantIpBuckets.get(req.ip);
+  if (bucket && now - bucket.start < ASSISTANT_IP_WINDOW_MS) {
+    if (bucket.count >= ASSISTANT_IP_LIMIT) {
+      return res.status(429).json({ success: false, error: res.locals.t('assistant.tooMany') });
+    }
+    bucket.count += 1;
+  } else {
+    // Reset amorti des fenêtres expirées pour que la Map ne grossisse pas indéfiniment.
+    if (assistantIpBuckets.size > 1000) {
+      for (const [ip, b] of assistantIpBuckets) {
+        if (now - b.start >= ASSISTANT_IP_WINDOW_MS) assistantIpBuckets.delete(ip);
+      }
+    }
+    assistantIpBuckets.set(req.ip, { start: now, count: 1 });
+  }
+  assistantDaily.count += 1;
+  next();
+}
+
+app.post('/api/assistant', assistantRateLimit, async (req, res) => {
+  const t = res.locals.t;
+  if (!assistant.isConfigured()) {
+    return res.status(503).json({ success: false, error: t('assistant.offline') });
+  }
+  const message = String((req.body && req.body.message) || '').trim();
+  if (!message || message.length > assistant.MAX_MESSAGE_LENGTH) {
+    return res.status(400).json({ success: false, error: t('assistant.error') });
+  }
+  try {
+    const active = db.listOpportunities().filter(isActiveOpportunity);
+    const { reply, ids } = await assistant.chat({
+      message,
+      history: req.body && req.body.history,
+      lang: res.locals.lang,
+      opportunities: active,
+      today: getTodayString(),
+    });
+    // Cartes renvoyées sous la même forme que /api/opportunities pour réutiliser le rendu client.
+    const byId = new Map(active.map((o) => [o.id, o]));
+    const opportunities = ids.map((id) => byId.get(id)).filter(Boolean);
+    res.json({ success: true, reply, opportunities });
+  } catch (err) {
+    console.error(`[assistant] ${err.message}`);
+    const status = err.code === 'NOT_CONFIGURED' ? 503 : err.code === 'QUOTA' ? 429 : 502;
+    const key = err.code === 'QUOTA' ? 'assistant.tooMany' : err.code === 'NOT_CONFIGURED' ? 'assistant.offline' : 'assistant.error';
+    res.status(status).json({ success: false, error: t(key) });
+  }
 });
 
 // GET /api/opportunities/:id

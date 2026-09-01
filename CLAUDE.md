@@ -38,6 +38,7 @@ No test or lint commands are configured.
 | `GET /api/opportunities` | List with query filters (country, type, funding, search, tag, status) |
 | `GET /api/opportunities/:id` | Single opportunity JSON |
 | `POST /api/opportunities` | Create (public, no auth) |
+| `POST /api/assistant` | Visitor chat assistant (Gemini Flash Lite, rate-limited per IP + global daily cap) |
 | `POST /newsletter` | Email subscription |
 | `GET/POST /admin/*` | Admin CRUD (protected by `requireAdmin` middleware) |
 
