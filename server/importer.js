@@ -1,21 +1,15 @@
 // AI import: fetch an opportunity page and extract the platform fields with the
 // Gemini API (free tier). Used by the admin "Import from URL" feature — the result
 // pre-fills the create form, it is never published without human review.
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const { callGemini, isConfigured } = require('./gemini');
 
 const FETCH_TIMEOUT_MS = 15000;
-const GEMINI_TIMEOUT_MS = 60000;
 const MAX_PAGE_CHARS = 18000;
 const MAX_TAGS = 5;
 
 const TYPE_VALUES = ['Stage', 'Bourse', 'Volontariat', 'Job', 'Études'];
 const FUNDING_VALUES = ['fully', 'partial', 'none'];
 const DOMAIN_VALUES = ['it', 'marketing', 'business', 'studies', 'humanitarian'];
-
-function isConfigured() {
-  return Boolean(process.env.GEMINI_API_KEY);
-}
 
 // Only public http(s) targets: the URL comes from the admin, but the server should
 // still refuse to fetch itself or anything on the local network (SSRF guard).
@@ -140,41 +134,6 @@ const RESPONSE_SCHEMA = {
   required: ['title', 'country', 'type'],
 };
 
-async function callGemini(parts) {
-  const response = await fetch(GEMINI_ENDPOINT, {
-    method: 'POST',
-    signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': process.env.GEMINI_API_KEY,
-    },
-    body: JSON.stringify({
-      contents: [{ parts }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: RESPONSE_SCHEMA,
-        temperature: 0.2,
-      },
-    }),
-  });
-  const payload = await response.json().catch(() => null);
-  if (!response.ok) {
-    const message = payload && payload.error && payload.error.message ? payload.error.message : `HTTP ${response.status}`;
-    throw new Error(`Gemini API error: ${message}`);
-  }
-  const text =
-    payload &&
-    payload.candidates &&
-    payload.candidates[0] &&
-    payload.candidates[0].content &&
-    payload.candidates[0].content.parts &&
-    payload.candidates[0].content.parts.map((part) => part.text || '').join('');
-  if (!text) {
-    throw new Error('Gemini API returned no content');
-  }
-  return JSON.parse(text);
-}
-
 function cleanString(value, maxLength) {
   if (typeof value !== 'string') return '';
   return value.trim().slice(0, maxLength);
@@ -235,7 +194,7 @@ async function importFromUrl(rawUrl) {
 
   try {
     const today = new Date().toISOString().slice(0, 10);
-    const raw = await callGemini([{ text: buildPagePrompt(pageText, url, today) }]);
+    const raw = await callGemini([{ text: buildPagePrompt(pageText, url, today) }], RESPONSE_SCHEMA);
     return normalizeExtraction(raw || {}, url); // the source URL is always the apply link
   } catch (err) {
     throw Object.assign(new Error(`extraction failed: ${err.message}`), { code: 'EXTRACT_FAILED' });
@@ -250,10 +209,13 @@ async function importFromImage(buffer, mimeType) {
   }
   try {
     const today = new Date().toISOString().slice(0, 10);
-    const raw = await callGemini([
-      { text: buildImagePrompt(today) },
-      { inline_data: { mime_type: mimeType, data: buffer.toString('base64') } },
-    ]);
+    const raw = await callGemini(
+      [
+        { text: buildImagePrompt(today) },
+        { inline_data: { mime_type: mimeType, data: buffer.toString('base64') } },
+      ],
+      RESPONSE_SCHEMA
+    );
     return normalizeExtraction(raw || {}, safeApplyLink(raw && raw.link));
   } catch (err) {
     throw Object.assign(new Error(`image extraction failed: ${err.message}`), { code: 'EXTRACT_FAILED' });

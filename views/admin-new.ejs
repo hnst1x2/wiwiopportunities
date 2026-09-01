@@ -20,6 +20,11 @@
       <button type="button" class="import-file-clear" id="import-file-clear" aria-label="<%= t('admin.importer.clearImage') %>">✕</button>
     </p>
     <p class="import-status" id="import-status" role="status" aria-live="polite"></p>
+    <div class="import-suggestions" id="import-suggestions" hidden>
+      <p class="import-suggestions-title"><%= t('admin.importer.suggestionsTitle') %></p>
+      <div class="import-suggestions-grid" id="import-suggestions-grid"></div>
+      <p class="import-suggestions-credit"><%= t('admin.importer.suggestionsCredit') %></p>
+    </div>
   </section>
   <% } %>
 

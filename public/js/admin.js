@@ -395,6 +395,7 @@ $(function () {
             setStatus(t('admin.importer.success'), 'success');
             if (selectedFile) attachPosterImage(selectedFile);
             setSelectedFile(null);
+            loadSuggestions(res.data.city, res.data.country);
             $('#title').trigger('focus');
           } else {
             setStatus((res && res.error) || t('admin.importer.error'), 'error');
@@ -408,6 +409,50 @@ $(function () {
           $button.prop('disabled', false);
         });
     }
+
+    // Destination photos (Wikimedia Commons, curated server-side): shown as a
+    // click-to-add grid. Purely a convenience — silent when nothing comes back.
+    function loadSuggestions(city, country) {
+      var $box = $('#import-suggestions');
+      var $grid = $('#import-suggestions-grid');
+      $box.prop('hidden', true);
+      $grid.empty();
+      if (!imagesApi || (!city && !country)) return;
+
+      $.ajax({
+        url: '/admin/image-suggestions',
+        method: 'GET',
+        data: { city: city || '', country: country || '' },
+        timeout: IMPORT_TIMEOUT_MS,
+      }).done(function (res) {
+        var images = res && res.success && Array.isArray(res.images) ? res.images : [];
+        if (!images.length) return;
+        $grid.html(
+          images
+            .map(function (img) {
+              var safe = W.safeImageUrl(img.url);
+              if (!safe) return '';
+              return (
+                '<button type="button" class="import-suggestion" data-url="' + esc(safe) + '"' +
+                  ' title="' + esc(t('admin.importer.suggestionsAdd')) + '">' +
+                  '<img src="' + esc(safe) + '" alt="' + esc(img.title || '') + '" loading="lazy" />' +
+                  '<span class="import-suggestion-check" aria-hidden="true">✓</span>' +
+                '</button>'
+              );
+            })
+            .join('')
+        );
+        $box.prop('hidden', false);
+      });
+    }
+
+    $('#import-suggestions-grid').on('click', '.import-suggestion', function () {
+      var $tile = $(this);
+      if (!imagesApi || $tile.hasClass('is-added')) return;
+      if (imagesApi.addImage(String($tile.data('url')))) {
+        $tile.addClass('is-added').attr('title', t('admin.importer.suggestionsAdded'));
+      }
+    });
 
     // The analyzed poster usually IS the opportunity visual: upload it and add it
     // to the images list as a convenience. Failures are silent — the admin can

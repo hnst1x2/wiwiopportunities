@@ -10,6 +10,7 @@ const translations = require('./i18n/translations');
 const db = require('./db');
 const mailer = require('./mailer');
 const importer = require('./importer');
+const imageSuggestions = require('./imageSuggestions');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -428,6 +429,24 @@ app.post('/admin/new', requireAdmin, (req, res) => {
   });
 
   res.redirect('/admin');
+});
+
+// Suggestions d'images de destination (Wikimedia Commons, filtrées par Gemini).
+// Appelé par le formulaire après un import réussi ; l'admin choisit ce qu'il ajoute.
+app.get('/admin/image-suggestions', requireAdmin, async (req, res) => {
+  const city = String(req.query.city || '').trim().slice(0, 80);
+  const country = String(req.query.country || '').trim().slice(0, 80);
+  if (!city && !country) {
+    return res.status(400).json({ success: false, images: [] });
+  }
+  try {
+    const images = await imageSuggestions.suggestImages(city, country);
+    res.json({ success: true, images });
+  } catch (err) {
+    console.error(`[image-suggestions] ${err.message}`);
+    // Suggestions are a convenience: report an empty list rather than an error state.
+    res.json({ success: true, images: [] });
+  }
 });
 
 // Formulaire édition
