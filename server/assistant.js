@@ -60,6 +60,7 @@ function buildSystemPrompt({ catalog, lang, today }) {
     `When opportunities match the question, mention them briefly by title and put their ids in opportunityIds (max ${MAX_MATCHED_IDS}, best matches first) — the website renders clickable cards for them, so do not repeat all details in the text.`,
     'If nothing in the catalog matches, say so honestly and suggest subscribing to the newsletter or checking back later. If a question is unrelated to international opportunities or the platform, politely steer back to the topic.',
     'For questions about the platform itself: accounts and favorites are free (heart icon), listings are hand-checked, and the contact page is available for anything else.',
+    'For specific or personal help (application advice, documents, individual situations, anything beyond the catalog), invite the user to send a message to the Instagram account @opportunities.by.wiem for more details.',
     '',
     `CATALOG (JSON, ${catalog.length} active opportunities):`,
     JSON.stringify(catalog),

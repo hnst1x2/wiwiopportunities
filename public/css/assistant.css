@@ -241,6 +241,73 @@
   background: rgba(145, 150, 250, 0.1);
 }
 
+/* --- login prompt (members-only) -------------------------------------------------- */
+
+.assistant-auth {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.assistant-auth-btn {
+  display: inline-block;
+  padding: 9px 16px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-default);
+  background: var(--bg-card);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+
+.assistant-auth-btn:hover {
+  text-decoration: none;
+  border-color: var(--lilas);
+  background: rgba(145, 150, 250, 0.1);
+  color: var(--ink);
+}
+
+.assistant-auth-btn--primary {
+  background: var(--violet-nuit);
+  border-color: var(--violet-nuit);
+  color: var(--ink-on-dark);
+}
+
+.assistant-auth-btn--primary:hover {
+  background: var(--violet-nuit-hover);
+  border-color: var(--violet-nuit-hover);
+  color: var(--ink-on-dark);
+}
+
+/* --- Instagram footer -------------------------------------------------------------- */
+
+.assistant-insta {
+  display: block;
+  padding: 9px 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-3);
+  background: var(--bg-chip);
+  border-top: 1px solid var(--border-subtle);
+  text-decoration: none;
+}
+
+.assistant-insta strong {
+  color: var(--link);
+}
+
+.assistant-insta:hover {
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.assistant-insta:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* --- input row ------------------------------------------------------------------ */
 
 .assistant-form {

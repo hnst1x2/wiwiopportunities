@@ -15,6 +15,37 @@
   var messages = loadMessages();
   var pending = false;
 
+  // The assistant is members-only: the widget checks /api/me (cached by shared.js)
+  // before enabling the input, and falls back to a login prompt on any 401.
+  function ensureMe(callback) {
+    var me = Wiwi.getMe();
+    if (me.loaded) return callback(me);
+    Wiwi.loadMe(callback);
+  }
+
+  function loginUrl(path) {
+    return path + '?next=' + encodeURIComponent(window.location.pathname + window.location.search);
+  }
+
+  function loginPromptHtml() {
+    return (
+      '<div class="assistant-msg assistant-msg--bot">' +
+      '<div class="assistant-bubble">' + esc(t('assistant.loginPrompt')) + '</div>' +
+      '<div class="assistant-auth">' +
+      '<a class="assistant-auth-btn assistant-auth-btn--primary" href="' + esc(loginUrl('/login')) + '">' + esc(t('assistant.loginBtn')) + '</a>' +
+      '<a class="assistant-auth-btn" href="' + esc(loginUrl('/register')) + '">' + esc(t('assistant.registerBtn')) + '</a>' +
+      '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderLoginPrompt() {
+    var $body = $('#assistant-messages');
+    $body.html(messageHtml({ role: 'bot', text: t('assistant.greeting') }) + loginPromptHtml());
+    $body.scrollTop($body[0].scrollHeight);
+    setBusy(true);
+  }
+
   function loadMessages() {
     try {
       var raw = sessionStorage.getItem(STORAGE_KEY);
@@ -100,6 +131,7 @@
     var history = messages.slice(-HISTORY_SENT - 1, -1).map(function (entry) {
       return { role: entry.role === 'user' ? 'user' : 'assistant', text: entry.text };
     });
+    var authFailed = false;
 
     $.ajax({
       url: '/api/assistant',
@@ -115,12 +147,22 @@
         }
       })
       .fail(function (xhr) {
+        if (xhr && xhr.status === 401) {
+          // Session expirée entre-temps : on retire le message envoyé et on repasse au prompt de connexion.
+          authFailed = true;
+          messages.pop();
+          return;
+        }
         var serverError = xhr && xhr.responseJSON && xhr.responseJSON.error;
         messages.push({ role: 'bot', text: serverError || t('assistant.error') });
       })
       .always(function () {
         pending = false;
         saveMessages();
+        if (authFailed) {
+          renderLoginPrompt();
+          return;
+        }
         setBusy(false);
         renderMessages();
         $('#assistant-input').trigger('focus');
@@ -149,6 +191,9 @@
       '<input type="text" id="assistant-input" maxlength="' + MAX_MESSAGE_LENGTH + '" placeholder="' + esc(t('assistant.placeholder')) + '" autocomplete="off" />' +
       '<button type="submit" class="assistant-send" id="assistant-send" aria-label="' + esc(t('assistant.send')) + '">➤</button>' +
       '</form>' +
+      '<a class="assistant-insta" href="' + esc(window.WIWI_INSTAGRAM || 'https://www.instagram.com/opportunities.by.wiem/') + '" target="_blank" rel="noopener">' +
+      esc(t('assistant.instaFooter')) + ' <strong>@opportunities.by.wiem</strong>' +
+      '</a>' +
       '</div>' +
       '<button type="button" class="assistant-fab" id="assistant-fab" aria-expanded="false" aria-label="' + esc(t('assistant.open')) + '">' +
       '<span class="assistant-fab-icon">💬</span>' +
@@ -167,7 +212,14 @@
       .toggleClass('is-open', show);
     if (show) {
       renderMessages();
-      $('#assistant-input').trigger('focus');
+      ensureMe(function (me) {
+        if (!me.user) {
+          renderLoginPrompt();
+        } else {
+          setBusy(false);
+          $('#assistant-input').trigger('focus');
+        }
+      });
     }
   }
 

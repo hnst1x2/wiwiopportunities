@@ -37,6 +37,7 @@
       lang: "<%= lang %>",
       strings: <%- JSON.stringify(i18n).replace(/</g, String.fromCharCode(92) + 'u003c') %>
     };
+    window.WIWI_INSTAGRAM = "<%= site.social.instagram %>";
     (function () {
       var key = 'wiwi_lang';
       var current = "<%= lang %>";

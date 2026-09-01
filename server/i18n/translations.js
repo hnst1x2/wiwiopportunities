@@ -432,6 +432,11 @@ const translations = {
       error: 'Oups, une erreur est survenue. Réessaie dans un instant.',
       offline: "L'assistant n'est pas disponible pour le moment.",
       tooMany: 'Trop de messages d\'un coup. Réessaie dans quelques minutes.',
+      loginRequired: 'Connecte-toi pour discuter avec Wiwi.',
+      loginPrompt: 'L\'assistant est réservé aux membres. Connecte-toi ou crée un compte gratuit pour discuter avec Wiwi !',
+      loginBtn: 'Se connecter',
+      registerBtn: 'Créer un compte',
+      instaFooter: 'Plus de détails ou aide personnalisée ? Écris-nous sur Instagram',
       clear: 'Nouvelle conversation',
       suggestions: [
         'Quelles bourses sont ouvertes en ce moment ?',
@@ -829,6 +834,11 @@ const translations = {
       error: 'Oops, something went wrong. Try again in a moment.',
       offline: 'The assistant is unavailable right now.',
       tooMany: 'Too many messages at once. Try again in a few minutes.',
+      loginRequired: 'Log in to chat with Wiwi.',
+      loginPrompt: 'The assistant is for members only. Log in or create a free account to chat with Wiwi!',
+      loginBtn: 'Log in',
+      registerBtn: 'Create an account',
+      instaFooter: 'More details or personalized help? Message us on Instagram',
       clear: 'New conversation',
       suggestions: [
         'Which scholarships are open right now?',

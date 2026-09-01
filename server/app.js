@@ -614,6 +614,13 @@ const ASSISTANT_DAILY_LIMIT = Number(process.env.ASSISTANT_DAILY_LIMIT) || 300;
 const assistantIpBuckets = new Map();
 let assistantDaily = { day: '', count: 0 };
 
+// Réservé aux membres connectés : évite l'abus anonyme du quota Gemini partagé
+// et le client sait proposer connexion/inscription via loginRequired.
+function requireMemberForAssistant(req, res, next) {
+  if (req.session && req.session.userId && res.locals.user) return next();
+  return res.status(401).json({ success: false, loginRequired: true, error: res.locals.t('assistant.loginRequired') });
+}
+
 function assistantRateLimit(req, res, next) {
   const now = Date.now();
   const today = getTodayString();
@@ -640,7 +647,7 @@ function assistantRateLimit(req, res, next) {
   next();
 }
 
-app.post('/api/assistant', assistantRateLimit, async (req, res) => {
+app.post('/api/assistant', requireMemberForAssistant, assistantRateLimit, async (req, res) => {
   const t = res.locals.t;
   if (!assistant.isConfigured()) {
     return res.status(503).json({ success: false, error: t('assistant.offline') });
