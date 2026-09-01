@@ -68,20 +68,27 @@ function getCookieLang(req) {
   return translations[value] ? value : null;
 }
 
-function getTranslation(lang, key) {
+function getTranslation(lang, key, vars) {
   const parts = key.split('.');
   let current = translations[lang];
   for (const part of parts) {
     if (!current || typeof current !== 'object') return key;
     current = current[part];
   }
-  return current || key;
+  const value = current || key;
+  // {placeholder} interpolation, mirroring the client-side t() in shared.js.
+  if (typeof value === 'string' && vars) {
+    return value.replace(/\{(\w+)\}/g, (match, name) =>
+      Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match
+    );
+  }
+  return value;
 }
 
 app.use((req, res, next) => {
   const lang = getCookieLang(req) || DEFAULT_LANG;
   res.locals.lang = lang;
-  res.locals.t = (key) => getTranslation(lang, key);
+  res.locals.t = (key, vars) => getTranslation(lang, key, vars);
   res.locals.i18n = translations[lang];
   next();
 });
