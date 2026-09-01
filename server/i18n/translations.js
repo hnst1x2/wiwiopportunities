@@ -359,6 +359,8 @@ const translations = {
       haveAccount: 'Déjà un compte ?',
       noAccount: 'Pas encore de compte ?',
       passwordHint: '8 caractères minimum.',
+      registerPrefsTitle: 'Tes préférences',
+      registerPrefsHint: "Optionnel — elles personnalisent la section « Pour toi » sur l'accueil, et restent modifiables dans « Mon compte ».",
       fields: {
         name: 'Prénom / Nom',
         email: 'Email',
@@ -736,6 +738,8 @@ const translations = {
       haveAccount: 'Already have an account?',
       noAccount: 'No account yet?',
       passwordHint: 'At least 8 characters.',
+      registerPrefsTitle: 'Your preferences',
+      registerPrefsHint: 'Optional — they personalize the "For you" section on the home page, and can be changed anytime in "My account".',
       fields: {
         name: 'Name',
         email: 'Email',

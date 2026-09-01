@@ -1,7 +1,7 @@
 <%- include('partials/header', { title: t('meta.registerTitle'), page: 'account', baseUrl }) %>
 
 <main id="main" class="container auth-page">
-  <div class="auth-card">
+  <div class="auth-card auth-card--wide">
     <img src="/img/opportunities-by-wiem-avatar.svg" alt="" width="44" height="44" class="auth-mark" />
     <h1 class="auth-title"><%= t('account.registerTitle') %></h1>
     <p class="auth-intro"><%= t('account.registerIntro') %></p>
@@ -20,6 +20,20 @@
         <label class="field-label" for="password"><%= t('account.fields.password') %> <span class="required">*</span></label>
         <input class="field" id="password" type="password" name="password" autocomplete="new-password" minlength="8" required />
         <p class="field-hint"><%= t('account.passwordHint') %></p>
+      </div>
+
+      <div class="auth-prefs">
+        <p class="auth-prefs-title"><%= t('account.registerPrefsTitle') %></p>
+        <p class="auth-prefs-hint"><%= t('account.registerPrefsHint') %></p>
+        <%- include('partials/pref-fields', {
+          prefTypes,
+          prefDomains,
+          selected: {
+            types: values.prefTypes || [],
+            domains: values.prefDomains || [],
+            countries: values.prefCountries || [],
+          },
+        }) %>
       </div>
 
       <% if (error) { %>

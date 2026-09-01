@@ -1,0 +1,34 @@
+<%
+  // Preference fields shared by the register and account forms.
+  // Expects: prefTypes / prefDomains (option lists) and selected { types, domains, countries } (arrays).
+  const TYPE_LABEL_KEYS = { 'Stage': 'stage', 'Bourse': 'scholarship', 'Volontariat': 'volunteering', 'Job': 'job', 'Études': 'studies' };
+%>
+<div class="form-field">
+  <span class="field-label"><%= t('account.prefsTypes') %></span>
+  <div class="pref-checks">
+    <% prefTypes.forEach((value) => { %>
+    <label class="pref-check">
+      <input type="checkbox" name="prefTypes" value="<%= value %>" <%= selected.types.includes(value) ? 'checked' : '' %> />
+      <span><%= t('options.types.' + TYPE_LABEL_KEYS[value]) %></span>
+    </label>
+    <% }) %>
+  </div>
+</div>
+
+<div class="form-field">
+  <span class="field-label"><%= t('account.prefsDomains') %></span>
+  <div class="pref-checks">
+    <% prefDomains.forEach((value) => { %>
+    <label class="pref-check">
+      <input type="checkbox" name="prefDomains" value="<%= value %>" <%= selected.domains.includes(value) ? 'checked' : '' %> />
+      <span><%= t('options.domains.' + value) %></span>
+    </label>
+    <% }) %>
+  </div>
+</div>
+
+<div class="form-field">
+  <label class="field-label" for="prefCountries"><%= t('account.prefsCountries') %></label>
+  <input class="field" id="prefCountries" name="prefCountries" value="<%= selected.countries.join(', ') %>" placeholder="<%= t('account.prefsCountriesPlaceholder') %>" />
+  <p class="field-hint"><%= t('account.prefsCountriesHint') %></p>
+</div>

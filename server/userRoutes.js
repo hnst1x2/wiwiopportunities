@@ -32,12 +32,11 @@ function rateLimit(req, res, next) {
   }
   bucket.count += 1;
   if (bucket.count > RATE_MAX_ATTEMPTS) {
-    return res.status(429).render(req.path === '/register' ? 'register' : 'login', {
-      page: 'account',
-      title: res.locals.t('meta.loginTitle'),
-      baseUrl: process.env.PUBLIC_BASE_URL || '',
+    const isRegister = req.path === '/register';
+    res.status(429);
+    return renderAuthPage(res, isRegister ? 'register' : 'login', {
+      title: res.locals.t(isRegister ? 'meta.registerTitle' : 'meta.loginTitle'),
       error: res.locals.t('account.errors.tooMany'),
-      values: {},
       next: safeNext(req.body && req.body.next),
     });
   }
@@ -93,6 +92,8 @@ function renderAuthPage(res, view, options) {
     error: null,
     values: {},
     next: '',
+    prefTypes: PREF_TYPES,
+    prefDomains: PREF_DOMAINS,
     ...options,
   });
 }
@@ -128,21 +129,30 @@ router.post('/register', rateLimit, (req, res) => {
   const next = safeNext(req.body.next);
   const t = res.locals.t;
 
-  const fail = (error) =>
-    res.status(400).render('register', {
-      page: 'account',
-      baseUrl: process.env.PUBLIC_BASE_URL || '',
+  // Preferences are part of the signup form so a new member lands with a
+  // working "Pour toi" section right away.
+  const prefs = {
+    prefTypes: cleanPrefList(req.body.prefTypes, PREF_TYPES),
+    prefDomains: cleanPrefList(req.body.prefDomains, PREF_DOMAINS),
+    prefCountries: cleanPrefList(req.body.prefCountries, null),
+  };
+
+  const fail = (error) => {
+    res.status(400);
+    renderAuthPage(res, 'register', {
       title: t('meta.registerTitle'),
       error,
-      values: { email, name },
+      values: { email, name, ...prefs },
       next,
     });
+  };
 
   if (!EMAIL_PATTERN.test(email)) return fail(t('account.errors.invalidEmail'));
   if (password.length < PASSWORD_MIN_LENGTH) return fail(t('account.errors.passwordTooShort'));
   if (usersDb.emailExists(email)) return fail(t('account.errors.emailTaken'));
 
   const userId = usersDb.createUser({ email, passwordHash: hashPassword(password), name });
+  usersDb.updateProfile(userId, { name, ...prefs });
   req.session.regenerate((err) => {
     if (err) return fail(t('account.errors.generic'));
     req.session.userId = userId;

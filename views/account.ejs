@@ -24,35 +24,11 @@
       <input class="field" id="name" name="name" value="<%= account.name || '' %>" autocomplete="name" maxlength="80" />
     </div>
 
-    <div class="form-field">
-      <span class="field-label"><%= t('account.prefsTypes') %></span>
-      <div class="pref-checks">
-        <% prefTypes.forEach((value) => { %>
-        <label class="pref-check">
-          <input type="checkbox" name="prefTypes" value="<%= value %>" <%= account.prefTypes.includes(value) ? 'checked' : '' %> />
-          <span><%= t('options.types.' + ({ 'Stage': 'stage', 'Bourse': 'scholarship', 'Volontariat': 'volunteering', 'Job': 'job', 'Études': 'studies' })[value]) %></span>
-        </label>
-        <% }) %>
-      </div>
-    </div>
-
-    <div class="form-field">
-      <span class="field-label"><%= t('account.prefsDomains') %></span>
-      <div class="pref-checks">
-        <% prefDomains.forEach((value) => { %>
-        <label class="pref-check">
-          <input type="checkbox" name="prefDomains" value="<%= value %>" <%= account.prefDomains.includes(value) ? 'checked' : '' %> />
-          <span><%= t('options.domains.' + value) %></span>
-        </label>
-        <% }) %>
-      </div>
-    </div>
-
-    <div class="form-field">
-      <label class="field-label" for="prefCountries"><%= t('account.prefsCountries') %></label>
-      <input class="field" id="prefCountries" name="prefCountries" value="<%= account.prefCountries.join(', ') %>" placeholder="<%= t('account.prefsCountriesPlaceholder') %>" />
-      <p class="field-hint"><%= t('account.prefsCountriesHint') %></p>
-    </div>
+    <%- include('partials/pref-fields', {
+      prefTypes,
+      prefDomains,
+      selected: { types: account.prefTypes, domains: account.prefDomains, countries: account.prefCountries },
+    }) %>
 
     <% if (saved) { %>
     <p class="form-success" role="status"><%= t('account.saved') %></p>
