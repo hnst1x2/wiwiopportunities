@@ -19,10 +19,11 @@ WiwiOpportunity — a platform for sharing international opportunities (internsh
 npm install          # Install dependencies
 npm run dev          # Dev server with nodemon (auto-restart)
 npm start            # Production server (node server/app.js)
+npm test             # Unit tests (node:test) for the rate limiter + SSRF guard
 docker compose up --build -d   # Docker launch
 ```
 
-No test or lint commands are configured.
+No lint command is configured.
 
 ## Architecture
 
@@ -37,7 +38,7 @@ No test or lint commands are configured.
 | `GET /` `/about` `/contact` `/archive` `/detail` | Public EJS pages |
 | `GET /api/opportunities` | List with query filters (country, type, funding, search, tag, status) |
 | `GET /api/opportunities/:id` | Single opportunity JSON |
-| `POST /api/opportunities` | Create (public, no auth) |
+| `POST /api/opportunities` | Create — admin session **or** `Authorization: Bearer $API_TOKEN`, rate-limited |
 | `POST /api/assistant` | Visitor chat assistant (Gemini Flash Lite, rate-limited per IP + global daily cap) |
 | `POST /newsletter` | Email subscription |
 | `GET/POST /admin/*` | Admin CRUD (protected by `requireAdmin` middleware) |
@@ -76,9 +77,16 @@ No test or lint commands are configured.
 
 Active vs archived is determined by comparing `deadline` against today's date (`isActiveOpportunity` helper in `app.js`).
 
+## Security
+
+- `server/securityHeaders.js` — CSP (per-request nonce, jQuery CDN allowed), `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, nosniff. Inline `<script>` blocks in views must carry `nonce="<%= cspNonce %>"` or the browser blocks them.
+- `server/rateLimit.js` — shared in-memory limiter used by member login/register, `/admin/login`, `/newsletter` and the write API.
+- `server/safeFetch.js` — SSRF guard for admin-supplied URLs (AI import): blocks private/loopback/link-local targets, resolves DNS, and re-validates **every** redirect hop.
+- Admin credentials are compared in constant time and the session is regenerated on login.
+
 ## Environment Variables
 
-See `.env.example`. Required: `ADMIN_USER`, `ADMIN_PASSWORD`. Optional: `PORT` (default 3000), `SESSION_SECRET`, `PUBLIC_BASE_URL` (for OG meta tags).
+See `.env.example`. Required: `ADMIN_USER`, `ADMIN_PASSWORD`. Optional: `PORT` (default 3000), `SESSION_SECRET`, `PUBLIC_BASE_URL` (for OG meta tags), `API_TOKEN` (bearer token for machine writes), `NEWSLETTER_DAILY_EMAIL_LIMIT` (default 200).
 
 ## Deployment
 

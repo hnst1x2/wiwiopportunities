@@ -2,6 +2,7 @@
 // Gemini API (free tier). Used by the admin "Import from URL" feature — the result
 // pre-fills the create form, it is never published without human review.
 const { callGemini, isConfigured } = require('./gemini');
+const { fetchPublicUrl, isSafePublicUrl } = require('./safeFetch');
 
 const FETCH_TIMEOUT_MS = 15000;
 const MAX_PAGE_CHARS = 18000;
@@ -10,28 +11,6 @@ const MAX_TAGS = 5;
 const TYPE_VALUES = ['Stage', 'Bourse', 'Volontariat', 'Job', 'Études'];
 const FUNDING_VALUES = ['fully', 'partial', 'none'];
 const DOMAIN_VALUES = ['it', 'marketing', 'business', 'studies', 'humanitarian'];
-
-// Only public http(s) targets: the URL comes from the admin, but the server should
-// still refuse to fetch itself or anything on the local network (SSRF guard).
-function isSafePublicUrl(rawUrl) {
-  let url;
-  try {
-    url = new URL(rawUrl);
-  } catch {
-    return false;
-  }
-  if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
-  const host = url.hostname.toLowerCase();
-  if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal')) return false;
-  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
-    const [a, b] = host.split('.').map(Number);
-    if (a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168)) {
-      return false;
-    }
-  }
-  if (host === '[::1]' || host.startsWith('[')) return false;
-  return true;
-}
 
 // Crude but dependency-free HTML → text: drop non-content blocks and tags,
 // decode the common entities, collapse whitespace.
@@ -58,9 +37,9 @@ function htmlToText(html) {
 }
 
 async function fetchPageText(url) {
-  const response = await fetch(url, {
-    redirect: 'follow',
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  // fetchPublicUrl re-checks every redirect hop against the SSRF guard.
+  const response = await fetchPublicUrl(url, {
+    timeoutMs: FETCH_TIMEOUT_MS,
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
       Accept: 'text/html,application/xhtml+xml',

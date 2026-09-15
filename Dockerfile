@@ -18,6 +18,13 @@ COPY scripts ./scripts
 ENV PORT=3000 DATA_DIR=/data
 EXPOSE 3000
 
+# Drop root: the app only ever needs to read its code and write inside DATA_DIR.
+# /data is pre-created owned by `node` so a fresh named volume inherits that ownership.
+# NOTE: an EXISTING volume keeps its current (root-owned) files — chown it once before
+# the first redeploy, see docs/DEPLOY-HETZNER.md.
+RUN mkdir -p /data && chown -R node:node /data
+USER node
+
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3000)+'/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 

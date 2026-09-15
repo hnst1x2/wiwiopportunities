@@ -15,6 +15,8 @@ const assistant = require('./assistant');
 const usersDb = require('./usersDb');
 const userRoutes = require('./userRoutes');
 const SQLiteSessionStore = require('./sessionStore');
+const { securityHeaders } = require('./securityHeaders');
+const { createRateLimiter } = require('./rateLimit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,10 +29,9 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  next();
-});
+// CSP (nonce-based) + nosniff / frame-ancestors / referrer / permissions policy.
+// Registered before the static middleware so uploaded files are covered too.
+app.use(securityHeaders);
 // --- Session (admin + comptes membres) ---
 // Persisted in SQLite so logins survive restarts/redeploys (no MemoryStore).
 app.use(
@@ -247,6 +248,38 @@ function requireAdmin(req, res, next) {
   return res.redirect('/admin/login');
 }
 
+// Constant-time string compare: hashing first keeps timingSafeEqual happy with
+// inputs of different lengths (it throws when the buffers do not match in size).
+function safeCompare(a, b) {
+  const digestA = crypto.createHash('sha256').update(String(a)).digest();
+  const digestB = crypto.createHash('sha256').update(String(b)).digest();
+  return crypto.timingSafeEqual(digestA, digestB);
+}
+
+// Machine access to the write API (the opportunity-importer agent): a bearer token
+// from API_TOKEN. Unset/blank token = no machine access at all, admin session only.
+const API_TOKEN = (process.env.API_TOKEN || '').trim();
+const MIN_API_TOKEN_LENGTH = 24;
+if (API_TOKEN && API_TOKEN.length < MIN_API_TOKEN_LENGTH) {
+  console.warn(`[security] API_TOKEN is shorter than ${MIN_API_TOKEN_LENGTH} chars — generate a long random value.`);
+}
+
+function hasValidApiToken(req) {
+  if (!API_TOKEN) return false;
+  const header = req.get('authorization') || '';
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  if (!match) return false;
+  return safeCompare(match[1].trim(), API_TOKEN);
+}
+
+// Write endpoints reachable from outside the admin UI: logged-in admin OR bearer token.
+// Never anonymous — an open POST let anyone publish content on the public site.
+function requireAdminOrApiToken(req, res, next) {
+  if ((req.session && req.session.isAdmin) || hasValidApiToken(req)) return next();
+  res.setHeader('WWW-Authenticate', 'Bearer');
+  return res.status(401).json({ error: res.locals.t('errors.unauthorized') });
+}
+
 // --- Espace membre (inscription, connexion, compte, favoris) ---
 app.use(userRoutes);
 
@@ -297,14 +330,37 @@ app.get('/archive', (req, res) => {
 });
 
 // Newsletter (POST) — store the email first, then send a Brevo confirmation to new subscribers.
-app.post('/newsletter', async (req, res) => {
+// Rate-limited per IP: each new address triggers a real Brevo email, so an open
+// endpoint is an email-bombing tool and burns the shared sending reputation.
+const NEWSLETTER_IP_LIMIT = 5;
+const NEWSLETTER_IP_WINDOW_MS = 15 * 60 * 1000;
+const NEWSLETTER_DAILY_EMAIL_LIMIT = Number(process.env.NEWSLETTER_DAILY_EMAIL_LIMIT) || 200;
+let newsletterDailyEmails = { day: '', count: 0 };
+
+// Site-wide cap on welcome emails per day: past it the subscription is still stored,
+// only the outgoing email is skipped.
+function canSendWelcomeEmail() {
+  const today = getTodayString();
+  if (newsletterDailyEmails.day !== today) newsletterDailyEmails = { day: today, count: 0 };
+  if (newsletterDailyEmails.count >= NEWSLETTER_DAILY_EMAIL_LIMIT) return false;
+  newsletterDailyEmails.count += 1;
+  return true;
+}
+
+const newsletterRateLimit = createRateLimiter({
+  max: NEWSLETTER_IP_LIMIT,
+  windowMs: NEWSLETTER_IP_WINDOW_MS,
+  onLimit: (req, res) => res.status(429).json({ success: false, message: res.locals.t('errors.tooMany') }),
+});
+
+app.post('/newsletter', newsletterRateLimit, async (req, res) => {
   const email = (req.body.email || '').trim().toLowerCase();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ success: false, message: res.locals.t('errors.emailRequired') });
   }
   // Persist first so a subscription is never lost even if the email send fails.
   const isNew = db.addNewsletter(email);
-  if (isNew) {
+  if (isNew && canSendWelcomeEmail()) {
     const lang = getCookieLang(req) || DEFAULT_LANG;
     try {
       await mailer.sendWelcomeEmail({ email, lang });
@@ -330,23 +386,46 @@ app.get('/admin/login', (req, res) => {
   });
 });
 
-// POST login
-app.post('/admin/login', (req, res) => {
+// POST login — rate-limited per IP (brute force) with a constant-time credential compare.
+const ADMIN_LOGIN_LIMIT = 10;
+const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+function renderAdminLogin(res, status, errorKey) {
+  return res.status(status).render('admin-login', {
+    page: 'admin-login',
+    title: res.locals.t('meta.adminLoginTitle'),
+    error: res.locals.t(errorKey),
+    baseUrl: process.env.PUBLIC_BASE_URL || '',
+  });
+}
+
+const adminLoginRateLimit = createRateLimiter({
+  max: ADMIN_LOGIN_LIMIT,
+  windowMs: ADMIN_LOGIN_WINDOW_MS,
+  onLimit: (req, res) => renderAdminLogin(res, 429, 'errors.tooMany'),
+});
+
+app.post('/admin/login', adminLoginRateLimit, (req, res) => {
   const { username, password } = req.body;
   const adminUser = process.env.ADMIN_USER || 'admin';
   const adminPass = process.env.ADMIN_PASSWORD || 'changeme';
 
-  if (username === adminUser && password === adminPass) {
-    req.session.isAdmin = true;
-    return res.redirect('/admin');
+  // Both compares always run: no early exit that would leak "user exists" by timing.
+  const userOk = safeCompare(username || '', adminUser);
+  const passOk = safeCompare(password || '', adminPass);
+  if (userOk && passOk) {
+    // Regenerate the session on privilege change (fixation), like the member login.
+    return req.session.regenerate((err) => {
+      if (err) {
+        console.error(`[admin] session regeneration failed: ${err.message}`);
+        return renderAdminLogin(res, 500, 'admin.invalidCredentials');
+      }
+      req.session.isAdmin = true;
+      res.redirect('/admin');
+    });
   }
 
-  return res.status(401).render('admin-login', {
-    page: 'admin-login',
-    title: res.locals.t('meta.adminLoginTitle'),
-    error: res.locals.t('admin.invalidCredentials'),
-    baseUrl: process.env.PUBLIC_BASE_URL || '',
-  });
+  return renderAdminLogin(res, 401, 'admin.invalidCredentials');
 });
 
 // Logout
@@ -686,8 +765,19 @@ app.get('/api/opportunities/:id', (req, res) => {
   res.json(opp);
 });
 
-// POST /api/opportunities (API publique d'ajout - à sécuriser si nécessaire)
-app.post('/api/opportunities', (req, res) => {
+// POST /api/opportunities — création réservée à l'admin (session) ou à un client
+// machine porteur du bearer API_TOKEN. Limité en débit pour éviter le flood de la base.
+const API_WRITE_LIMIT = 30;
+const API_WRITE_WINDOW_MS = 60 * 60 * 1000;
+
+const apiWriteRateLimit = createRateLimiter({
+  max: API_WRITE_LIMIT,
+  windowMs: API_WRITE_WINDOW_MS,
+  onLimit: (req, res) => res.status(429).json({ error: res.locals.t('errors.tooMany') }),
+});
+
+// Limiter first: unauthenticated flood attempts must be throttled too (same order as /admin/login).
+app.post('/api/opportunities', apiWriteRateLimit, requireAdminOrApiToken, (req, res) => {
   const body = req.body || {};
   if (!body.title || !body.country || !body.type) {
     return res.status(400).json({ error: res.locals.t('errors.apiRequired') });

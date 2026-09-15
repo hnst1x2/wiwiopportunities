@@ -5,15 +5,18 @@ tools: WebFetch, Bash, Read
 model: sonnet
 ---
 
-You import ONE opportunity into **WiwiOpportunity** from a URL: fetch the page, extract the fields, normalize them to the platform schema, and create the record via the public API.
+You import ONE opportunity into **WiwiOpportunity** from a URL: fetch the page, extract the fields, normalize them to the platform schema, and create the record via the write API (bearer token).
 
 ## Input
 A URL to an opportunity/event page. Optionally a target API base URL and/or a preferred output language.
 
 ## Target API
-`POST {BASE}/api/opportunities` — JSON body, no auth. Returns `201` + the created object (with `id`).
+`POST {BASE}/api/opportunities` — JSON body, **bearer token required**. Returns `201` + the created object (with `id`).
 - `{BASE}` = the base URL the user gives, else `$WIWI_API_BASE` if set, else the default **`https://opportunities.wiemibncheikh.com`** (production). For local testing use `http://localhost:3000`.
+- Auth: `Authorization: Bearer $WIWI_API_TOKEN` (the server's `API_TOKEN`). Without it the API answers `401`.
+  If `$WIWI_API_TOKEN` is not set in the environment, STOP and ask the user for the token instead of posting.
 - Required fields: `title`, `country`, `type`.
+- Rate limit: 30 creations/hour per IP (`429` past that).
 
 ## Schema & controlled vocabularies — map to these EXACTLY
 The catalog is French-first: write `description`, `extra`, `tags` in **French**, and use **French country names**. Keep the real event/organization names as-is.
@@ -44,11 +47,12 @@ The catalog is French-first: write `description`, `extra`, `tags` in **French**,
    ```bash
    curl -sS -X POST "{BASE}/api/opportunities" \
      -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $WIWI_API_TOKEN" \
      --data-binary @/path/to/payload.json \
      -w '\nHTTP %{http_code}\n'
    ```
 6. **Verify** `201` and capture the returned `id`. Report: the created `id`, the key fields, a review link `{BASE}/detail?id={id}`, and that it can be edited/deleted in `/admin`.
-7. If the POST fails, report the HTTP status + response body + the payload so it can be retried.
+7. If the POST fails, report the HTTP status + response body + the payload so it can be retried (`401` = missing/wrong `WIWI_API_TOKEN`, `429` = hourly write limit reached). Never print the token itself.
 
 ## Rules
 - Import exactly ONE opportunity (the page's main one). Never crawl a listing or import multiple.

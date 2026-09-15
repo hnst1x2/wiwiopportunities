@@ -4,6 +4,7 @@ const express = require('express');
 const db = require('./db');
 const usersDb = require('./usersDb');
 const { hashPassword, verifyPassword } = require('./passwords');
+const { createRateLimiter } = require('./rateLimit');
 
 const router = express.Router();
 
@@ -17,21 +18,14 @@ const MAX_PREF_LENGTH = 60;
 const PREF_TYPES = ['Stage', 'Bourse', 'Volontariat', 'Job', 'Études'];
 const PREF_DOMAINS = ['it', 'marketing', 'business', 'studies', 'humanitarian'];
 
-// --- tiny in-memory rate limiter (login/register bruteforce protection) --------
+// --- login/register bruteforce protection (shared in-memory limiter) -----------
 const RATE_MAX_ATTEMPTS = 20;
 const RATE_WINDOW_MS = 15 * 60 * 1000;
-const rateBuckets = new Map();
 
-function rateLimit(req, res, next) {
-  const key = `${req.ip}|${req.path}`;
-  const now = Date.now();
-  const bucket = rateBuckets.get(key);
-  if (!bucket || bucket.resetAt < now) {
-    rateBuckets.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return next();
-  }
-  bucket.count += 1;
-  if (bucket.count > RATE_MAX_ATTEMPTS) {
+const rateLimit = createRateLimiter({
+  max: RATE_MAX_ATTEMPTS,
+  windowMs: RATE_WINDOW_MS,
+  onLimit: (req, res) => {
     const isRegister = req.path === '/register';
     res.status(429);
     return renderAuthPage(res, isRegister ? 'register' : 'login', {
@@ -39,9 +33,8 @@ function rateLimit(req, res, next) {
       error: res.locals.t('account.errors.tooMany'),
       next: safeNext(req.body && req.body.next),
     });
-  }
-  next();
-}
+  },
+});
 
 // --- helpers --------------------------------------------------------------------
 

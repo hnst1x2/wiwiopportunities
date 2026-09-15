@@ -31,7 +31,7 @@
   </footer>
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script>
+  <script nonce="<%= cspNonce %>">
     <%# JSON embedded in a <script>: "<" is escaped so a "</script>" inside a string cannot break out. %>
     window.I18N = {
       lang: "<%= lang %>",

@@ -36,7 +36,7 @@
   </div>
 </main>
 
-<script>
+<script nonce="<%= cspNonce %>">
   <%# "<" is escaped so a "</script>" inside a record cannot break out of this tag. %>
   window.__ADMIN_OPPORTUNITIES__ = <%- JSON.stringify(opportunities || []).replace(/</g, String.fromCharCode(92) + 'u003c') %>;
 </script>

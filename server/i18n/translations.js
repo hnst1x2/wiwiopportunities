@@ -415,6 +415,8 @@ const translations = {
       notFound: 'Opportunité non trouvée',
       apiRequired: 'title, country, type sont obligatoires',
       emailRequired: 'Email requis',
+      tooMany: 'Trop de requêtes. Réessaie dans quelques minutes.',
+      unauthorized: 'Authentification requise',
     },
     footer: {
       tag: "Opportunités à l'international pour les jeunes de la région MENA. Sélection indépendante, vérifiée à la main.",
@@ -817,6 +819,8 @@ const translations = {
       notFound: 'Opportunity not found',
       apiRequired: 'title, country, type are required',
       emailRequired: 'Email is required',
+      tooMany: 'Too many requests. Try again in a few minutes.',
+      unauthorized: 'Authentication required',
     },
     footer: {
       tag: 'International opportunities for MENA youth. Independent, hand-checked selection.',

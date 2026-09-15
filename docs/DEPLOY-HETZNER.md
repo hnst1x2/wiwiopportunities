@@ -101,6 +101,7 @@ nano .env   # renseigner ADMIN_USER, ADMIN_PASSWORD (fort), PUBLIC_BASE_URL, SES
 ADMIN_USER=…
 ADMIN_PASSWORD=…            # PAS "changeme"
 SESSION_SECRET=…            # openssl rand -hex 32
+API_TOKEN=…                 # openssl rand -hex 32 — bearer pour POST /api/opportunities (vide = admin seul)
 PUBLIC_BASE_URL=https://opportunities.wiemibncheikh.com
 # Email Brevo (réutiliser le compte/creds de ChatFlow — domaine wiemibncheikh.com déjà SPF/DKIM) :
 SMTP_HOST=smtp-relay.brevo.com
@@ -115,6 +116,15 @@ MAIL_FROM=WiwiOpportunity <contact@wiemibncheikh.com>
 > `MAIL_FROM` depuis `/opt/chatflow/.env` (mêmes valeurs, sauf `MAIL_FROM` propre à Wiwi).
 
 ## Étape 3 — Lancer le conteneur *(user `deploy`)*
+
+> **Une seule fois, avant la 1re mise à jour post-durcissement :** le conteneur ne tourne
+> plus en root (`USER node` dans le Dockerfile). Le volume `wiwi-data` existant contient
+> des fichiers appartenant à root ; sans ce `chown` l'app ne peut plus écrire la base.
+>
+> ```bash
+> docker compose -f docker-compose.prod.yml down
+> docker run --rm -v wiwiopportunity_wiwi-data:/data alpine chown -R 1000:1000 /data
+> ```
 
 ```bash
 cd /opt/wiwiopportunity
