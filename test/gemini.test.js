@@ -92,6 +92,20 @@ test('retries an empty candidate list', async () => {
   assert.strictEqual(calls.length, 2);
 });
 
+test('keeps retrying past the old 3-attempt ceiling while budget remains', async () => {
+  // 503s return fast, so the attempt count must not be what gives up first.
+  const answers = [
+    jsonResponse(503, { error: { message: 'high demand' } }),
+    jsonResponse(503, { error: { message: 'high demand' } }),
+    jsonResponse(503, { error: { message: 'high demand' } }),
+    jsonResponse(200, OK_BODY),
+  ];
+  const calls = stubFetch(answers);
+  const result = await callGemini([{ text: 'hi' }], {}, fast);
+  assert.deepStrictEqual(result, { title: 'Sommet' });
+  assert.strictEqual(calls.length, 4);
+});
+
 test('does not retry once the time budget is spent', async () => {
   const calls = stubFetch([jsonResponse(503, { error: { message: 'high demand' } })]);
   await assert.rejects(() => callGemini([{ text: 'hi' }], {}, { baseDelayMs: 10, budgetMs: 1 }), /high demand/);

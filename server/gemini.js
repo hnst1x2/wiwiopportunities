@@ -8,10 +8,14 @@ const GEMINI_TIMEOUT_MS = 60000;
 // Overload (503) and rate-limit (429) answers from Gemini are transient: the API
 // says so in the error body ("experiencing high demand ... try again later").
 // Retrying a couple of times turns most of them into a successful import.
-const MAX_ATTEMPTS = 3;
+// Overload answers come back in well under a second, so 3 attempts used to give
+// up after ~12s with most of the budget untouched. The budget, not the attempt
+// count, is meant to be the binding constraint.
+const MAX_ATTEMPTS = 6;
 const BASE_RETRY_DELAY_MS = 700;
-// The admin form gives up after 90s, so never spend the whole budget retrying:
-// a new attempt starts only if there is room left for it.
+// The admin form gives up after 90s and the page fetch takes a second or two, so
+// never spend the whole budget retrying: a new attempt starts only if there is
+// room left for it. Worst case here is ~22s of backoff plus the calls themselves.
 const RETRY_BUDGET_MS = 70000;
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 
