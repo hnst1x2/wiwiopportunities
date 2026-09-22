@@ -2,6 +2,7 @@
 
 # Local env + SQLite store (never commit runtime data)
 .env
+.env.bak*
 *.db
 *.db-shm
 *.db-wal
