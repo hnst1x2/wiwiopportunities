@@ -154,7 +154,7 @@ function normalizeExtraction(raw, applyLink) {
 }
 
 // Full pipeline: fetch the page, extract with Gemini, normalize.
-// Throws Error with a `code` in {NOT_CONFIGURED, INVALID_URL, FETCH_FAILED, EXTRACT_FAILED}.
+// Throws Error with a `code` in {NOT_CONFIGURED, INVALID_URL, FETCH_FAILED, FETCH_TIMEOUT, EXTRACT_FAILED}.
 async function importFromUrl(rawUrl) {
   if (!isConfigured()) {
     throw Object.assign(new Error('GEMINI_API_KEY is not configured'), { code: 'NOT_CONFIGURED' });
@@ -165,10 +165,19 @@ async function importFromUrl(rawUrl) {
   }
 
   let pageText;
+  const fetchStartedAt = Date.now();
   try {
     pageText = await fetchPageText(url);
   } catch (err) {
-    throw Object.assign(new Error(`could not read the page: ${err.message}`), { code: 'FETCH_FAILED' });
+    // A timeout is worth its own message: "site inaccessible ou contenu JS"
+    // misdirects the admin when the page is merely slow and a retry would work.
+    const code = err.name === 'TimeoutError' ? 'FETCH_TIMEOUT' : 'FETCH_FAILED';
+    // The URL and the elapsed time are the two things a post-mortem needs; without
+    // them a failure report cannot be told apart from an unrelated import.
+    throw Object.assign(
+      new Error(`could not read ${url} after ${Date.now() - fetchStartedAt}ms: ${err.message}`),
+      { code }
+    );
   }
 
   try {

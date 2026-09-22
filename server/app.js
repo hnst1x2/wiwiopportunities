@@ -475,6 +475,7 @@ app.post('/admin/import', requireAdmin, (req, res) => {
     NOT_CONFIGURED: t('admin.importer.notConfigured'),
     INVALID_URL: t('admin.importer.invalidUrl'),
     FETCH_FAILED: t('admin.importer.fetchFailed'),
+    FETCH_TIMEOUT: t('admin.importer.fetchTimeout'),
     EXTRACT_FAILED: t('admin.importer.extractFailed'),
   };
 
