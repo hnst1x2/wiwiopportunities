@@ -146,6 +146,10 @@ $(function () {
             (link
               ? '<a class="btn btn--gradient btn--block detail-apply" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' +
                 esc(t('detail.apply')) + ' ↗</a>'
+              : o.linkLocked
+              ? '<button type="button" class="btn btn--gradient btn--block detail-apply detail-apply--locked js-open-gate">' +
+                '🔒 ' + esc(t('detail.gate.applyLocked')) + '</button>' +
+                '<p class="detail-gate-hint">' + esc(t('detail.gate.hint')) + '</p>'
               : '') +
             '<button type="button" class="btn btn--ghost btn--block detail-fav" data-fav-id="' + esc(o.id) + '"></button>' +
           '</aside>' +
@@ -177,9 +181,53 @@ $(function () {
     });
   });
 
-  W.loadMe(function () {
+  // ---- member gate (apply links are members-only) ---------------------------------
+  // Visitors get a login / sign-up popup when the page opens; they can dismiss it
+  // and keep reading, and the locked "apply" button reopens it.
+
+  function gateHtml() {
+    var next = encodeURIComponent(window.location.pathname + window.location.search);
+    return (
+      '<div class="gate-overlay" id="member-gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">' +
+        '<div class="gate-dialog">' +
+          '<button type="button" class="gate-close js-close-gate" aria-label="' + esc(t('detail.gate.later')) + '">×</button>' +
+          '<div class="gate-icon" aria-hidden="true">🔒</div>' +
+          '<h2 class="gate-title" id="gate-title">' + esc(t('detail.gate.title')) + '</h2>' +
+          '<p class="gate-text">' + esc(t('detail.gate.text')) + '</p>' +
+          '<div class="gate-actions">' +
+            '<a class="btn btn--gradient btn--block" href="/register?next=' + next + '">' + esc(t('detail.gate.register')) + '</a>' +
+            '<a class="btn btn--ghost btn--block" href="/login?next=' + next + '">' + esc(t('detail.gate.login')) + '</a>' +
+          '</div>' +
+          '<button type="button" class="gate-later js-close-gate">' + esc(t('detail.gate.later')) + '</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function openGate() {
+    if ($('#member-gate').length) return;
+    $('body').append(gateHtml()).addClass('has-gate');
+    $('#member-gate .gate-actions a').first().trigger('focus');
+  }
+
+  function closeGate() {
+    $('#member-gate').remove();
+    $('body').removeClass('has-gate');
+  }
+
+  $(document).on('click', '.js-close-gate', closeGate);
+  $(document).on('click', '#member-gate', function (event) {
+    if (event.target === this) closeGate();
+  });
+  $(document).on('keydown', function (event) {
+    if (event.key === 'Escape') closeGate();
+  });
+  $root.on('click', '.js-open-gate', openGate);
+
+  W.loadMe(function (me) {
     var $fav = $root.find('.detail-fav');
     if ($fav.length) syncFavButton($fav.data('fav-id'));
+    if (!me.user && id) openGate();
   });
 
   if (!id) {

@@ -170,6 +170,15 @@ const translations = {
       imageOf: 'Image {current} sur {total}',
       notFound: 'Opportunité introuvable.',
       missingId: "Identifiant d'opportunité manquant.",
+      gate: {
+        title: 'Réservé aux membres',
+        text: 'Le lien de candidature est réservé aux membres. Crée un compte gratuit ou connecte-toi pour postuler et garder tes favoris.',
+        register: 'Créer un compte gratuit',
+        login: 'Se connecter',
+        later: 'Continuer sans compte',
+        applyLocked: 'Postuler (membres)',
+        hint: 'Connecte-toi pour accéder au lien de candidature.',
+      },
     },
     archive: {
       eyebrow: 'Archives',
@@ -660,6 +669,15 @@ const translations = {
       imageOf: 'Image {current} of {total}',
       notFound: 'Opportunity not found.',
       missingId: 'Missing opportunity identifier.',
+      gate: {
+        title: 'Members only',
+        text: 'The application link is for members. Create a free account or log in to apply and keep your favorites.',
+        register: 'Create a free account',
+        login: 'Log in',
+        later: 'Continue without an account',
+        applyLocked: 'Apply (members)',
+        hint: 'Log in to access the application link.',
+      },
     },
     archive: {
       eyebrow: 'Archive',

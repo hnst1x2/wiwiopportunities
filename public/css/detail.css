@@ -228,3 +228,124 @@ main.detail-page {
   background: #fff;
   transform: scale(1.25);
 }
+
+/* Member gate: apply links are members-only ------------------------------- */
+
+.detail-apply--locked {
+  cursor: pointer;
+}
+
+.detail-gate-hint {
+  margin-top: -8px;
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--ink-4);
+}
+
+body.has-gate {
+  overflow: hidden;
+}
+
+.gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(46, 20, 81, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: gate-fade 0.18s ease-out;
+}
+
+.gate-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  padding: clamp(24px, 4vw, 34px);
+  border-radius: var(--r-panel, 20px);
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(46, 20, 81, 0.35);
+  text-align: center;
+  animation: gate-pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.gate-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink-4);
+  cursor: pointer;
+}
+
+.gate-close:hover {
+  background: rgba(46, 20, 81, 0.06);
+  color: var(--ink);
+}
+
+.gate-icon {
+  font-size: 34px;
+}
+
+.gate-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.gate-text {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.gate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.gate-later {
+  margin-top: 4px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-4);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.gate-later:hover {
+  color: var(--ink);
+}
+
+@keyframes gate-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes gate-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gate-overlay,
+  .gate-dialog {
+    animation: none;
+  }
+}

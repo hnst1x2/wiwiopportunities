@@ -737,6 +737,18 @@ app.post('/admin/delete/:id', requireAdmin, (req, res) => {
 });
 
 // --- API ---
+// Le lien de candidature est réservé aux membres connectés (et à l'admin) : pour
+// un visiteur anonyme il est retiré de la réponse et remplacé par linkLocked=true,
+// ce qui permet au client d'afficher l'invitation à se connecter.
+function isMemberRequest(req, res) {
+  return Boolean((req.session && req.session.isAdmin) || (res.locals.user && req.session && req.session.userId));
+}
+
+function forVisitor(o, req, res) {
+  if (isMemberRequest(req, res) || !o.link) return o;
+  return { ...o, link: '', linkLocked: true };
+}
+
 // GET /api/opportunities avec filtres + tags
 app.get('/api/opportunities', (req, res) => {
   const { country, type, funding, search, tag, status } = req.query;
@@ -776,7 +788,7 @@ app.get('/api/opportunities', (req, res) => {
     );
   }
 
-  res.json(data);
+  res.json(data.map((o) => forVisitor(o, req, res)));
 });
 
 // --- Assistant virtuel (widget de chat public) ---
@@ -841,7 +853,7 @@ app.post('/api/assistant', requireMemberForAssistant, assistantRateLimit, async 
     });
     // Cartes renvoyées sous la même forme que /api/opportunities pour réutiliser le rendu client.
     const byId = new Map(active.map((o) => [o.id, o]));
-    const opportunities = ids.map((id) => byId.get(id)).filter(Boolean);
+    const opportunities = ids.map((id) => byId.get(id)).filter(Boolean).map((o) => forVisitor(o, req, res));
     analytics.recordEvent('assistant', { userId: req.session.userId, ip: req.ip });
     res.json({ success: true, reply, opportunities });
   } catch (err) {
@@ -863,7 +875,7 @@ app.get('/api/opportunities/:id', (req, res) => {
   if (!(req.session && req.session.isAdmin)) {
     analytics.recordView({ opportunityId: id, userId: req.session && req.session.userId, ip: req.ip, userAgent: req.get('user-agent') });
   }
-  res.json(opp);
+  res.json(forVisitor(opp, req, res));
 });
 
 // POST /api/opportunities — création réservée à l'admin (session) ou à un client
