@@ -1,4 +1,5 @@
-<%- include('partials/header', { title: t('meta.detailTitle'), page: 'detail', baseUrl }) %>
+<%# title / metaDescription / ogImage come from the route (real opportunity data for SEO and previews). %>
+<%- include('partials/header', { title, page: 'detail', baseUrl }) %>
 
 <main id="main" class="container detail-page">
   <a href="/#opps" class="back-link"><%= t('detail.back') %></a>

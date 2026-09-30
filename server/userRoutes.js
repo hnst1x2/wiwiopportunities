@@ -3,6 +3,7 @@
 const express = require('express');
 const db = require('./db');
 const usersDb = require('./usersDb');
+const analytics = require('./analyticsDb');
 const { hashPassword, verifyPassword } = require('./passwords');
 const { createRateLimiter } = require('./rateLimit');
 
@@ -146,6 +147,7 @@ router.post('/register', rateLimit, (req, res) => {
 
   const userId = usersDb.createUser({ email, passwordHash: hashPassword(password), name });
   usersDb.updateProfile(userId, { name, ...prefs });
+  analytics.recordEvent('register', { userId, ip: req.ip });
   req.session.regenerate((err) => {
     if (err) return fail(t('account.errors.generic'));
     req.session.userId = userId;
@@ -181,6 +183,7 @@ router.post('/login', rateLimit, (req, res) => {
   req.session.regenerate((err) => {
     if (err) return res.status(500).send(t('account.errors.generic'));
     req.session.userId = auth.id;
+    analytics.recordEvent('login', { userId: auth.id, ip: req.ip });
     res.redirect(next || '/account');
   });
 });
@@ -231,7 +234,8 @@ router.post('/account/delete', requireUser, (req, res) => {
     res.status(400);
     return renderAccount(res, user, { deleteError: t('account.errors.wrongPassword') });
   }
-  usersDb.deleteUser(user.id);
+  // Same clean-up as the admin delete: history stays aggregate-only, every device logged out.
+  analytics.purgeUser(user.id);
   req.session.destroy(() => res.redirect('/'));
 });
 

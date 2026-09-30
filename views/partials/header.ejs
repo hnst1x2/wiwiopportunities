@@ -4,19 +4,28 @@
   <meta charset="UTF-8" />
   <title><%= title || t('meta.defaultTitle') %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="<%= t('meta.defaultDescription') %>" />
+  <% const pageDescription = (typeof metaDescription !== 'undefined' && metaDescription) || t('meta.defaultDescription'); %>
+  <meta name="description" content="<%= pageDescription %>" />
   <meta name="keywords" content="<%= t('meta.keywords') %>" />
   <meta name="theme-color" content="#2e1451" />
 
   <!-- OpenGraph / Social -->
   <meta property="og:title" content="<%= title || t('meta.defaultTitle') %>" />
-  <meta property="og:description" content="<%= t('meta.ogDescription') %>" />
+  <meta property="og:description" content="<%= (typeof metaDescription !== 'undefined' && metaDescription) || t('meta.ogDescription') %>" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Opportunities by Wiem" />
-  <% if (typeof baseUrl !== 'undefined' && baseUrl) { %>
+  <% if (typeof canonicalUrl !== 'undefined' && canonicalUrl) { %>
+  <link rel="canonical" href="<%= canonicalUrl %>" />
+  <meta property="og:url" content="<%= canonicalUrl %>" />
+  <% } else if (typeof baseUrl !== 'undefined' && baseUrl) { %>
   <meta property="og:url" content="<%= baseUrl %>" />
   <% } %>
-  <meta property="og:image" content="https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg" />
+  <%# login/register render with page 'account', so they are covered too. %>
+  <% const isPrivatePage = ['admin', 'admin-login', 'account', 'favorites'].includes(page); %>
+  <% if (isPrivatePage) { %>
+  <meta name="robots" content="noindex, nofollow" />
+  <% } %>
+  <meta property="og:image" content="<%= (typeof ogImage !== 'undefined' && ogImage) || 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg' %>" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <link rel="icon" type="image/svg+xml" href="/img/opportunities-by-wiem-avatar.svg" />
@@ -42,6 +51,16 @@
   <% } %>
   <% if (page !== 'admin' && page !== 'admin-login') { %>
   <link rel="stylesheet" href="/css/assistant.css" />
+  <% } %>
+  <% if (typeof gaMeasurementId !== 'undefined' && gaMeasurementId && !isPrivatePage) { %>
+  <%# Google Analytics 4 (optional, GA_MEASUREMENT_ID): public pages only, no ads signals. %>
+  <script async nonce="<%= cspNonce %>" src="https://www.googletagmanager.com/gtag/js?id=<%= encodeURIComponent(gaMeasurementId) %>"></script>
+  <script nonce="<%= cspNonce %>">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', <%- JSON.stringify(gaMeasurementId).replace(/</g, String.fromCharCode(92) + 'u003c') %>, { allow_google_signals: false, allow_ad_personalization_signals: false });
+  </script>
   <% } %>
 </head>
 <body>

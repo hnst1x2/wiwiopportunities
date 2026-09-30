@@ -1,0 +1,54 @@
+<%- include('partials/header', { title, page: 'admin', baseUrl }) %>
+
+<main id="main" class="container admin-page">
+  <%- include('partials/admin-header', { adminSection: 'users' }) %>
+
+  <div class="admin-list">
+    <div class="admin-toolbar">
+      <label for="admin-user-search" class="sr-only"><%= t('admin.users.search') %></label>
+      <input id="admin-user-search" type="search" class="field field--pill admin-search" placeholder="<%= t('admin.users.searchPlaceholder') %>" autocomplete="off" />
+      <span id="admin-user-count" class="admin-count" role="status" aria-live="polite"><%= t('admin.users.count.' + (users.length === 1 ? 'one' : 'other'), { count: users.length }) %></span>
+      <% if (done === 'deleted') { %>
+      <span class="admin-message" role="status"><%= t('admin.users.deleted') %></span>
+      <% } %>
+    </div>
+
+    <% if (!users.length) { %>
+    <p class="admin-empty"><%= t('admin.users.none') %></p>
+    <% } else { %>
+    <div class="admin-table-wrap">
+      <div class="admin-table admin-table--users" role="table" aria-label="<%= t('admin.users.title') %>">
+        <div class="admin-row admin-row--users admin-row--head" role="row">
+          <% ['member', 'registered', 'lastSeen', 'favorites', 'views', 'logins', 'actions'].forEach((col) => { %>
+          <span role="columnheader"><%= t('admin.users.table.' + col) %></span>
+          <% }) %>
+        </div>
+        <div id="admin-users-body" role="rowgroup">
+          <% users.forEach((u) => { %>
+          <div class="admin-row admin-row--users" role="row" data-search="<%= (u.name + ' ' + u.email).toLowerCase() %>">
+            <div class="admin-cell-title" role="cell">
+              <div class="admin-opp-title"><a class="admin-user-link" href="/admin/users/<%= u.id %>"><%= u.name || u.email %></a></div>
+              <% if (u.name) { %><div class="admin-opp-org"><%= u.email %></div><% } %>
+            </div>
+            <span role="cell"><%= fmt(u.createdAt, false) %></span>
+            <span role="cell" class="<%= u.lastSeenAt ? '' : 'admin-muted' %>"><%= u.lastSeenAt ? fmt(u.lastSeenAt) : t('admin.users.never') %></span>
+            <span role="cell" class="admin-num"><%= u.favoritesCount %></span>
+            <span role="cell" class="admin-num"><%= u.viewsCount %></span>
+            <span role="cell" class="admin-num"><%= u.loginsCount %></span>
+            <div class="admin-actions" role="cell">
+              <a href="/admin/users/<%= u.id %>" class="btn btn--ghost btn--xs"><%= t('admin.users.view') %></a>
+              <form action="/admin/users/<%= u.id %>/delete" method="post" class="js-delete-user">
+                <button type="submit" class="btn btn--danger-text btn--xs"><%= t('admin.users.delete') %></button>
+              </form>
+            </div>
+          </div>
+          <% }) %>
+          <div class="admin-empty-row" id="admin-users-empty" hidden><%= t('admin.users.noMatch') %></div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer', { page: 'admin' }) %>

@@ -42,12 +42,19 @@ No lint command is configured.
 | `POST /api/assistant` | Visitor chat assistant (Gemini Flash Lite, rate-limited per IP + global daily cap) |
 | `POST /newsletter` | Email subscription |
 | `GET/POST /admin/*` | Admin CRUD (protected by `requireAdmin` middleware) |
+| `GET /admin/users`, `/admin/users/:id` | Member management: list with usage counters, per-member profile/usage; `POST .../logout` (close all sessions) and `POST .../delete` |
+| `GET /admin/stats` | Site statistics: connected/active members, daily activity, most viewed and most starred opportunities |
+| `GET /robots.txt`, `/sitemap.xml` | SEO endpoints (sitemap needs `PUBLIC_BASE_URL`; lists active opportunities) |
 
 ### Data Flow
 
 - Public pages (`views/*.ejs`) render shells; client JS (`public/js/app.js`, `detail.js`) fetches data from `/api/opportunities` and renders listings/details dynamically.
 - Admin pages are server-rendered EJS with form submissions.
 - Data is read/written via `fs.readFileSync`/`fs.writeFileSync` to JSON files in `server/`.
+
+### Usage analytics (first-party)
+
+`server/analyticsDb.js` owns the `events` table (kinds: `view`, `login`, `register`, `assistant`) and `users.last_seen_at`. Views are recorded on `GET /api/opportunities/:id` (skipped for admin sessions), logins/registrations in `userRoutes.js`, assistant messages in the chat route. Anonymous visitors are keyed by a salted IP hash; raw IPs are never stored. Deleting a member (self or admin) anonymizes their events so "most viewed" stays accurate. "Connected now" = live rows in the `sessions` table carrying a `userId`. `server/adminInsightsRoutes.js` renders `views/admin-users.ejs`, `admin-user.ejs`, `admin-stats.ejs`.
 
 ### Key Directories
 
@@ -86,7 +93,7 @@ Active vs archived is determined by comparing `deadline` against today's date (`
 
 ## Environment Variables
 
-See `.env.example`. Required: `ADMIN_USER`, `ADMIN_PASSWORD`. Optional: `PORT` (default 3000), `SESSION_SECRET`, `PUBLIC_BASE_URL` (for OG meta tags), `API_TOKEN` (bearer token for machine writes), `NEWSLETTER_DAILY_EMAIL_LIMIT` (default 200).
+See `.env.example`. Required: `ADMIN_USER`, `ADMIN_PASSWORD`. Optional: `PORT` (default 3000), `SESSION_SECRET`, `PUBLIC_BASE_URL` (OG meta, canonical, robots/sitemap), `API_TOKEN` (bearer token for machine writes), `NEWSLETTER_DAILY_EMAIL_LIMIT` (default 200), `GA_MEASUREMENT_ID` (Google Analytics 4; the CSP only allows gtag when set), `DISPLAY_TIMEZONE` (admin date display, default Africa/Tunis).
 
 ## Deployment
 

@@ -1,0 +1,88 @@
+<%- include('partials/header', { title, page: 'admin', baseUrl }) %>
+
+<main id="main" class="container admin-page">
+  <%- include('partials/admin-header', { adminSection: 'users' }) %>
+
+  <a href="/admin/users" class="admin-back">&larr; <%= t('admin.users.back') %></a>
+
+  <% if (done === 'logout') { %>
+  <p class="admin-message" role="status"><%= t('admin.users.loggedOut') %></p>
+  <% } %>
+
+  <div class="admin-two-col">
+    <section class="admin-card" aria-labelledby="member-profile-heading">
+      <h2 id="member-profile-heading" class="admin-card-title"><%= member.name || member.email %></h2>
+      <dl class="admin-dl">
+        <dt><%= t('admin.users.table.member') %></dt>
+        <dd><%= member.email %></dd>
+        <dt><%= t('admin.users.table.registered') %></dt>
+        <dd><%= fmt(member.createdAt) %></dd>
+        <dt><%= t('admin.users.lastLogin') %></dt>
+        <dd><%= usage.lastLoginAt ? fmt(usage.lastLoginAt) : t('admin.users.never') %></dd>
+        <dt><%= t('admin.users.prefs.types') %></dt>
+        <dd><%= member.prefTypes.length ? member.prefTypes.join(', ') : t('admin.users.prefs.none') %></dd>
+        <dt><%= t('admin.users.prefs.domains') %></dt>
+        <dd><%= member.prefDomains.length ? member.prefDomains.join(', ') : t('admin.users.prefs.none') %></dd>
+        <dt><%= t('admin.users.prefs.countries') %></dt>
+        <dd><%= member.prefCountries.length ? member.prefCountries.join(', ') : t('admin.users.prefs.none') %></dd>
+      </dl>
+    </section>
+
+    <section class="admin-card" aria-labelledby="member-usage-heading">
+      <h2 id="member-usage-heading" class="admin-card-title"><%= t('admin.users.usage') %></h2>
+      <div class="stat-grid stat-grid--compact">
+        <% [
+          ['logins', usage.loginsCount],
+          ['views', usage.viewsCount],
+          ['favorites', usage.favorites.length],
+          ['assistant', usage.assistantCount],
+          ['liveSessions', usage.liveSessions],
+        ].forEach(([key, value]) => { %>
+        <div class="stat-card">
+          <span class="stat-value"><%= value %></span>
+          <span class="stat-label"><%= t('admin.users.table.' + key) %></span>
+        </div>
+        <% }) %>
+      </div>
+      <div class="admin-card-actions">
+        <form action="/admin/users/<%= member.id %>/logout" method="post" class="js-logout-user">
+          <button type="submit" class="btn btn--ghost btn--sm" <%= usage.liveSessions ? '' : 'disabled' %>><%= t('admin.users.logout') %></button>
+        </form>
+        <form action="/admin/users/<%= member.id %>/delete" method="post" class="js-delete-user">
+          <button type="submit" class="btn btn--danger-text btn--sm"><%= t('admin.users.delete') %></button>
+        </form>
+      </div>
+      <p class="admin-hint"><%= t('admin.users.deleteHint') %></p>
+    </section>
+  </div>
+
+  <div class="admin-two-col">
+    <section class="admin-card" aria-labelledby="member-fav-heading">
+      <h2 id="member-fav-heading" class="admin-card-title"><%= t('admin.users.favoritesList') %> <span class="admin-group-count"><%= usage.favorites.length %></span></h2>
+      <% if (!usage.favorites.length) { %>
+      <p class="admin-empty"><%= t('admin.users.noFavorites') %></p>
+      <% } else { %>
+      <ul class="admin-linklist">
+        <% usage.favorites.forEach((o) => { %>
+        <li><a href="/detail?id=<%= o.id %>"><%= o.title %></a><span class="admin-muted"> · <%= o.country %></span></li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </section>
+
+    <section class="admin-card" aria-labelledby="member-views-heading">
+      <h2 id="member-views-heading" class="admin-card-title"><%= t('admin.users.recentViews') %></h2>
+      <% if (!usage.recentViews.length) { %>
+      <p class="admin-empty"><%= t('admin.users.noViews') %></p>
+      <% } else { %>
+      <ul class="admin-linklist">
+        <% usage.recentViews.forEach((v) => { %>
+        <li><a href="/detail?id=<%= v.opportunity.id %>"><%= v.opportunity.title %></a><span class="admin-muted"> · <%= fmt(v.at) %></span></li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </section>
+  </div>
+</main>
+
+<%- include('partials/footer', { page: 'admin' }) %>

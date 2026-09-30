@@ -8,14 +8,27 @@ const crypto = require('crypto');
 // permissive img-src.
 const JQUERY_ORIGIN = 'https://code.jquery.com';
 
+// Optional Google Analytics 4 (GA_MEASUREMENT_ID): the gtag loader and its
+// collection endpoints are only allowed when the tag is actually configured.
+const GA_ID_PATTERN = /^G-[A-Z0-9]{4,20}$/;
+const rawGaId = (process.env.GA_MEASUREMENT_ID || '').trim();
+if (rawGaId && !GA_ID_PATTERN.test(rawGaId)) {
+  console.warn('[security] GA_MEASUREMENT_ID does not look like a GA4 id (G-XXXXXXXX): ignored.');
+}
+const GA_MEASUREMENT_ID = GA_ID_PATTERN.test(rawGaId) ? rawGaId : '';
+const GA_SCRIPT_ORIGINS = 'https://www.googletagmanager.com';
+const GA_CONNECT_ORIGINS = 'https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com';
+
 function buildContentSecurityPolicy(nonce) {
+  const gaScript = GA_MEASUREMENT_ID ? ` ${GA_SCRIPT_ORIGINS}` : '';
+  const gaConnect = GA_MEASUREMENT_ID ? ` ${GA_CONNECT_ORIGINS}` : '';
   return [
     "default-src 'self'",
-    `script-src 'self' ${JQUERY_ORIGIN} 'nonce-${nonce}'`,
+    `script-src 'self' ${JQUERY_ORIGIN}${gaScript} 'nonce-${nonce}'`,
     "style-src 'self'",
     "img-src 'self' data: https:",
     "font-src 'self'",
-    "connect-src 'self'",
+    `connect-src 'self'${gaConnect}`,
     "form-action 'self'",
     "base-uri 'self'",
     "object-src 'none'",
@@ -37,4 +50,4 @@ function securityHeaders(req, res, next) {
   next();
 }
 
-module.exports = { securityHeaders, buildContentSecurityPolicy };
+module.exports = { securityHeaders, buildContentSecurityPolicy, GA_MEASUREMENT_ID };

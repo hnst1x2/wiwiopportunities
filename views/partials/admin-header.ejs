@@ -1,3 +1,4 @@
+<% const section = typeof adminSection !== 'undefined' ? adminSection : 'opps'; %>
 <div class="admin-header">
   <div>
     <p class="eyebrow"><%= t('admin.eyebrow') %></p>
@@ -11,3 +12,9 @@
     </form>
   </div>
 </div>
+
+<nav class="admin-nav" aria-label="<%= t('admin.nav.label') %>">
+  <% [['opps', '/admin'], ['users', '/admin/users'], ['stats', '/admin/stats']].forEach(([key, href]) => { const isActive = key === section; %>
+  <a href="<%= href %>" class="admin-nav-link<%= isActive ? ' is-active' : '' %>"<%- isActive ? ' aria-current="page"' : '' %>><%= t('admin.nav.' + key) %></a>
+  <% }) %>
+</nav>

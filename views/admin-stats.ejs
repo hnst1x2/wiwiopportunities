@@ -1,0 +1,108 @@
+<%- include('partials/header', { title, page: 'admin', baseUrl }) %>
+
+<main id="main" class="container admin-page">
+  <%- include('partials/admin-header', { adminSection: 'stats' }) %>
+
+  <section aria-labelledby="stats-members-heading">
+    <h2 id="stats-members-heading" class="admin-section-title"><%= t('admin.stats.members') %></h2>
+    <div class="stat-grid">
+      <% [
+        ['connectedNow', stats.connectedNow, true],
+        ['activeToday', stats.activeToday],
+        ['active7d', stats.active7d],
+        ['active30d', stats.active30d],
+        ['totalUsers', stats.totalUsers],
+        ['newUsers7d', stats.newUsers7d],
+        ['newUsers30d', stats.newUsers30d],
+        ['newsletter', stats.newsletterCount],
+      ].forEach(([key, value, highlight]) => { %>
+      <div class="stat-card<%= highlight ? ' stat-card--accent' : '' %>">
+        <span class="stat-value"><%= value %></span>
+        <span class="stat-label"><%= t('admin.stats.' + key) %></span>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <section aria-labelledby="stats-daily-heading">
+    <h2 id="stats-daily-heading" class="admin-section-title"><%= t('admin.stats.daily', { days: series.length }) %></h2>
+    <%
+      const maxValue = Math.max(1, ...series.map((d) => Math.max(d.views, d.logins, d.registrations)));
+      const metrics = [['views', 'bar--views'], ['logins', 'bar--logins'], ['registrations', 'bar--registrations']];
+    %>
+    <div class="admin-card">
+      <div class="bars-legend">
+        <% metrics.forEach(([key, cls]) => { %>
+        <span class="bars-legend-item"><i class="bars-swatch <%= cls %>" aria-hidden="true"></i><%= t('admin.stats.legend.' + key) %></span>
+        <% }) %>
+      </div>
+      <div class="bars" role="img" aria-label="<%= t('admin.stats.daily', { days: series.length }) %>">
+        <% series.forEach((d) => { %>
+        <div class="bars-day" title="<%= d.day %> — <%= t('admin.stats.legend.views') %> <%= d.views %>, <%= t('admin.stats.legend.logins') %> <%= d.logins %>, <%= t('admin.stats.legend.registrations') %> <%= d.registrations %>">
+          <div class="bars-stack">
+            <% metrics.forEach(([key, cls]) => { %>
+            <%# Height is applied by admin.js: the CSP forbids inline style attributes. %>
+            <span class="bar <%= cls %>" data-h="<%= Math.round((d[key] / maxValue) * 100) %>"></span>
+            <% }) %>
+          </div>
+          <span class="bars-label"><%= d.day.slice(5) %></span>
+        </div>
+        <% }) %>
+      </div>
+      <p class="admin-hint"><%= t('admin.stats.viewsSummary', { total: stats.viewsTotal, week: stats.views7d }) %></p>
+    </div>
+  </section>
+
+  <div class="admin-two-col">
+    <section class="admin-card" aria-labelledby="stats-viewed-heading">
+      <h2 id="stats-viewed-heading" class="admin-card-title"><%= t('admin.stats.topViewed', { days: topViewedDays }) %></h2>
+      <% if (!topViewed.length) { %>
+      <p class="admin-empty"><%= t('admin.stats.noData') %></p>
+      <% } else { %>
+      <ol class="admin-ranking">
+        <% topViewed.forEach((r) => { %>
+        <li>
+          <a href="/detail?id=<%= r.opportunity.id %>"><%= r.opportunity.title %></a>
+          <span class="admin-ranking-meta"><strong><%= r.views %></strong> <%= t('admin.stats.views') %> · <%= r.uniqueVisitors %> <%= t('admin.stats.uniqueVisitors') %></span>
+        </li>
+        <% }) %>
+      </ol>
+      <% } %>
+    </section>
+
+    <section class="admin-card" aria-labelledby="stats-starred-heading">
+      <h2 id="stats-starred-heading" class="admin-card-title"><%= t('admin.stats.topStarred') %></h2>
+      <% if (!topStarred.length) { %>
+      <p class="admin-empty"><%= t('admin.stats.noData') %></p>
+      <% } else { %>
+      <ol class="admin-ranking">
+        <% topStarred.forEach((r) => { %>
+        <li>
+          <a href="/detail?id=<%= r.opportunity.id %>"><%= r.opportunity.title %></a>
+          <span class="admin-ranking-meta"><strong><%= r.stars %></strong> <%= t('admin.stats.stars') %></span>
+        </li>
+        <% }) %>
+      </ol>
+      <% } %>
+    </section>
+  </div>
+
+  <section class="admin-card" aria-labelledby="stats-connected-heading">
+    <h2 id="stats-connected-heading" class="admin-card-title"><%= t('admin.stats.connectedUsers') %> <span class="admin-group-count"><%= connected.length %></span></h2>
+    <p class="admin-hint"><%= t('admin.stats.connectedHint', { sessions: stats.liveSessions }) %></p>
+    <% if (!connected.length) { %>
+    <p class="admin-empty"><%= t('admin.stats.noConnected') %></p>
+    <% } else { %>
+    <ul class="admin-linklist">
+      <% connected.forEach((u) => { %>
+      <li>
+        <a href="/admin/users/<%= u.id %>"><%= u.name || u.email %></a>
+        <span class="admin-muted"> · <%= u.lastSeenAt ? fmt(u.lastSeenAt) : t('admin.users.never') %> · <%= t('admin.stats.sessions.' + (u.sessions === 1 ? 'one' : 'other'), { count: u.sessions }) %></span>
+      </li>
+      <% }) %>
+    </ul>
+    <% } %>
+  </section>
+</main>
+
+<%- include('partials/footer', { page: 'admin' }) %>

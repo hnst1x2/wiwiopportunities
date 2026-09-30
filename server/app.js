@@ -14,8 +14,10 @@ const imageSuggestions = require('./imageSuggestions');
 const assistant = require('./assistant');
 const usersDb = require('./usersDb');
 const userRoutes = require('./userRoutes');
+const analytics = require('./analyticsDb');
+const { createAdminInsightsRouter } = require('./adminInsightsRoutes');
 const SQLiteSessionStore = require('./sessionStore');
-const { securityHeaders } = require('./securityHeaders');
+const { securityHeaders, GA_MEASUREMENT_ID } = require('./securityHeaders');
 const { createRateLimiter } = require('./rateLimit');
 
 const app = express();
@@ -53,6 +55,9 @@ app.use((req, res, next) => {
   if (req.session && req.session.userId) {
     res.locals.user = usersDb.getUserById(req.session.userId);
     if (!res.locals.user) delete req.session.userId;
+    // "Last seen" for the admin stats; throttled in SQL so it is one cheap write per few
+    // minutes. Static assets (anything with a file extension) do not count as activity.
+    else if (!/\.\w{2,5}$/.test(req.path)) analytics.touchLastSeen(res.locals.user.id);
   }
   next();
 });
@@ -61,6 +66,36 @@ app.use((req, res, next) => {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 app.locals.site = site;
+app.locals.gaMeasurementId = GA_MEASUREMENT_ID;
+
+// Canonical URL for search engines on the public pages only: the public base +
+// path, query-less except for the detail page whose identity IS its id.
+const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
+const CANONICAL_PATHS = new Set(['/', '/archive', '/about', '/contact', '/detail']);
+app.use((req, res, next) => {
+  res.locals.canonicalUrl = '';
+  if (PUBLIC_BASE_URL && req.method === 'GET' && CANONICAL_PATHS.has(req.path)) {
+    const id = req.path === '/detail' && /^\d+$/.test(String(req.query.id || '')) ? `?id=${req.query.id}` : '';
+    res.locals.canonicalUrl = `${PUBLIC_BASE_URL}${req.path}${id}`;
+  }
+  next();
+});
+
+// CSRF guard for every state-changing admin request, on top of the SameSite=Lax
+// cookie: the browser's fetch metadata (or the Origin header) must say same-origin.
+// Requests carrying neither header (old clients, curl with a session) pass through.
+function requireSameOriginForAdminWrites(req, res, next) {
+  if (req.method === 'GET' || req.method === 'HEAD') return next();
+  const fetchSite = req.get('sec-fetch-site');
+  if (fetchSite && fetchSite !== 'same-origin' && fetchSite !== 'none') return res.status(403).send('Forbidden');
+  const origin = req.get('origin');
+  if (origin) {
+    const allowed = new Set([`${req.protocol}://${req.get('host')}`, PUBLIC_BASE_URL].filter(Boolean));
+    if (!allowed.has(origin)) return res.status(403).send('Forbidden');
+  }
+  next();
+}
+app.use('/admin', requireSameOriginForAdminWrites);
 
 function getCookieLang(req) {
   const cookie = req.headers.cookie || '';
@@ -283,6 +318,58 @@ function requireAdminOrApiToken(req, res, next) {
 // --- Espace membre (inscription, connexion, compte, favoris) ---
 app.use(userRoutes);
 
+// --- Back-office : membres, usage et statistiques ---
+app.use(createAdminInsightsRouter({ requireAdmin }));
+
+// --- Référencement : robots.txt + sitemap.xml ---
+// Pages privées exclues ; /api reste autorisé car les listes et les fiches sont
+// rendues côté client à partir de l'API (Googlebot doit pouvoir la lire).
+// Le sitemap liste les pages publiques et chaque opportunité active.
+app.get('/robots.txt', (req, res) => {
+  const lines = [
+    'User-agent: *',
+    'Disallow: /admin',
+    'Disallow: /account',
+    'Disallow: /favorites',
+    'Disallow: /login',
+    'Disallow: /register',
+    'Allow: /',
+  ];
+  if (PUBLIC_BASE_URL) lines.push(`Sitemap: ${PUBLIC_BASE_URL}/sitemap.xml`);
+  res.type('text/plain').send(`${lines.join('\n')}\n`);
+});
+
+function xmlEscape(value) {
+  return String(value).replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]);
+}
+
+const SITEMAP_CACHE_MS = 10 * 60 * 1000;
+let sitemapCache = { at: 0, xml: '' };
+
+app.get('/sitemap.xml', (req, res) => {
+  if (!PUBLIC_BASE_URL) return res.status(404).type('text/plain').send('PUBLIC_BASE_URL is not configured');
+  if (Date.now() - sitemapCache.at < SITEMAP_CACHE_MS) return res.type('application/xml').send(sitemapCache.xml);
+  const staticPages = [
+    { loc: '/', changefreq: 'daily', priority: '1.0' },
+    { loc: '/archive', changefreq: 'weekly', priority: '0.5' },
+    { loc: '/about', changefreq: 'monthly', priority: '0.4' },
+    { loc: '/contact', changefreq: 'monthly', priority: '0.4' },
+  ];
+  const opportunities = db
+    .listOpportunities()
+    .filter(isActiveOpportunity)
+    .map((o) => ({ loc: `/detail?id=${o.id}`, changefreq: 'weekly', priority: '0.8' }));
+  const urls = [...staticPages, ...opportunities]
+    .map(
+      (u) =>
+        `  <url><loc>${xmlEscape(`${PUBLIC_BASE_URL}${u.loc}`)}</loc><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`
+    )
+    .join('\n');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+  sitemapCache = { at: Date.now(), xml };
+  res.type('application/xml').send(xml);
+});
+
 // --- Pages publiques ---
 // Home
 app.get('/', (req, res) => {
@@ -294,10 +381,17 @@ app.get('/', (req, res) => {
 });
 
 // Détail d'une opportunité (le contenu vient de l'API via JS)
+// The content itself is rendered client-side; the <head> gets the real title,
+// description and cover so search engines and social previews see the opportunity.
+const META_DESCRIPTION_MAX = 160;
 app.get('/detail', (req, res) => {
+  const opp = /^\d+$/.test(String(req.query.id || '')) ? db.getOpportunity(req.query.id) : null;
+  const description = opp ? String(opp.description || '').replace(/\s+/g, ' ').trim() : '';
   res.render('detail', {
     page: 'detail',
-    title: res.locals.t('meta.detailTitle'),
+    title: opp ? `${opp.title} – Opportunities by Wiem` : res.locals.t('meta.detailTitle'),
+    metaDescription: description ? `${description.slice(0, META_DESCRIPTION_MAX)}${description.length > META_DESCRIPTION_MAX ? '…' : ''}` : '',
+    ogImage: opp && Array.isArray(opp.images) && /^https:\/\//.test(opp.images[0] || '') ? opp.images[0] : '',
     baseUrl: process.env.PUBLIC_BASE_URL || '',
   });
 });
@@ -748,6 +842,7 @@ app.post('/api/assistant', requireMemberForAssistant, assistantRateLimit, async 
     // Cartes renvoyées sous la même forme que /api/opportunities pour réutiliser le rendu client.
     const byId = new Map(active.map((o) => [o.id, o]));
     const opportunities = ids.map((id) => byId.get(id)).filter(Boolean);
+    analytics.recordEvent('assistant', { userId: req.session.userId, ip: req.ip });
     res.json({ success: true, reply, opportunities });
   } catch (err) {
     console.error(`[assistant] ${err.message}`);
@@ -763,6 +858,11 @@ app.get('/api/opportunities/:id', (req, res) => {
   const opp = db.getOpportunity(id);
 
   if (!opp) return res.status(404).json({ error: res.locals.t('errors.notFound') });
+  // The detail page is the only public caller: count it as a view. Admin reads
+  // (featured toggle re-check) are not audience traffic.
+  if (!(req.session && req.session.isAdmin)) {
+    analytics.recordView({ opportunityId: id, userId: req.session && req.session.userId, ip: req.ip, userAgent: req.get('user-agent') });
+  }
   res.json(opp);
 });
 

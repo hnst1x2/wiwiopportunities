@@ -9,9 +9,49 @@ $(function () {
   var REQUEST_TIMEOUT_MS = 8000;
 
   initList();
+  initUsers();
   initForm();
   var imagesApi = initImages();
   initImport(imagesApi);
+
+  // ---- members ------------------------------------------------------------------
+
+  function initUsers() {
+    var $body = $('#admin-users-body');
+    var $search = $('#admin-user-search');
+
+    // Delete / force-logout confirmations (members list + member page).
+    $(document).on('submit', 'form.js-delete-user', function (event) {
+      if (!window.confirm(t('admin.users.confirmDelete'))) event.preventDefault();
+    });
+    $(document).on('submit', 'form.js-logout-user', function (event) {
+      if (!window.confirm(t('admin.users.confirmLogout'))) event.preventDefault();
+    });
+
+    // Stats chart: bar heights come from data attributes because the CSP
+    // (style-src 'self') blocks inline style attributes; the CSSOM is allowed.
+    $('.bar[data-h]').each(function () {
+      this.style.height = Math.max(0, Math.min(100, Number($(this).data('h')) || 0)) + '%';
+    });
+
+    if (!$body.length) return;
+
+    var $rows = $body.find('.admin-row--users');
+    var $empty = $('#admin-users-empty');
+    var $count = $('#admin-user-count');
+
+    $search.on('input', function () {
+      var needle = W.norm($(this).val() || '');
+      var shown = 0;
+      $rows.each(function () {
+        var match = !needle || W.norm($(this).data('search') || '').indexOf(needle) !== -1;
+        $(this).toggle(match);
+        if (match) shown += 1;
+      });
+      $empty.prop('hidden', shown > 0);
+      $count.text(W.tCount('admin.users.count', shown));
+    });
+  }
 
   // ---- list -------------------------------------------------------------------
 

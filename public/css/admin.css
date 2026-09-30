@@ -723,3 +723,298 @@ main.admin-login-page {
   font-size: 12.5px;
   color: var(--ink-4);
 }
+
+/* Back-office sections nav (Opportunités / Membres / Statistiques) ---------- */
+
+.admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.admin-nav-link {
+  padding: 10px 14px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-3);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+
+.admin-nav-link:hover {
+  color: var(--ink);
+}
+
+.admin-nav-link.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--accent, #9196fa);
+}
+
+/* Members table ------------------------------------------------------------ */
+
+.admin-table--users {
+  min-width: 900px;
+}
+
+.admin-row--users {
+  grid-template-columns: 2.2fr 1fr 1.3fr 0.6fr 0.6fr 0.8fr 170px;
+}
+
+.admin-user-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.admin-user-link:hover {
+  text-decoration: underline;
+}
+
+.admin-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-muted {
+  color: var(--ink-4);
+}
+
+.admin-back {
+  align-self: flex-start;
+  font-size: 14px;
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+.admin-back:hover {
+  color: var(--ink);
+}
+
+/* Cards, stat tiles, rankings ---------------------------------------------- */
+
+.admin-section-title {
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.admin-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(18px, 2.6vw, 26px);
+  border: 1px solid rgba(46, 20, 81, 0.1);
+  border-radius: var(--r-card);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.admin-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-card-actions form {
+  margin: 0;
+}
+
+.admin-hint {
+  font-size: 13px;
+  color: var(--ink-4);
+}
+
+.admin-two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.admin-dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  font-size: 14px;
+}
+
+.admin-dl dt {
+  color: var(--ink-4);
+}
+
+.admin-dl dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.admin-linklist,
+.admin-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-left: 0;
+  font-size: 14px;
+  list-style: none;
+}
+
+.admin-ranking {
+  counter-reset: rank;
+}
+
+.admin-ranking li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  counter-increment: rank;
+}
+
+.admin-ranking li::before {
+  content: counter(rank);
+  min-width: 22px;
+  font-weight: 800;
+  color: var(--accent, #9196fa);
+}
+
+.admin-ranking-meta {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--ink-4);
+}
+
+.admin-linklist a,
+.admin-ranking a {
+  color: var(--ink);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.stat-grid--compact {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid rgba(46, 20, 81, 0.1);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.stat-card--accent {
+  border-color: transparent;
+  background: linear-gradient(135deg, rgba(145, 150, 250, 0.22), rgba(46, 20, 81, 0.08));
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: 12.5px;
+  color: var(--ink-4);
+}
+
+/* Daily activity bars (pure CSS, no chart library) ------------------------- */
+
+.bars-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.bars-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bars-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+  height: 180px;
+  align-items: end;
+}
+
+.bars-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  min-width: 0;
+}
+
+.bars-stack {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  flex: 1;
+  width: 100%;
+  justify-content: center;
+}
+
+.bar {
+  display: block;
+  width: 30%;
+  max-width: 14px;
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+}
+
+.bar--views {
+  background: var(--accent, #9196fa);
+}
+
+.bar--logins {
+  background: #2e1451;
+}
+
+.bar--registrations {
+  background: #e6a23c;
+}
+
+.bars-label {
+  font-size: 10.5px;
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .bars {
+    height: 140px;
+  }
+  .bars-label {
+    font-size: 9px;
+  }
+}
